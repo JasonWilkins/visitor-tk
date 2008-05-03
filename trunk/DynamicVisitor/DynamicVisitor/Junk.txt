@@ -1,0 +1,593 @@
+#if false
+        public class Rule {
+            bool m_enumerable;
+            bool m_name;
+
+            public bool IsEnumerable
+            {
+                get
+                {
+                    return m_enumerable;
+                }
+            }
+
+            public Object Next()
+            {
+                return null;
+            }
+
+            public string Name
+            {
+                get
+                {
+                    return m_name;
+                }
+            }
+        }
+
+        public static void accept(Rule rule, Object visitor)
+        {
+            Type visitor_type = visitor.GetType();
+
+            {
+                MethodInfo mi = visitor_type.GetMethod("visit", no_params);
+
+                if (mi != null) mi.Invoke(visitor, no_args);
+            }
+
+            if (rule.IsEnumerable) {
+                for (Rule new_rule = rule.Next(); new_rule != null; new_rule = rule.Next()) {
+                    string visit_method = "visit_" + rule.Name;
+
+                    MethodInfo mi = visitor_type.GetMethod(visit_method, no_params);
+
+                    if (mi != null) {
+                        Object new_visitor = mi.Invoke(visitor, no_args);
+                        accept(new_rule, new_visitor);
+                    }
+                }
+            } else {
+                for (Rule p = rule.NextProp(); p != null; p = rule.NextProp()) {
+                    string visit_method = "visit_" + p.Name;
+
+                    if (p.IsTerminal) {
+                        MethodInfo mi = visitor_type.GetMethod(visit_method, p.Types);
+
+                        if (mi != null) {
+                            mi.Invoke(visitor, client.GetArgs());
+                        }
+                    } else {
+                        MethodInfo mi = visitor_type.GetMethod(visit_method, no_params);
+
+                        if (mi != null) {
+                            Object new_visitor = mi.Invoke(visitor, no_args);
+                            accept(p, new_visitor);
+                        }
+                    }
+                }
+            }
+
+            {
+                MethodInfo mi = visitor_type.GetMethod("visit_End", no_params);
+
+                if (mi != null) mi.Invoke(visitor, no_args);
+            }
+        }
+#endif
+
+
+
+
+
+            } else if ('+' == cin || '-' == cin) {
+                // a num or id, cannot tell yet
+
+                StringBuilder sb = new StringBuilder();
+                sb.Append(cin);
+
+                while (!is_eof || !is_delimiter(peek)) {
+                    sb.Append(getc());
+                }
+
+                string tok = sb.ToString();
+
+                if (is_valid_number(tok)) {
+                    return Token.NUM;
+                } else if (is_valid_id(tok)) {
+                    return Token.VAR;
+                } else {
+                    return Token.ERROR;
+                }
+            } else if (is_initial(cin)) {
+                // definitely an id
+
+                StringBuilder sb = new StringBuilder(cin);
+
+                while (is_subsequent(peek)) {
+                    sb.Append(getc());
+                }
+
+                string id = sb.ToString();
+
+                if ("quote" == id) {
+                    return Token.KW_QUOTE;
+                } else if ("lambda" == id) {
+                    return Token.KW_LAMBDA;
+                } else if ("if" == id) {
+                    return Token.KW_IF;
+                } else if ("set!" == id) {
+                    return Token.KW_SET;
+                } else if ("begin" == id) {
+                    return Token.KW_BEGIN;
+                } else if ("cond" == id) {
+                    return Token.KW_COND;
+                } else if ("and" == id) {
+                    return Token.KW_AND;
+                } else if ("or" == id) {
+                    return Token.KW_OR;
+                } else if ("case" == id) {
+                    return Token.KW_CASE;
+                } else if ("let" == id) {
+                    return Token.KW_LET;
+                } else if ("let*" == id) {
+                    return Token.KW_LET_STAR;
+                } else if ("letrec" == id) {
+                    return Token.KW_LETREC;
+                } else if ("do" == id) {
+                    return Token.KW_DO;
+                } else if ("delay" == id) {
+                    return Token.KW_DELAY;
+                } else if ("quasiquote" == id) {
+                    return Token.KW_QUASIQUOTE;
+                } else if ("else" == id) {
+                    return Token.KW_ELSE;
+                } else if ("=>" == id) {
+                    return Token.KW_GOES_TO;
+                } else if ("define" == id) {
+                    return Token.KW_DEFINE;
+                } else if ("unquote" == id) {
+                    return Token.KW_UNQUOTE;
+                } else if ("unquote-splicing" == id) {
+                    return Token.KW_UNQUOTE_SPLICING;
+                } else {
+                    return Token.VAR;
+                }
+            } else if (
+                char.IsDigit(cin) ||
+                ('#' == cin && (
+                    'b' == m_reader.peek() || 'B' == m_reader.peek() ||
+                    'e' == m_reader.peek() || 'E' == m_reader.peek() ||
+                    'i' == m_reader.peek() || 'I' == m_reader.peek() ||
+                    'd' == m_reader.peek() || 'D' == m_reader.peek() ||
+                    'o' == m_reader.peek() || 'O' == m_reader.peek() ||
+                    'x' == m_reader.peek() || 'X' == m_reader.peek()))) {
+
+                StringBuilder sb;
+
+                sb.Append(char.ConvertFromUtf32(cin));
+                sb.Append(char.ConvertFromUtf32(m_reader.getc()));
+
+                while (!is_eof || !is_delimiter(peek)) {
+                    sb.Append(getc());
+                }
+
+                return Token.NUM;
+            } else if ('#' == cin && '(' == m_reader.peek()) {
+                m_reader.getc();
+                return Token.OPEN_VECTOR;
+            } else if ('#' == cin && ('t' == peek || 'f' == peek)) {
+                m_reader.getc();
+                return Token.BOOL;
+            } else if ('#' == cin && '\\' == peek) {
+                m_reader.getc();
+
+                StringBuilder sb = new StringBuilder();
+                peek = m_reader.peek();
+
+                if (char.IsLetter(peek)) {
+                    do {
+                        sb.Append(char.ConvertFromUtf32(m_reader.getc()));
+                        peek = m_reader.peek();
+                    } while (peek != -1 && !is_delimiter(peek));
+                } else if (-1 == peek) {
+                    return Token.ERROR;
+                } else {
+                    sb.Append(char.ConvertToUtf32(peek));
+                    m_reader.getc();
+                }
+
+                return Token.CHAR;
+            } else if ('"' == cin) {
+                StringBuilder sb = new StringBuilder();
+                int peek = m_reader.peek();
+
+                while (peek != '"') {
+                    if (-1 == peek) {
+                        return Token.ERROR;
+                    }
+
+                    if ('\\' == peek) {
+                        m_reader.getc();
+                        peek = m_reader.peek();
+
+                        if (peek != '\\' && peek != '"') {
+                            // WARNING!
+                        }
+                    }
+
+                    sb.Append(char.ConvertFromUtf32(m_reader.getc()));
+                    peek = m_reader.peek();
+                }
+
+                m_reader.getc();
+
+                return Token.STRING;
+            } else if ('(' == cin) {
+                return Token.OPEN_PAREN;
+            } else if (')' == cin) {
+                return Token.CLOSE_PAREN;
+            } else if ('`' == cin) {
+                return Token.LEFT_QUOTE;
+            } else if ('\'' == cin) {
+                return Token.RIGHT_QUOTE;
+            } else if (',' == cin) {
+                if ('@' == m_reader.peek()) {
+                    m_reader.getc();
+                    return Token.SPLICING_UNQUOTE;
+                } else {
+                    return Token.COMMA;
+                }
+            } else if ('.' == cin) {
+                if ('.' == m_reader.peek()) {
+                    m_reader.getc();
+                    if ('.' == m_reader.peek()) {
+                        m_reader.getc();
+                        return m_simple ? Token.ID : Token.VAR;
+                    } else {
+                        return Token.ERROR;
+                    }
+                } else {
+                    return Token.DOT;
+                }
+            } else {
+                return Token.ERROR;
+            }
+        }
+
+
+
+
+
+
+        private bool is_initial(int cin)
+        {
+            return
+                char.IsLetter((char)cin) ||
+                '!' == cin ||
+                '$' == cin ||
+                '%' == cin ||
+                '&' == cin ||
+                '*' == cin ||
+                '/' == cin ||
+                ':' == cin ||
+                '<' == cin ||
+                '=' == cin ||
+                '>' == cin ||
+                '?' == cin ||
+                '^' == cin ||
+                '_' == cin ||
+                '~' == cin;
+        }
+
+        private bool is_subsequent(int cin)
+        {
+            return
+                is_initial(cin) ||
+                char.IsDigit((char)cin) ||
+                '+' == cin ||
+                '-' == cin ||
+                '.' == cin ||
+                '@' == cin;
+        }
+
+
+
+
+        public enum Token {
+            ERROR,
+            EOF,
+            VAR,
+            BOOL,
+            NUM,
+            CHAR,
+            STRING,
+            OPEN_PAREN,
+            CLOSE_PAREN,
+            OPEN_VECTOR,
+            LEFT_QUOTE,
+            RIGHT_QUOTE,
+            COMMA,
+            SPLICING_UNQUOTE,
+            DOT,
+            _FIRST_EXPRESSION_KW,
+            KW_QUOTE,
+            KW_LAMBDA,
+            KW_IF,
+            KW_SET,
+            KW_BEGIN,
+            KW_COND,
+            KW_AND,
+            KW_OR,
+            KW_CASE,
+            KW_LET,
+            KW_LET_STAR,
+            KW_LETREC,
+            KW_DO,
+            KW_DELAY,
+            _LAST_EXPRESSION_KW,
+            _FIRST_SYNTAX_KW,
+            KW_QUASIQUOTE,
+            KW_ELSE,
+            KW_GOES_TO,
+            KW_DEFINE,
+            KW_UNQUOTE,
+            KW_UNQUOTE_SPLICING,
+            _LAST_SYNTAX_KW,
+        }
+
+
+
+
+
+        void expression_list()
+        {
+            while (lookahead != Token.EOF) {
+                expression();
+            }
+        }
+
+        void expression()
+        {
+            if (Token.ID == lookahead) {
+                variable();
+            } else if (Token.ID == lookahead) {
+                literal();
+            } else if (Token.ID == lookahead) {
+                procedure_call();
+            } else if (Token.ID == lookahead) {
+                lamda_expression();
+            } else if (Token.ID == lookahead) {
+                conditional();
+            } else if (Token.ID == lookahead) {
+                assignment();
+            } else if (Token.ID == lookahead) {
+                derived_expression();
+            } else if (Token.ID == lookahead) {
+                macro_use();
+            } else if (Token.ID == lookahead) {
+                macro_block();
+            }
+        }
+
+
+
+
+    public class VectorVisitor {
+        public void visit()
+        {
+        }
+
+        public void visitEnd()
+        {
+        }
+
+        public void visitItem(Boolean o)
+        {
+        }
+
+        public void visitItem(Char o)
+        {
+        }
+
+        public void visitItem(Int64 o)
+        {
+        }
+
+        public void visitItem(Double o)
+        {
+        }
+
+        public void visitItem(String o)
+        {
+        }
+
+        public SymbolVisitor visitItem_Symbol()
+        {
+            return null;
+        }
+
+        public VectorVisitor visitItem_Vector()
+        {
+            return null;
+        }
+
+        public Visitor visitItem_Cons()
+        {
+            return null;
+        }
+    }
+
+
+
+
+
+using System;
+
+namespace CodeBuilder {
+    class TypePirateBuilder : TypeVisitor {
+        public override void visit_name(string name) { }
+    }
+
+    class TypeListPirateBuilder : TypeListVisitor {
+        public override TypeVisitor visitItem_Type() { return new TypePirateBuilder(); }
+        public override PrototypeVisitor visitItem_Prototype() { return new PrototypePirateBuilder(); }
+    }
+
+    class PrototypePirateBuilder : PrototypeVisitor {
+        public override void visit_name(string name) { }
+        public override TypeListVisitor visit_parameter_types() { return new TypeListPirateBuilder(); }
+        public override TypeListVisitor visit_return_types() { return new TypeListPirateBuilder(); }
+    }
+
+    class PrototypeListPirateBuilder : PrototypeListVisitor {
+        public override PrototypeVisitor visitItem() { return new PrototypePirateBuilder(); }
+    }
+
+    class OperandPirateBuilder : OperandVisitor {
+        public override TypeVisitor visit_Type_type() { return new TypePirateBuilder(); }
+        public override PrototypeVisitor visit_Prototype_type() { return new PrototypePirateBuilder(); }
+        public override void visit_name(string name) { }
+    }
+
+    class LvalueListPirateBuilder : LvalueListVisitor {
+        public override GlobalVisitor visitItem_Global() { return new GlobalPirateBuilder(); }
+        public override LocalVisitor visitItem_Local() { return new LocalPirateBuilder(); }
+        public override ParameterVisitor visitItem_Parameter() { return new ParameterPirateBuilder(); }
+    }
+
+    class OperandListPirateBuilder : OperandListVisitor {
+        public override GlobalVisitor visitItem_Global() { return new GlobalPirateBuilder(); }
+        public override LocalVisitor visitItem_Local() { return new LocalPirateBuilder(); }
+        public override ParameterVisitor visitItem_Parameter() { return new ParameterPirateBuilder(); }
+        public override ConstantVisitor visitItem_Constant() { return new ConstantPirateBuilder(); }
+    }
+
+    class GlobalPirateBuilder : GlobalVisitor {
+        public override TypeVisitor visit_Type_type() { return new TypePirateBuilder(); }
+        public override PrototypeVisitor visit_Prototype_type() { return new PrototypePirateBuilder(); }
+        public override void visit_name(string name) { }
+    }
+
+    class GlobalListPirateBuilder : GlobalListVisitor {
+        public override GlobalVisitor visitItem() { return new GlobalPirateBuilder(); }
+    }
+
+    class LocalPirateBuilder : LocalVisitor {
+        public override TypeVisitor visit_Type_type() { return new TypePirateBuilder(); }
+        public override PrototypeVisitor visit_Prototype_type() { return new PrototypePirateBuilder(); }
+        public override void visit_name(string name) { }
+    }
+
+    class LocalListPirateBuilder : LocalListVisitor {
+        public override LocalVisitor visitItem() { return new LocalPirateBuilder(); }
+    }
+
+    class ParameterPirateBuilder : ParameterVisitor {
+        public override TypeVisitor visit_Type_type() { return new TypePirateBuilder(); }
+        public override PrototypeVisitor visit_Prototype_type() { return new PrototypePirateBuilder(); }
+        public override void visit_name(string name) { }
+    }
+
+    class ParameterListPirateBuilder : ParameterListVisitor {
+        public override ParameterVisitor visitItem() { return new ParameterPirateBuilder(); }
+    }
+
+    class ConstantPirateBuilder : ConstantVisitor {
+        public override TypeVisitor visit_Type_type() { return new TypePirateBuilder(); }
+        public override PrototypeVisitor visit_Prototype_type() { return new PrototypePirateBuilder(); }
+        public override void visit_name(string name) { }
+    }
+
+    class ConstantListPirateBuilder : ConstantListVisitor {
+        public override ConstantVisitor visitItem() { return new ConstantPirateBuilder(); }
+    }
+
+    class OperatorPirateBuilder : OperatorVisitor {
+        public override void visit_name(string name) { }
+        public override TypeListVisitor visit_result_types() { return new TypeListPirateBuilder(); }
+        public override TypeListVisitor visit_operand_types() { return new TypeListPirateBuilder(); }
+    }
+
+    class OperatorListPirateBuilder : OperatorListVisitor {
+        public override OperatorVisitor visitItem() { return new OperatorPirateBuilder(); }
+    }
+
+    class LambdaPirateBuilder : LambdaVisitor {
+        public override void visit_name(string name) { }
+        public override TypeListVisitor visit_return_types() { return new TypeListPirateBuilder(); }
+        public override ParameterListVisitor visit_parameter_types() { return new ParameterListPirateBuilder(); }
+        public override LocalListVisitor visit_locals() { return new LocalListPirateBuilder(); }
+        public override LambdaListVisitor visit_lambda() { return new LambdaListPirateBuilder(); }
+        public override StatementListVisitor visit_statements() { return new StatementListPirateBuilder(); }
+    }
+
+    class LambdaListPirateBuilder : LambdaListVisitor {
+        public override LambdaVisitor visitItem() { return new LambdaPirateBuilder(); }
+    }
+
+    class StatementListPirateBuilder : StatementListVisitor {
+        public override OperatorStampVisitor visitItem_OperatorStamp() { return new OperatorStampPirateBuilder(); }
+        public override LambdaStampVisitor visitItem_LambdaStamp() { return new LambdaStampPirateBuilder(); }
+        public override CallVisitor visitItem_Call() { return new CallPirateBuilder(); }
+        public override IfVisitor visitItem_If() { return new IfPirateBuilder(); }
+        public override MoveVisitor visitItem_Move() { return new MovePirateBuilder(); }
+    }
+
+    class OperatorStampPirateBuilder : OperatorStampVisitor {
+        public override void visit_label(string label) { }
+        public override LvalueListVisitor visit_lvalues() { return new LvalueListPirateBuilder(); }
+        public override OperatorVisitor visit_op() { return new OperatorPirateBuilder(); }
+        public override OperandListVisitor visit_arguments() { return new OperandListPirateBuilder(); }
+    }
+
+    class LambdaStampPirateBuilder : LambdaStampVisitor {
+        public override void visit_label(string label) { }
+        public override LvalueListVisitor visit_lvalues() { return new LvalueListPirateBuilder(); }
+        public override LambdaVisitor visit_lambda() { return new LambdaPirateBuilder(); }
+        public override OperandListVisitor visit_arguments() { return new OperandListPirateBuilder(); }
+    }
+
+    class CallPirateBuilder : CallVisitor {
+        public override void visit_label(string label) { }
+        public override LvalueListVisitor visit_lvalues() { return new LvalueListPirateBuilder(); }
+        public override PrototypeVisitor visit_prototype() { return new PrototypePirateBuilder(); }
+        public override GlobalVisitor visit_Global_lambda_ref() { return new GlobalPirateBuilder(); }
+        public override LocalVisitor visit_Local_lambda_ref() { return new LocalPirateBuilder(); }
+        public override ParameterVisitor visit_Parameter_lambda_ref() { return new ParameterPirateBuilder(); }
+        public override ConstantVisitor visit_Constant_lambda_ref() { return new ConstantPirateBuilder(); }
+        public override OperandListVisitor visit_arguments() { return new OperandListPirateBuilder(); }
+    }
+
+    class RelationPirateBuilder : RelationVisitor {
+        public override void visit_name(string name) { }
+        public override TypeListVisitor visit_element_types() { return new TypeListPirateBuilder(); }
+    }
+
+    class RelationListPirateBuilder : RelationListVisitor {
+        public override RelationVisitor visitItem() { return new RelationPirateBuilder(); }
+    }
+
+    class IfPirateBuilder : IfVisitor {
+        public override void visit_label(string label) { }
+        public override LvalueListVisitor visit_lvalues() { return new LvalueListPirateBuilder(); }
+        public override RelationVisitor visit_conditional() { return new RelationPirateBuilder(); }
+        public override LambdaVisitor visit_consequent() { return new LambdaPirateBuilder(); }
+        public override LambdaVisitor visit_alternate() { return new LambdaPirateBuilder(); }
+    }
+
+    class MovePirateBuilder : MoveVisitor {
+        public override void visit_label(string label) { }
+        public override LvalueListVisitor visit_lvalues() { return new LvalueListPirateBuilder(); }
+        public override OperandListVisitor visit_rvalues() { return new OperandListPirateBuilder(); }
+    }
+
+    class PirateCodeBuilder : CodeVisitor {
+        public override TypeListVisitor visit_types() { return new TypeListPirateBuilder(); }
+        public override ConstantListVisitor visit_constants() { return new ConstantListPirateBuilder(); }
+        public override GlobalListVisitor visit_globals() { return new GlobalListPirateBuilder(); }
+        public override OperatorListVisitor visit_operators() { return new OperatorListPirateBuilder(); }
+        public override PrototypeListVisitor visit_prototypes() { return new PrototypeListPirateBuilder(); }
+        public override RelationListVisitor visit_relations() { return new RelationListPirateBuilder(); }
+        public override LambdaListVisitor visit_lambdas() { return new LambdaListPirateBuilder(); }
+    }
+}

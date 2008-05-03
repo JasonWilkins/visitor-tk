@@ -1,15 +1,14 @@
-#define WARNING
-#define VERBOSE
+//#define WARNING
+//#define VERBOSE
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using Utils;
 
 namespace DynamicVisitor {
-    using Trace;
-
     public class ObjectVisitorMethod {
         private static Type[] no_params = new Type[0];
         private static object[] no_args = new object[0];
@@ -66,7 +65,7 @@ namespace DynamicVisitor {
             MethodInfo mi = visitor_type.GetMethod(method_name, no_params);
 
             if (mi != null) {
-                new_visitor = mi.Invoke(visitor, no_args) as Object;
+                new_visitor = mi.Invoke(visitor, no_args);
 
                 if (null == new_visitor) {
                     Trace.Verbose("debug: {0} did not return a new visitor", method_name);
@@ -143,6 +142,10 @@ namespace DynamicVisitor {
 
             Type face = graph_type.GetInterface("IEnumerable`1");
 
+            if (face == null) {
+                face = graph_type.GetInterface("IEnumerable");
+            }
+
             if (face != null) {
                 foreach (object v in graph as IEnumerable) {
                     if (v != null) {
@@ -150,7 +153,7 @@ namespace DynamicVisitor {
                         m_list.Add(new NameTypeValue(null, t, v));
                     } else {
                         Type[] args = face.GetGenericArguments();
-                        Trace.Verbose("debug: item in {0}<{1}> is null, skipping", graph_type.FullName, args[0]);
+                        Trace.Verbose("debug: item in {0}{1} is null, skipping", graph_type.FullName, args.Length > 0 ? "<"+args[0]+">" : "");
                     }
                 }
             } else {

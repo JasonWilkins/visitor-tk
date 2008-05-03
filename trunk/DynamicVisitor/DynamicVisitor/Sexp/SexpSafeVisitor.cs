@@ -31,6 +31,7 @@ namespace Sexp {
         public override void visit_value(Double o) { if (m_atom != null) m_atom.visit_value(o); }
         public override void visit_value(String o) { if (m_atom != null) m_atom.visit_value(o); }
         public override void visit_value(Char o) { if (m_atom != null) m_atom.visit_value(o); }
+        public override void visit_value(Object o) { if (m_atom != null) m_atom.visit_value(o); }
         public override SymbolVisitor visit_Symbol_value() { return new SafeSymbolVisitor(m_atom != null ? m_atom.visit_Symbol_value() : null); }
     }
 

@@ -2,14 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DynamicVisitor.Main {
+namespace Main {
     //using Test;
+    using DynamicVisitor;
     using Pirate;
     using PirateType=Pirate.Type;
-    using Writer;
-    //using Sexp;
-    using CodeBuilder;
-    using CodeBuilderType=CodeBuilder.Type;
+    using Utils;
+    using Sexp;
+    using Flat;
+    using Flat2Pirate;
+    using CodeBuilderType=Flat.Type;
 
     class Program {
 #if false
@@ -488,7 +490,7 @@ namespace DynamicVisitor.Main {
             return sw.ToString();
         }
 #endif
-#if false
+#if true
         static void test_scan(string path)
         {
             using (Reader file = new Reader(path)) {
@@ -585,13 +587,13 @@ namespace DynamicVisitor.Main {
         static Vector build(string path)
         {
             using (Reader file = new Reader(path)) {
-                VectorBuilder visitor = new VectorBuilder();
+                TopLevelBuilder visitor = new TopLevelBuilder();
                 Parser parser = new Parser(file, visitor);
 
                 Console.WriteLine("parsing: {0}", path);
                 parser.read();
                 Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
-                return visitor.getVector();
+                return visitor.getTopLevel();
             }
         }
 
@@ -649,11 +651,11 @@ namespace DynamicVisitor.Main {
             Log log2 = new Log();
 
             using (Reader file = new Reader(path)) {
-                VectorBuilder builder = new VectorBuilder();
+                TopLevelBuilder builder = new TopLevelBuilder();
                 Parser p = new Parser(file, builder);
                 p.read();
 
-                Vector top = builder.getVector();
+                Vector top = builder.getTopLevel();
                 VectorLogger logger = new VectorLogger(log2, new SafeVectorVisitor(null));
                 DynamicVisitor.accept(top, logger);
             }
@@ -678,7 +680,7 @@ namespace DynamicVisitor.Main {
             CodeBuilderType string_type = cb.defineType("string");
             Prototype print_prototype = cb.definePrototype(null, new TypeList(string_type), null);
             Global print_global = cb.defineGlobal("print", print_prototype);
-            Constant hello_world = cb.defineConstant("\"Hello World!\"\\n", string_type);
+            Constant hello_world = cb.defineConstant(null, string_type, "Hello World!\n");
             LambdaBuilder lb = cb.getLambdaBuilder("main", null);
             lb.addCall(null, print_prototype, print_global, null, new OperandList(hello_world));
             cb.defineLambda(lb.getLambda(null));
@@ -687,7 +689,6 @@ namespace DynamicVisitor.Main {
             StringWriter sw = new StringWriter();
             DynamicVisitor.accept(pir.getPirate(), new PirateWriter(sw));
             Console.Write(sw.ToString());
-
         }
 
         static void code_builder_test2()
@@ -723,19 +724,19 @@ namespace DynamicVisitor.Main {
             Local n3 = lb.defineLocal("n3", single_type);
             Local n4 = lb.defineLocal("n4", single_type);
 
-            Constant _2 = cb.defineConstant("2", single_type);
+            Constant _2 = cb.defineConstant(null, single_type, 2);
             lb.addMove(null, new LvalueList(a), new OperandList(_2));
 
-            Constant _n3 = cb.defineConstant("-3", single_type);
+            Constant _n3 = cb.defineConstant(null, single_type, -3);
             lb.addMove(null, new LvalueList(b), new OperandList(_n3));
 
-            Constant _n2 = cb.defineConstant("-2", single_type);
+            Constant _n2 = cb.defineConstant(null, single_type, -2);
             lb.addMove(null, new LvalueList(c), new OperandList(_n2));
 
             lb.addOperator(null, neg, new LvalueList(n0), new OperandList(b));
             lb.addOperator(null, mul, new LvalueList(n1), new OperandList(b, b));
 
-            Constant _4 = cb.defineConstant("4", single_type);
+            Constant _4 = cb.defineConstant(null, single_type, 4);
             lb.addOperator(null, mul, new LvalueList(n2), new OperandList(_4, a));
             
             lb.addOperator(null, mul, new LvalueList(n2), new OperandList(n2, c));
@@ -751,10 +752,10 @@ namespace DynamicVisitor.Main {
             lb.addOperator(null, sub, new LvalueList(x2), new OperandList(n0, n4));
             lb.addOperator(null, div_assign, new LvalueList(x2), new OperandList(n3));
 
-            Constant answer1 = cb.defineConstant("\"Answers to ABC formular are:\\n\"", string_type);
-            Constant answer2 = cb.defineConstant("\"x1 = \"", string_type);
-            Constant answer3 = cb.defineConstant("\"\\nx2 = \"", string_type);
-            Constant answer4 = cb.defineConstant("\"\\n\"", string_type);
+            Constant answer1 = cb.defineConstant(null, string_type, "Answers to ABC formular are:\n");
+            Constant answer2 = cb.defineConstant(null, string_type, "x1 = ");
+            Constant answer3 = cb.defineConstant(null, string_type, "\nx2 = ");
+            Constant answer4 = cb.defineConstant(null, string_type, "\n");
 
             lb.addCall(null, print_prototype1, print_global1, null, new OperandList(answer1));
             lb.addCall(null, print_prototype1, print_global1, null, new OperandList(answer2));
@@ -798,7 +799,7 @@ namespace DynamicVisitor.Main {
             //test_safe_parse("test.txt");
             //test_safe_parse("test2.txt");
 #endif
-#if false
+#if true
             parse_and_write("test.txt", "test-output1.txt");
             parse_and_write("test-output1.txt", "test-output2.txt");
             compare_files("test.txt", "test-output1.txt");

@@ -189,6 +189,12 @@ namespace Sexp {
             m_next.visit_value(o);
         }
 
+        public override void visit_value(Object o)
+        {
+            m_log.Add(m_sequence++, m_class_name, "visit_value(Object)");
+            m_next.visit_value(o);
+        }
+
         public override SymbolVisitor visit_Symbol_value()
         {
             m_log.Add(m_sequence++, m_class_name, "visit_Symbol_value()");

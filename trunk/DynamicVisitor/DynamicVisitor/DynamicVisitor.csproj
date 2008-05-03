@@ -32,18 +32,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Flat\Flat.cs" />
+    <Compile Include="♭\Flat.cs" />
     <Compile Include="Sexp\ChainVisitor.cs" />
-    <Compile Include="Flat\Common.cs" />
+    <Compile Include="♭\Common.cs" />
     <Compile Include="Sexp\Datum.cs" />
-    <Compile Include="Writer\FileWriter.cs" />
+    <Compile Include="Util\FileWriter.cs" />
     <Compile Include="DynamicVisitor\IChainable.cs" />
     <Compile Include="Flat2Pirate\Flat2Pirate.cs" />
     <Compile Include="DynamicVisitor\ObjectVisitor.cs" />
     <Compile Include="Pirate\Pirate.cs" />
     <Compile Include="DynamicVisitor\DynamicVisitor.cs" />
     <Compile Include="Pirate\PirateWriter.cs" />
-    <Compile Include="Flat\FlatBuilder.cs" />
+    <Compile Include="♭\FlatBuilder.cs" />
     <Compile Include="Flat2Pirate\FlatVisitor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -56,13 +56,13 @@
     <Compile Include="Sexp\SexpVisitor.cs" />
     <Compile Include="Sexp\SexpSafeVisitor.cs" />
     <Compile Include="Sexp\SexpWriter.cs" />
-    <Compile Include="Writer\StringWriter.cs" />
+    <Compile Include="Util\StringWriter.cs" />
     <Compile Include="Sexp\SexpLogger.cs" />
     <Compile Include="Test.cs" />
-    <Compile Include="Writer\Trace.cs" />
+    <Compile Include="Util\Trace.cs" />
     <Compile Include="DynamicVisitor\VisitorAttributes.cs" />
     <Compile Include="DynamicVisitor\VisitorMethod.cs" />
-    <Compile Include="Writer\Writer.cs" />
+    <Compile Include="Util\Writer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Junk.txt" />

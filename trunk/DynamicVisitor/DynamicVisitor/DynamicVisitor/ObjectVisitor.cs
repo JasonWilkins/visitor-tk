@@ -12,7 +12,7 @@ namespace DynamicVisitor {
     public class ObjectVisitorMethod {
         private static Type[] no_params = new Type[0];
         private static object[] no_args = new object[0];
-        
+
         public void invokeVisit(Object visitor, Type visitor_type)
         {
             MethodInfo mi = visitor_type.GetMethod("visit", no_params);
@@ -35,12 +35,12 @@ namespace DynamicVisitor {
             }
         }
 
-        bool is_terminal(Type type)
+        bool is_nonterminal(Type type)
         {
-            return type.FullName.StartsWith("System");
+            return !type.FullName.StartsWith("System");
         }
 
-        void invokeTerminal(Object visitor, Type visitor_type, string method_name, Type type, object value)
+        bool invokeTerminal(Object visitor, Type visitor_type, string method_name, Type type, object value)
         {
             Type[] types = new Type[1];
 
@@ -52,12 +52,14 @@ namespace DynamicVisitor {
                     object[] args = new object[1];
                     args[0] = value;
                     mi.Invoke(visitor, args);
-                    return;
+                    return true;
                 } else {
                     Trace.Warning("debug: could not find method {0}.{1}({2}), skipping", visitor_type.FullName, method_name, type.FullName);
                     type = type.BaseType;
                 }
             }
+
+            return false;
         }
 
         bool innerCall(Object visitor, Type visitor_type, string method_name, out Object new_visitor, bool is_last)
@@ -83,7 +85,7 @@ namespace DynamicVisitor {
 
         Object invokeNonTerminal(Object visitor, Type visitor_type, string prefix, Type type, string name)
         {
-            Object new_visitor = null;
+            Object new_visitor;
 
             while (type.BaseType != null) {
                 if (!type.IsGenericType) {
@@ -111,11 +113,12 @@ namespace DynamicVisitor {
                 prefix = "visitItem";
             }
 
-            if (is_terminal(type)) {
-                invokeTerminal(visitor, visitor_type, prefix+"_"+name, type, value);
+            if (invokeTerminal(visitor, visitor_type, prefix+(name!=null?"_"+name:""), type, value)) {
                 return null;
-            } else {
+            } else if (is_nonterminal(type)) {
                 return invokeNonTerminal(visitor, visitor_type, prefix, type, name);
+            } else {
+                return null;
             }
         }
     }
@@ -133,6 +136,8 @@ namespace DynamicVisitor {
         }
     }
 
+    // TODO: remake NameTypeValueList into an iterator so that the whole structure does not have to be in memory at once
+
     class NameTypeValueList : IEnumerable<NameTypeValue> {
         List<NameTypeValue> m_list = new List<NameTypeValue>();
 
@@ -142,7 +147,7 @@ namespace DynamicVisitor {
 
             Type face = graph_type.GetInterface("IEnumerable`1");
 
-            if (face == null) {
+            if (null == face) {
                 face = graph_type.GetInterface("IEnumerable");
             }
 

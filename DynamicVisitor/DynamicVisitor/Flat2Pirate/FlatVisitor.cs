@@ -1,10 +1,9 @@
 #define WARNING
 
 using System;
+using Utils;
 
-namespace Pirate {
-    using Trace;
-
+namespace Flat2Pirate {
     abstract class TypeVisitor {
         public virtual void visit() { }
         public virtual void visitEnd() { }
@@ -81,7 +80,9 @@ namespace Pirate {
         public virtual ParameterVisitor visitItem() { return null; }
     }
 
-    abstract class ConstantVisitor : OperandVisitor { }
+    abstract class ConstantVisitor : OperandVisitor {
+        public virtual void visit_value(object value) { Trace.Warning("default {0}.visit_name({1})", GetType().Name, value); }
+    }
 
     abstract class ConstantListVisitor {
         public virtual void visit() { }

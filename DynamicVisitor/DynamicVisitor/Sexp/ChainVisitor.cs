@@ -35,6 +35,7 @@ namespace Sexp {
         public override void visit_value(Double o) { car.visit_value(o); cdr.visit_value(o); }
         public override void visit_value(String o) { car.visit_value(o); cdr.visit_value(o); }
         public override void visit_value(Char o) { car.visit_value(o); cdr.visit_value(o); }
+        public override void visit_value(Object o) { car.visit_value(o); cdr.visit_value(o); }
         public override SymbolVisitor visit_Symbol_value() { return new SymbolMultiVisitor(car.visit_Symbol_value(), cdr.visit_Symbol_value()); }
     }
 

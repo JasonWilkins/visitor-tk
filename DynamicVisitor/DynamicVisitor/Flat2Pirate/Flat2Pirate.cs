@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace Flat2Pirate {
     using Pirate;
@@ -69,6 +68,32 @@ namespace Flat2Pirate {
         }
     }
 
+    class ConstantPirateBuilder : ConstantVisitor {
+        AtomExprList m_list;
+
+        public ConstantPirateBuilder(AtomExprList list)
+        {
+            m_list = list;
+        }
+
+        public override void visit_value(object value)
+        {
+            Literal lit;
+
+            if (value is Int32) {
+                lit = new IntLiteral((Int32)value);
+            } else if (value is Single) {
+                lit = new NumLiteral((Single)value);
+            } else if (value is String) {
+                lit = new StringLiteral((String)value);
+            } else {
+                throw new InvalidOperationException("values of type " + value.GetType().Name + " are not supported");
+            }
+
+            m_list.Add(lit);
+        }
+    }
+
     class LvaluePirateBuilder : LvalueVisitor {
         RegList m_regs;
 
@@ -123,6 +148,7 @@ namespace Flat2Pirate {
         }
 
         public override OperandVisitor visitItem() { return new OperandPirateBuilder(m_list); }
+        public virtual ConstantVisitor visitItem_Constant() { return new ConstantPirateBuilder(m_list); }
     }
 
     //class GlobalPirateBuilder : GlobalVisitor {

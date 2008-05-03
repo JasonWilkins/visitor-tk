@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Trace {
+namespace Utils {
     public static class Trace {
         [Conditional("WARNING")]
         public static void Warning(string msg, params object[] args)

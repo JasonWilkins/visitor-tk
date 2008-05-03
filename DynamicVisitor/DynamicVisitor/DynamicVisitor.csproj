@@ -29,21 +29,22 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Flat\Flat.cs" />
     <Compile Include="Sexp\ChainVisitor.cs" />
     <Compile Include="Flat\Common.cs" />
+    <Compile Include="Sexp\Datum.cs" />
     <Compile Include="Writer\FileWriter.cs" />
     <Compile Include="DynamicVisitor\IChainable.cs" />
-    <Compile Include="Flat\Primitive2Pirate.cs" />
+    <Compile Include="Flat2Pirate\Flat2Pirate.cs" />
     <Compile Include="DynamicVisitor\ObjectVisitor.cs" />
     <Compile Include="Pirate\Pirate.cs" />
     <Compile Include="DynamicVisitor\DynamicVisitor.cs" />
     <Compile Include="Pirate\PirateWriter.cs" />
-    <Compile Include="Flat\PrimitiveBuilder.cs" />
-    <Compile Include="Flat\PrimitiveVisitor.cs" />
+    <Compile Include="Flat\FlatBuilder.cs" />
+    <Compile Include="Flat2Pirate\FlatVisitor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sexp\SexpBuilder.cs" />
@@ -58,16 +59,13 @@
     <Compile Include="Writer\StringWriter.cs" />
     <Compile Include="Sexp\SexpLogger.cs" />
     <Compile Include="Test.cs" />
-    <Compile Include="Trace.cs" />
+    <Compile Include="Writer\Trace.cs" />
     <Compile Include="DynamicVisitor\VisitorAttributes.cs" />
     <Compile Include="DynamicVisitor\VisitorMethod.cs" />
     <Compile Include="Writer\Writer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Junk.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Flat2Pirate\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

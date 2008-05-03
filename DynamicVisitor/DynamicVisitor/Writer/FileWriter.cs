@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace Writer {
+namespace Utils {
     public class FileWriter : Writer, IDisposable {
         private StreamWriter m_sw;
 

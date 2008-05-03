@@ -3,7 +3,7 @@ using System.Text;
 using System.Collections.Generic;
 
 namespace Sexp {
-    using Writer;
+    using Utils;
 
     public interface IWritable {
         void write(Writer writer);
@@ -142,6 +142,11 @@ namespace Sexp {
             } else {
                 txt = "#\\"+o;
             }
+        }
+
+        public override void visit_value(Object o)
+        {
+            throw new InvalidOperationException("values of type " + o.GetType().Name + " are not supported");
         }
 
         string escape(string input)

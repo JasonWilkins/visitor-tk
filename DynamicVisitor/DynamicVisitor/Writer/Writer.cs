@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Writer
+namespace Utils
 {
     public abstract class Writer
     {

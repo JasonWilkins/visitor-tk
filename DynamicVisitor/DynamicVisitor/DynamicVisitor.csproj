@@ -1,0 +1,78 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5FE72B5B-096A-45C9-938A-19385702CF7B}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DynamicVisitor</RootNamespace>
+    <AssemblyName>DynamicVisitor</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ChainVisitor.cs" />
+    <Compile Include="Common.cs" />
+    <Compile Include="FileWriter.cs" />
+    <Compile Include="IChainable.cs" />
+    <Compile Include="Primative2Pirate.cs" />
+    <Compile Include="ObjectVisitor.cs" />
+    <Compile Include="Pirate.cs" />
+    <Compile Include="DynamicVisitor.cs" />
+    <Compile Include="PirateWriter.cs" />
+    <Compile Include="PrimitiveBuilder.cs" />
+    <Compile Include="PrimitiveVisitor.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="sexp.cs" />
+    <Compile Include="SexpBuilder.cs" />
+    <Compile Include="SexpCompare.cs" />
+    <Compile Include="SexpInterpreter.cs" />
+    <Compile Include="SexpParser.cs" />
+    <Compile Include="SexpScanner.cs" />
+    <Compile Include="SexpToken.cs" />
+    <Compile Include="SexpVisitor.cs" />
+    <Compile Include="SexpSafeVisitor.cs" />
+    <Compile Include="SexpWriter.cs" />
+    <Compile Include="StringWriter.cs" />
+    <Compile Include="SexpLogger.cs" />
+    <Compile Include="Test.cs" />
+    <Compile Include="Trace.cs" />
+    <Compile Include="VisitorAttributes.cs" />
+    <Compile Include="VisitorMethod.cs" />
+    <Compile Include="Writer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Junk.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

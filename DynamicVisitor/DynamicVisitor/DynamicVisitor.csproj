@@ -33,9 +33,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Sexp\Literals.cs" />
-    <Compile Include="♭\Flat.cs" />
+    <Compile Include="Flat\Flat.cs" />
     <Compile Include="Sexp\ChainVisitor.cs" />
-    <Compile Include="♭\Common.cs" />
+    <Compile Include="Flat\Common.cs" />
     <Compile Include="Sexp\Datum.cs" />
     <Compile Include="Util\FileWriter.cs" />
     <Compile Include="DynamicVisitor\IChainable.cs" />
@@ -44,7 +44,7 @@
     <Compile Include="Pirate\Pirate.cs" />
     <Compile Include="DynamicVisitor\DynamicVisitor.cs" />
     <Compile Include="Pirate\PirateWriter.cs" />
-    <Compile Include="♭\FlatBuilder.cs" />
+    <Compile Include="Flat\FlatBuilder.cs" />
     <Compile Include="Flat2Pirate\FlatVisitor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

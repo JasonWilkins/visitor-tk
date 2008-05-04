@@ -32,6 +32,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Sexp\Literals.cs" />
     <Compile Include="♭\Flat.cs" />
     <Compile Include="Sexp\ChainVisitor.cs" />
     <Compile Include="♭\Common.cs" />

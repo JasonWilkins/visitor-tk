@@ -60,7 +60,4 @@ namespace Sexp {
 
     public class VectorInterpreter : VectorVisitor {
     }
-
-    public class SymbolInterpreter : SymbolVisitor {
-    }
 }

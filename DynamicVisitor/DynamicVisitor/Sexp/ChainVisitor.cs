@@ -36,7 +36,7 @@ namespace Sexp {
         public override void visit_value(String o) { car.visit_value(o); cdr.visit_value(o); }
         public override void visit_value(Char o) { car.visit_value(o); cdr.visit_value(o); }
         public override void visit_value(Object o) { car.visit_value(o); cdr.visit_value(o); }
-        public override SymbolVisitor visit_Symbol_value() { return new SymbolMultiVisitor(car.visit_Symbol_value(), cdr.visit_Symbol_value()); }
+        public override void visit_value(Symbol o) { car.visit_value(o); cdr.visit_value(o); }
     }
 
     public class ConsMultiVisitor : ConsVisitor {
@@ -59,18 +59,18 @@ namespace Sexp {
         public override VectorVisitor visit_Vector_cdr() { return new VectorMultiVisitor(car.visit_Vector_cdr(), cdr.visit_Vector_cdr()); }
     }
 
-    public class SymbolMultiVisitor : SymbolVisitor {
-        SymbolVisitor car;
-        SymbolVisitor cdr;
+    //public class SymbolMultiVisitor : SymbolVisitor {
+    //    SymbolVisitor car;
+    //    SymbolVisitor cdr;
 
-        public SymbolMultiVisitor(SymbolVisitor car, SymbolVisitor cdr)
-        {
-            this.car = car;
-            this.cdr = cdr;
-        }
+    //    public SymbolMultiVisitor(SymbolVisitor car, SymbolVisitor cdr)
+    //    {
+    //        this.car = car;
+    //        this.cdr = cdr;
+    //    }
 
-        public override void visit() { car.visit(); cdr.visit(); }
-        public override void visitEnd() { car.visitEnd(); cdr.visitEnd(); }
-        public override void visit_name(string name) { car.visit_name(name); cdr.visit_name(name); }
-    }
+    //    public override void visit() { car.visit(); cdr.visit(); }
+    //    public override void visitEnd() { car.visitEnd(); cdr.visitEnd(); }
+    //    public override void visit_name(string name) { car.visit_name(name); cdr.visit_name(name); }
+    //}
 }

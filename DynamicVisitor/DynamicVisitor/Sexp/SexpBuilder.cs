@@ -65,42 +65,42 @@ namespace Sexp {
 
         public override void visitEnd()
         {
-            if (m_value is SymbolBuilder) {
-                m_atom = new Atom((m_value as SymbolBuilder).getSymbol());
-            } else {
-                m_atom = new Atom(m_value);
-            }
+            m_atom = new Atom(m_value);
         }
 
         public override void visit_value(Boolean o)
         {
-            m_value = new Atom(o);
+            m_value = o;
         }
 
         public override void visit_value(Int64 o)
         {
-            m_value = new Atom(o);
+            m_value = o;
         }
 
         public override void visit_value(Double o)
         {
-            m_value = new Atom(o);
+            m_value = o;
         }
 
         public override void visit_value(Char o)
         {
-            m_value = new Atom(o);
+            m_value = o;
+        }
+
+        public override void visit_value(String o)
+        {
+            m_value = o;
         }
 
         public override void visit_value(Object o)
         {
-            m_value = new Atom(o);
+            m_value = o;
         }
 
-        public override SymbolVisitor visit_Symbol_value()
+        public override void visit_value(Symbol o)
         {
-            m_value = new SymbolBuilder();
-            return m_value as SymbolBuilder;
+            m_value = o;
         }
     }
 
@@ -158,17 +158,17 @@ namespace Sexp {
         }
     }
 
-    public class SymbolBuilder : SymbolVisitor {
-        Symbol sym;
+    //public class SymbolBuilder : SymbolVisitor {
+    //    Symbol sym;
 
-        public Symbol getSymbol()
-        {
-            return sym;
-        }
+    //    public Symbol getSymbol()
+    //    {
+    //        return sym;
+    //    }
 
-        public override void visit_name(string name)
-        {
-            sym = new Symbol(name);
-        }
-    }
+    //    public override void visit_name(string name)
+    //    {
+    //        sym = new Symbol(name);
+    //    }
+    //}
 }

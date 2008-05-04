@@ -10,9 +10,9 @@ using Utils;
 
 namespace DynamicVisitor {
     public class ObjectVisitorMethod {
-        private static Type[] no_params = new Type[0];
-        private static object[] no_args = new object[0];
-
+        private static Type[] no_params = { };
+        private static object[] no_args = { };
+        
         public void invokeVisit(Object visitor, Type visitor_type)
         {
             MethodInfo mi = visitor_type.GetMethod("visit", no_params);
@@ -35,22 +35,19 @@ namespace DynamicVisitor {
             }
         }
 
-        bool is_nonterminal(Type type)
+        bool is_terminal(Type type)
         {
-            return !type.FullName.StartsWith("System");
+            return type.FullName.StartsWith("System");
         }
 
         bool invokeTerminal(Object visitor, Type visitor_type, string method_name, Type type, object value)
         {
-            Type[] types = new Type[1];
-
             while (type != null) {
-                types[0] = type;
+                Type[] types = { type };
                 MethodInfo mi = visitor_type.GetMethod(method_name, types);
 
                 if (mi != null) {
-                    object[] args = new object[1];
-                    args[0] = value;
+                    object[] args = { value };
                     mi.Invoke(visitor, args);
                     return true;
                 } else {
@@ -83,22 +80,19 @@ namespace DynamicVisitor {
             }
         }
 
-        Object invokeNonTerminal(Object visitor, Type visitor_type, string prefix, Type type, string name)
+        bool invokeNonTerminal(Object visitor, Type visitor_type, string prefix, Type type, string name, out Object new_visitor)
         {
-            Object new_visitor;
-
             while (type.BaseType != null) {
                 if (!type.IsGenericType) {
                     if (innerCall(visitor, visitor_type, prefix+"_"+type.Name+(name!=null?"_"+name:""), out new_visitor, false)) {
-                        return new_visitor;
+                        return true;
                     }
                 }
 
                 type = type.BaseType;
             }
 
-            innerCall(visitor, visitor_type, prefix+(name!=null?"_"+name:""), out new_visitor, true);
-            return new_visitor;
+            return innerCall(visitor, visitor_type, prefix+(name!=null?"_"+name:""), out new_visitor, true);
         }
 
         public Object invokeVisit(Object visitor, Type visitor_type, Type type, string name, object value)
@@ -113,12 +107,18 @@ namespace DynamicVisitor {
                 prefix = "visitItem";
             }
 
-            if (invokeTerminal(visitor, visitor_type, prefix+(name!=null?"_"+name:""), type, value)) {
+            if (is_terminal(type)) {
+                invokeTerminal(visitor, visitor_type, prefix+(name!=null?"_"+name:""), type, value);
                 return null;
-            } else if (is_nonterminal(type)) {
-                return invokeNonTerminal(visitor, visitor_type, prefix, type, name);
             } else {
-                return null;
+                Object new_visitor;
+
+                if (invokeNonTerminal(visitor, visitor_type, prefix, type, name, out new_visitor)) {
+                    return new_visitor;
+                } else {
+                    invokeTerminal(visitor, visitor_type, prefix+(name!=null?"_"+name:""), type, value);
+                    return null;
+                }
             }
         }
     }

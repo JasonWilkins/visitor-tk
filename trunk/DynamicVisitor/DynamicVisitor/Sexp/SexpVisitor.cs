@@ -19,7 +19,7 @@ namespace Sexp {
         public virtual void visit_value(String o) { }
         public virtual void visit_value(Char o) { }
         public virtual void visit_value(Object o) { }
-        public virtual SymbolVisitor visit_Symbol_value() { return null; }
+        public virtual void visit_value(Symbol o) { }
     }
 
     public class ConsVisitor : DatumVisitor {
@@ -31,9 +31,9 @@ namespace Sexp {
         public virtual VectorVisitor visit_Vector_cdr() { return null; }
     }
 
-    public class SymbolVisitor {
-        public virtual void visit() { }
-        public virtual void visitEnd() { }
-        public virtual void visit_name(string name) { }
-    }
+    //public class SymbolVisitor {
+    //    public virtual void visit() { }
+    //    public virtual void visitEnd() { }
+    //    public virtual void visit_name(string name) { }
+    //}
 }

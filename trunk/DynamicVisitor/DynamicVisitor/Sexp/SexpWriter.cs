@@ -2,8 +2,9 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 
+using Utils;
+
 namespace Sexp {
-    using Utils;
 
     public interface IWritable {
         void write(Writer writer);
@@ -102,86 +103,53 @@ namespace Sexp {
     }
 
     public class AtomWriter : AtomVisitor, IWritable {
-        public object txt;
-
-        public AtomWriter()
-        { }
+        string m_literal;
+        public object value;
 
         public void write(Writer writer)
         {
-            if (txt != null) {
-                if (txt is SymbolWriter) {
-                    (txt as SymbolWriter).write(writer);
-                } else {
-                    writer.Append(txt.ToString());
-                }
-            }
+            writer.Append(m_literal);
         }
 
-        public override void visit_value(Boolean o)
+        public override void visit_value(Boolean v)
         {
-            txt = o ? "#t" : "#f";
+            m_literal = Literal.literal(v);
+            value = v;
         }
 
-        public override void visit_value(Int64 o)
+        public override void visit_value(Int64 v)
         {
-            txt = o;
+            m_literal = Literal.literal(v);
+            value = v;
         }
 
-        public override void visit_value(Double o)
+        public override void visit_value(Double v)
         {
-            txt = o;
+            m_literal = Literal.literal(v);
+            value = v;
         }
 
-        public override void visit_value(Char o)
+        public override void visit_value(Char v)
         {
-            if ('\n' == o) {
-                txt = "#\\newline";
-            } else if (' ' == o) {
-                txt = "#\\space";
-            } else {
-                txt = "#\\"+o;
-            }
+            m_literal = Literal.literal(v);
+            value = v;
+        }
+
+        public override void visit_value(String v)
+        {
+            m_literal = Literal.literal(v);
+            value = v;
+        }
+
+        public override void visit_value(Symbol v)
+        {
+            m_literal = Literal.literal(v);
+            value = v;
         }
 
         public override void visit_value(Object o)
         {
             throw new InvalidOperationException("values of type " + o.GetType().Name + " are not supported");
-        }
-
-        string escape(string input)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            foreach (char c in input) {
-                switch (c) {
-                    case '"':
-                        sb.Append("\\\"");
-                        break;
-
-                    case '\\':
-                        sb.Append("\\\\");
-                        break;
-
-                    default:
-                        sb.Append(c);
-                        break;
-                }
-            }
-
-            return sb.ToString();
-        }
-
-        public override void visit_value(String o)
-        {
-            txt = '"' + escape(o.ToString()) + '"';
-        }
-
-        public override SymbolVisitor visit_Symbol_value()
-        {
-            SymbolWriter sym = new SymbolWriter();
-            txt = sym;
-            return sym;
         }
     }
 
@@ -198,8 +166,8 @@ namespace Sexp {
             // TODO - clean up and generalize this 
             if (car is AtomWriter) {
                 AtomWriter atom = (AtomWriter)car;
-                if (atom.txt is SymbolWriter) {
-                    SymbolWriter sym = (SymbolWriter)atom.txt;
+                if (atom.value is Symbol) {
+                    Symbol sym = atom.value as Symbol;
                     if (sym.name == "quote") {
                         is_quote = true;
                         quote_sym = "quote";
@@ -223,8 +191,7 @@ namespace Sexp {
             if (is_quote) {
                 if (cdr == null) {
                     writer.Append("("+quote_sym+")");
-                }
-                else {
+                } else {
                     writer.Append(quote_ch);
                     cdr.write(writer);
                 }
@@ -356,20 +323,20 @@ namespace Sexp {
         }
     }
 
-    public class SymbolWriter : SymbolVisitor, IWritable {
-        public string name;
+    //public class SymbolWriter : SymbolVisitor, IWritable {
+    //    public string name;
 
-        public SymbolWriter()
-        { }
+    //    public SymbolWriter()
+    //    { }
 
-        public void write(Writer writer)
-        {
-            writer.Append(name);
-        }
+    //    public void write(Writer writer)
+    //    {
+    //        writer.Append(name);
+    //    }
 
-        public override void visit_name(string name)
-        {
-            this.name = name;
-        }
-    }
+    //    public override void visit_name(string name)
+    //    {
+    //        this.name = name;
+    //    }
+    //}
 }

@@ -694,14 +694,14 @@ namespace Main {
         static void code_builder_test2()
         {
             CodeBuilder cb = new CodeBuilder();
-            
+
             CodeBuilderType string_type = cb.defineType("string");
             CodeBuilderType single_type = cb.defineType("single");
 
             Prototype print_prototype1 = cb.definePrototype(null, new TypeList(string_type), null);
             Prototype print_prototype2 = cb.definePrototype(null, new TypeList(single_type), null);
             Prototype sqrt_prototype = cb.definePrototype(null, new TypeList(single_type), new TypeList(single_type));
-            
+
             Global print_global1 = cb.defineGlobal("print", print_prototype1);
             Global print_global2 = cb.defineGlobal("print", print_prototype2);
             Global sqrt_global = cb.defineGlobal("sqrt", sqrt_prototype);
@@ -738,7 +738,7 @@ namespace Main {
 
             Constant _4 = cb.defineConstant(null, single_type, 4);
             lb.addOperator(null, mul, new LvalueList(n2), new OperandList(_4, a));
-            
+
             lb.addOperator(null, mul, new LvalueList(n2), new OperandList(n2, c));
             lb.addOperator(null, sub, new LvalueList(det), new OperandList(n1, n2));
 
@@ -816,7 +816,7 @@ namespace Main {
             compare_logs("test-output3.txt");
             compare_logs("test.txt", "test2.txt");
 #endif
-            //code_builder_test1();
+            code_builder_test1();
             code_builder_test2();
         }
     }

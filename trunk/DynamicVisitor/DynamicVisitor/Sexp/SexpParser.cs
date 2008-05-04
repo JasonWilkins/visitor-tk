@@ -202,26 +202,27 @@ namespace Sexp {
                 atom.visit_value((String)m_attrib.value);
                 match(Token.STRING);
             } else if (Token.ID == lookahead) {
-                symbol(atom);
+                atom.visit_value((Symbol)m_attrib.value);
+                match(Token.ID);
             } else {
                 // ERROR
                 expecting("simple_datum", pack(Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID));
             }
         }
 
-        void symbol(AtomVisitor atom)
-        {
-            if (Token.ID == lookahead) {
-                SymbolVisitor symbol = atom.visit_Symbol_value();
-                symbol.visit();
-                symbol.visit_name(((Symbol)m_attrib.value).name);
-                symbol.visitEnd();
-                match(Token.ID);
-            } else {
-                // ERROR
-                expecting("symbol", pack(Token.ID));
-            }
-        }
+        //void symbol(AtomVisitor atom)
+        //{
+        //    if (Token.ID == lookahead) {
+        //        SymbolVisitor symbol = atom.visit_value();
+        //        symbol.visit();
+        //        symbol.visit_name(((Symbol)m_attrib.value).name);
+        //        symbol.visitEnd();
+        //        match(Token.ID);
+        //    } else {
+        //        // ERROR
+        //        expecting("symbol", pack(Token.ID));
+        //    }
+        //}
 
         void compound_datum(ConsVisitor cons)
         {
@@ -368,12 +369,8 @@ namespace Sexp {
             AtomVisitor atom = abbrev.visit_Atom_car();
             atom.visit();
 
-            SymbolVisitor symbol = atom.visit_Symbol_value();
-            symbol.visit();
-
-            symbol.visit_name(name);
-
-            symbol.visitEnd();
+            Symbol sym = new Symbol(name);
+            atom.visit_value(sym);
 
             atom.visitEnd();
         }

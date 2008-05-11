@@ -6,14 +6,41 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+
 using Utils;
 
 namespace DynamicVisitor {
-    public class ObjectVisitorMethod {
+    public class Operator {
         private static Type[] no_params = { };
         private static object[] no_args = { };
-        
-        public void invokeVisit(Object visitor, Type visitor_type)
+
+        Object visitor;
+        Type visitor_type;
+
+        public Operator(Object visitor)
+        {
+            if (null == visitor) throw new ArgumentNullException("visitor");
+
+            this.visitor = visitor;
+            this.visitor_type = visitor.GetType();
+        }
+
+        public bool parent(NameTypeValue node)
+        {
+            Type[] param = { node.type };
+            MethodInfo mi = visitor_type.GetMethod("visit", param);
+
+            if (mi != null) {
+                Object[] arg = { node.value };
+                mi.Invoke(visitor, arg);
+                return true;
+            } else {
+                Trace.Verbose("debug: could not find method {0}.visit({1}), skipping", visitor_type.FullName, node.type.FullName);
+                return false;
+            }
+        }
+
+        public void begin()
         {
             MethodInfo mi = visitor_type.GetMethod("visit", no_params);
 
@@ -24,7 +51,7 @@ namespace DynamicVisitor {
             }
         }
 
-        public void invokeVisitEnd(Object visitor, Type visitor_type)
+        public void end()
         {
             MethodInfo mi = visitor_type.GetMethod("visitEnd", no_params);
 
@@ -35,12 +62,7 @@ namespace DynamicVisitor {
             }
         }
 
-        bool is_terminal(Type type)
-        {
-            return type.FullName.StartsWith("System");
-        }
-
-        bool invokeTerminal(Object visitor, Type visitor_type, string method_name, Type type, object value)
+        bool invokeTerminal(string method_name, Type type, object value, out Operator new_op)
         {
             while (type != null) {
                 Type[] types = { type };
@@ -48,7 +70,15 @@ namespace DynamicVisitor {
 
                 if (mi != null) {
                     object[] args = { value };
-                    mi.Invoke(visitor, args);
+                    Object new_visitor = mi.Invoke(visitor, args);
+                    
+                    if (null == new_visitor) {
+                        new_op = null;
+                        Trace.Warning("debug: {0}.{1}({2}) did not return a new visitor", visitor_type.FullName, method_name, type.FullName);
+                    } else {
+                        new_op = new Operator(new_visitor);
+                    }
+
                     return true;
                 } else {
                     Trace.Warning("debug: could not find method {0}.{1}({2}), skipping", visitor_type.FullName, method_name, type.FullName);
@@ -56,18 +86,23 @@ namespace DynamicVisitor {
                 }
             }
 
+            new_op = null;
+
             return false;
         }
 
-        bool innerCall(Object visitor, Type visitor_type, string method_name, out Object new_visitor, bool is_last)
+        bool innerCall(string method_name, out Operator new_method, bool is_last)
         {
             MethodInfo mi = visitor_type.GetMethod(method_name, no_params);
 
             if (mi != null) {
-                new_visitor = mi.Invoke(visitor, no_args);
+                Object new_visitor = mi.Invoke(visitor, no_args);
 
                 if (null == new_visitor) {
+                    new_method = null;
                     Trace.Verbose("debug: {0} did not return a new visitor", method_name);
+                } else {
+                    new_method = new Operator(new_visitor);
                 }
 
                 return true;
@@ -75,16 +110,16 @@ namespace DynamicVisitor {
                 if (is_last) {
                     Trace.Warning("debug: could not find method {0}.{1}(), skipping", visitor_type.FullName, method_name);
                 }
-                new_visitor = null;
+                new_method = null;
                 return false;
             }
         }
 
-        bool invokeNonTerminal(Object visitor, Type visitor_type, string prefix, Type type, string name, out Object new_visitor)
+        bool invokeNonTerminal(string prefix, Type type, string name, out Operator new_method)
         {
             while (type.BaseType != null) {
                 if (!type.IsGenericType) {
-                    if (innerCall(visitor, visitor_type, prefix+"_"+type.Name+(name!=null?"_"+name:""), out new_visitor, false)) {
+                    if (innerCall(prefix+"_"+type.Name+(name!=null?"_"+name:""), out new_method, false)) {
                         return true;
                     }
                 }
@@ -92,38 +127,26 @@ namespace DynamicVisitor {
                 type = type.BaseType;
             }
 
-            return innerCall(visitor, visitor_type, prefix+(name!=null?"_"+name:""), out new_visitor, true);
+            return innerCall(prefix+(name!=null?"_"+name:""), out new_method, true);
         }
 
-        public Object invokeVisit(Object visitor, Type visitor_type, Type type, string name, object value)
+        public bool child(NameTypeValue node, out Operator new_op)
         {
-            if (null == type) throw new ArgumentNullException("type");
-
             string prefix;
 
-            if (name != null) {
+            if (node.name != null) {
                 prefix = "visit";
             } else {
                 prefix = "visitItem";
             }
 
-            if (is_terminal(type)) {
-                invokeTerminal(visitor, visitor_type, prefix+(name!=null?"_"+name:""), type, value);
-                return null;
-            } else {
-                Object new_visitor;
-
-                if (invokeNonTerminal(visitor, visitor_type, prefix, type, name, out new_visitor)) {
-                    return new_visitor;
-                } else {
-                    invokeTerminal(visitor, visitor_type, prefix+(name!=null?"_"+name:""), type, value);
-                    return null;
-                }
-            }
+            return
+                invokeNonTerminal(prefix, node.type, node.name, out new_op) ||
+                invokeTerminal(prefix+(node.name!=null?"_"+node.name:""), node.type, node.value, out new_op);
         }
     }
 
-    class NameTypeValue {
+    public class NameTypeValue {
         public string name;
         public Type type;
         public object value;
@@ -140,6 +163,10 @@ namespace DynamicVisitor {
 
     class NameTypeValueList : IEnumerable<NameTypeValue> {
         List<NameTypeValue> m_list = new List<NameTypeValue>();
+
+        public NameTypeValueList(NameTypeValue graph)
+            : this(graph.value)
+        { }
 
         public NameTypeValueList(object graph)
         {
@@ -204,36 +231,31 @@ namespace DynamicVisitor {
         #endregion
     }
 
-    class ObjectVisitor {
-        ObjectVisitorMethod m_method;
-
-        public ObjectVisitor(ObjectVisitorMethod method)
+    class Walkabout {
+        public void accept(Object parent, Operator op)
         {
-            m_method = method;
+            if (null == parent) throw new ArgumentNullException("parent");
+
+            accept(new NameTypeValue(null, parent.GetType(), parent), op);
         }
 
-        public void accept(object value, Object visitor)
+        void accept(NameTypeValue parent, Operator op)
         {
-            if (null != value && null != visitor) {
-                Type visitor_type = visitor.GetType();
+            if (!op.parent(parent)) {
 
-                m_method.invokeVisit(visitor, visitor_type);
+                op.begin();
 
-                foreach (NameTypeValue child in new NameTypeValueList(value)) {
-                    Object new_visitor = m_method.invokeVisit(visitor, visitor_type, child.type, child.name, child.value);
+                foreach (NameTypeValue child in new NameTypeValueList(parent)) {
+                    Operator new_op;
 
-                    if (new_visitor != null) {
-                        accept(child.value, new_visitor);
+                    if (!op.child(child, out new_op)) {
+                        accept(child, op);
+                    } else if (new_op != null) {
+                        accept(child, new_op);
                     }
                 }
 
-                m_method.invokeVisitEnd(visitor, visitor_type);
-            } else {
-                if (null == value) {
-                    Trace.Warning("debug: value null, skipping");
-                } else {
-                    Trace.Warning("debug: visitor null, skipping");
-                }
+                op.end();
             }
         }
     }

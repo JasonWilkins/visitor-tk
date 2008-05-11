@@ -10,8 +10,8 @@ namespace DynamicVisitor {
     static class DynamicVisitor {
         public static void accept(object graph, object visitor)
         {
-            ObjectVisitor ov = new ObjectVisitor(new ObjectVisitorMethod());
-            ov.accept(graph, visitor);
+            Walkabout ov = new Walkabout();
+            ov.accept(graph, new WalkaboutOp(visitor));
         }
 #if false
         private static Type[] no_params = new Type[0];

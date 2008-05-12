@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DynamicVisitor {
+namespace GuidedTour {
     public interface ISiteseer {
         void begin();
         void end();

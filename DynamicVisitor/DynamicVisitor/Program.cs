@@ -4,14 +4,15 @@ using System.Text;
 
 namespace Main {
     //using Test;
-    using DynamicVisitor;
+    using GuidedTour;
     using Pirate;
     using PirateType=Pirate.Type;
     using Utils;
     using Sexp;
     using Flat;
     using Flat2Pirate;
-    using CodeBuilderType=Flat.Type;
+    using FlatType=Flat.Type;
+    using DynamicVisitor;
 
     class Program {
 #if false
@@ -677,7 +678,7 @@ namespace Main {
                     (call print_prototype print () ("Hello World!\\n"))))
 #endif
             CodeBuilder cb = new CodeBuilder();
-            CodeBuilderType string_type = cb.defineType("string");
+            FlatType string_type = cb.defineType("string");
             Prototype print_prototype = cb.definePrototype(null, new TypeList(string_type), null);
             Global print_global = cb.defineGlobal("print", print_prototype);
             Constant hello_world = cb.defineConstant(null, string_type, "Hello World!\n");
@@ -695,8 +696,8 @@ namespace Main {
         {
             CodeBuilder cb = new CodeBuilder();
 
-            CodeBuilderType string_type = cb.defineType("string");
-            CodeBuilderType single_type = cb.defineType("single");
+            FlatType string_type = cb.defineType("string");
+            FlatType single_type = cb.defineType("single");
 
             Prototype print_prototype1 = cb.definePrototype(null, new TypeList(string_type), null);
             Prototype print_prototype2 = cb.definePrototype(null, new TypeList(single_type), null);
@@ -783,7 +784,7 @@ namespace Main {
                 Console.WriteLine("summing ints");
             }
 
-            public void visit(int v)
+            public void visit(long v)
             {
                 i += v;
             }

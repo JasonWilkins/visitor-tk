@@ -5,7 +5,7 @@ using System.Reflection;
 
 using Utils;
 
-namespace DynamicVisitor {
+namespace GuidedTour {
     public class Site {
         public string name;
         public Type type;

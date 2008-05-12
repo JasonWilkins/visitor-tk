@@ -157,18 +157,4 @@ namespace Sexp {
             return m_cdr as VectorBuilder;
         }
     }
-
-    //public class SymbolBuilder : SymbolVisitor {
-    //    Symbol sym;
-
-    //    public Symbol getSymbol()
-    //    {
-    //        return sym;
-    //    }
-
-    //    public override void visit_name(string name)
-    //    {
-    //        sym = new Symbol(name);
-    //    }
-    //}
 }

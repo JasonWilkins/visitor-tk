@@ -58,19 +58,4 @@ namespace Sexp {
         public override ConsVisitor visit_Cons_cdr() { return new ConsMultiVisitor(car.visit_Cons_cdr(), cdr.visit_Cons_cdr()); }
         public override VectorVisitor visit_Vector_cdr() { return new VectorMultiVisitor(car.visit_Vector_cdr(), cdr.visit_Vector_cdr()); }
     }
-
-    //public class SymbolMultiVisitor : SymbolVisitor {
-    //    SymbolVisitor car;
-    //    SymbolVisitor cdr;
-
-    //    public SymbolMultiVisitor(SymbolVisitor car, SymbolVisitor cdr)
-    //    {
-    //        this.car = car;
-    //        this.cdr = cdr;
-    //    }
-
-    //    public override void visit() { car.visit(); cdr.visit(); }
-    //    public override void visitEnd() { car.visitEnd(); cdr.visitEnd(); }
-    //    public override void visit_name(string name) { car.visit_name(name); cdr.visit_name(name); }
-    //}
 }

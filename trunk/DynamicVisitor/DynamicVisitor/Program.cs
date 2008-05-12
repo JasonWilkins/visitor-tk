@@ -774,6 +774,32 @@ namespace Main {
             Console.Write(sw.ToString());
         }
 
+        class IntVisitor {
+            Int64 i = 0;
+            int scount = 0;
+
+            public void visit()
+            {
+                Console.WriteLine("summing ints");
+            }
+
+            public void visit(int v)
+            {
+                i += v;
+            }
+
+            public void visit_value(Symbol s)
+            {
+                scount++;
+            }
+
+            public void visitEnd()
+            {
+                Console.WriteLine("total is {0}", i);
+                Console.WriteLine("symbol count = {0}", scount);
+            }
+        }
+
         static void Main(string[] args)
         {
 #if false
@@ -800,7 +826,7 @@ namespace Main {
             //test_safe_parse("test2.txt");
 #endif
 
-#if true
+#if false
             parse_and_write("test.txt", "test-output1.txt");
             parse_and_write("test-output1.txt", "test-output2.txt");
             compare_files("test.txt", "test-output1.txt");
@@ -816,9 +842,12 @@ namespace Main {
             compare_logs("test-output2.txt");
             compare_logs("test-output3.txt");
             compare_logs("test.txt", "test2.txt");
-#endif
             code_builder_test1();
             code_builder_test2();
+#endif
+
+            Vector v = build("test.txt");
+            DynamicVisitor.accept(v, new IntVisitor());
         }
     }
 }

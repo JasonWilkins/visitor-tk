@@ -58,9 +58,6 @@ namespace Sexp {
     public class VectorWriter : VectorVisitor, IWritable {
         List<object> vect = new List<object>();
 
-        public VectorWriter()
-        { }
-
         public void write(Writer writer)
         {
             bool is_first = true;
@@ -265,9 +262,6 @@ namespace Sexp {
         IWritable car;
         IWritable cdr;
 
-        public ConsWriter()
-        { }
-
         public void write(Writer writer)
         {
             if (car != null) {
@@ -322,21 +316,4 @@ namespace Sexp {
             return vect;
         }
     }
-
-    //public class SymbolWriter : SymbolVisitor, IWritable {
-    //    public string name;
-
-    //    public SymbolWriter()
-    //    { }
-
-    //    public void write(Writer writer)
-    //    {
-    //        writer.Append(name);
-    //    }
-
-    //    public override void visit_name(string name)
-    //    {
-    //        this.name = name;
-    //    }
-    //}
 }

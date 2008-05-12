@@ -30,10 +30,4 @@ namespace Sexp {
         public virtual ConsVisitor visit_Cons_cdr() { return null; }
         public virtual VectorVisitor visit_Vector_cdr() { return null; }
     }
-
-    //public class SymbolVisitor {
-    //    public virtual void visit() { }
-    //    public virtual void visitEnd() { }
-    //    public virtual void visit_name(string name) { }
-    //}
 }

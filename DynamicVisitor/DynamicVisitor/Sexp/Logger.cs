@@ -259,35 +259,4 @@ namespace Sexp {
             return new VectorLogger(m_log, m_next.visit_Vector_cdr());
         }
     }
-
-    //public class SymbolLogger : SymbolVisitor {
-    //    SymbolVisitor m_next;
-    //    int m_sequence = 0;
-    //    string m_class_name = "SymbolLogger";
-    //    Log m_log = new Log();
-
-    //    public SymbolLogger(Log log, SymbolVisitor next)
-    //    {
-    //        m_log = log;
-    //        m_next = next;
-    //    }
-
-    //    public override void visit()
-    //    {
-    //        m_log.Add(m_sequence++, m_class_name, "visit()");
-    //        m_next.visit();
-    //    }
-
-    //    public override void visitEnd()
-    //    {
-    //        m_log.Add(m_sequence++, m_class_name, "visitEnd()");
-    //        m_next.visitEnd();
-    //    }
-
-    //    public override void visit_name(String name)
-    //    {
-    //        m_log.Add(m_sequence++, m_class_name, "visit_name(String)");
-    //        m_next.visit_name(name);
-    //    }
-    //}
 }

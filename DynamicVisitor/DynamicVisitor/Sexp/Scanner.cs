@@ -491,6 +491,7 @@ namespace Sexp {
                     attrib.value = new Symbol(attrib.literal);
                 }
             } else if (Token.ERROR == attrib.token) {
+                // leave it alone
             } else {
                 attrib.value = attrib.literal;
             }

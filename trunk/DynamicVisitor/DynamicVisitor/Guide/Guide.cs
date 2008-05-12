@@ -1,6 +1,6 @@
 using System;
 
-namespace DynamicVisitor {
+namespace GuidedTour {
     class Guide {
         ISiteseer m_default_siteseer;
 

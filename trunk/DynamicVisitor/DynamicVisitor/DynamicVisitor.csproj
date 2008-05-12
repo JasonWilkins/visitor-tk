@@ -7,7 +7,7 @@
     <ProjectGuid>{5FE72B5B-096A-45C9-938A-19385702CF7B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DynamicVisitor</RootNamespace>
+    <RootNamespace>GuidedTour</RootNamespace>
     <AssemblyName>DynamicVisitor</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -32,18 +32,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DynamicVisitor\Guide.cs" />
-    <Compile Include="DynamicVisitor\ISiteseer.cs" />
-    <Compile Include="DynamicVisitor\Site.cs" />
+    <Compile Include="Guide\Guide.cs" />
+    <Compile Include="Guide\ISiteseer.cs" />
+    <Compile Include="Guide\Site.cs" />
     <Compile Include="Sexp\Literals.cs" />
     <Compile Include="Flat\Flat.cs" />
     <Compile Include="Sexp\ChainVisitor.cs" />
     <Compile Include="Flat\Common.cs" />
     <Compile Include="Sexp\Datum.cs" />
     <Compile Include="Util\FileWriter.cs" />
-    <Compile Include="DynamicVisitor\IChainable.cs" />
     <Compile Include="Flat2Pirate\Flat2Pirate.cs" />
-    <Compile Include="DynamicVisitor\ObjectVisitor.cs" />
+    <Compile Include="DynamicVisitor\VisitSiteSeer.cs" />
     <Compile Include="Pirate\Pirate.cs" />
     <Compile Include="DynamicVisitor\DynamicVisitor.cs" />
     <Compile Include="Pirate\PirateWriter.cs" />
@@ -64,8 +63,6 @@
     <Compile Include="Sexp\SexpLogger.cs" />
     <Compile Include="Test.cs" />
     <Compile Include="Util\Trace.cs" />
-    <Compile Include="DynamicVisitor\VisitorAttributes.cs" />
-    <Compile Include="DynamicVisitor\VisitorMethod.cs" />
     <Compile Include="Util\Writer.cs" />
   </ItemGroup>
   <ItemGroup>

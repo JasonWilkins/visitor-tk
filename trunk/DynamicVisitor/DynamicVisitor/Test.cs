@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DynamicVisitor.Test {
+namespace GuidedTour.Test {
     class NameProperty {
         string m_name;
 

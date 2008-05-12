@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 
 using Utils;
+using GuidedTour;
 
 namespace DynamicVisitor {
     public class VisitSiteseer : ISiteseer {

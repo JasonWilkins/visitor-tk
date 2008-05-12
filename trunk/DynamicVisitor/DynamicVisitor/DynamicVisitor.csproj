@@ -32,6 +32,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DynamicVisitor\Guide.cs" />
+    <Compile Include="DynamicVisitor\ISiteseer.cs" />
+    <Compile Include="DynamicVisitor\Site.cs" />
     <Compile Include="Sexp\Literals.cs" />
     <Compile Include="Flat\Flat.cs" />
     <Compile Include="Sexp\ChainVisitor.cs" />

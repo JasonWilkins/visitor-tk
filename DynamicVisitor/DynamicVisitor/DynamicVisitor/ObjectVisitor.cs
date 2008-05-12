@@ -25,10 +25,20 @@ namespace DynamicVisitor {
             this.visitor_type = visitor.GetType();
         }
 
+        MethodInfo GetMethod(string name, Type[] param)
+        {
+            return visitor_type.GetMethod(
+                name,
+                BindingFlags.Public|BindingFlags.Instance|BindingFlags.ExactBinding,
+                null,
+                param,
+                null);
+        }
+
         public bool parent(NameTypeValue node)
         {
             Type[] param = { node.type };
-            MethodInfo mi = visitor_type.GetMethod("visit", param);
+            MethodInfo mi = GetMethod("visit", param);
 
             if (mi != null) {
                 Object[] arg = { node.value };
@@ -42,7 +52,7 @@ namespace DynamicVisitor {
 
         public void begin()
         {
-            MethodInfo mi = visitor_type.GetMethod("visit", no_params);
+            MethodInfo mi = GetMethod("visit", no_params);
 
             if (mi != null) {
                 mi.Invoke(visitor, no_args);
@@ -53,7 +63,7 @@ namespace DynamicVisitor {
 
         public void end()
         {
-            MethodInfo mi = visitor_type.GetMethod("visitEnd", no_params);
+            MethodInfo mi = GetMethod("visitEnd", no_params);
 
             if (mi != null) {
                 mi.Invoke(visitor, no_args);
@@ -108,7 +118,7 @@ namespace DynamicVisitor {
                 args_list.CopyTo(arg_array);
 
                 string method_name = prefix+"_"+type.Name+(name!=null?"_"+name:"");
-                MethodInfo mi = visitor_type.GetMethod(method_name, param_array);
+                MethodInfo mi = GetMethod(method_name, param_array);
 
                 if (mi != null) {
                     Object new_visitor = mi.Invoke(visitor, arg_array);
@@ -135,7 +145,7 @@ namespace DynamicVisitor {
         {
             while (type != null) {
                 Type[] types = { type };
-                MethodInfo mi = visitor_type.GetMethod(method_name, types);
+                MethodInfo mi = GetMethod(method_name, types);
 
                 if (mi != null) {
                     object[] args = { value };
@@ -162,7 +172,7 @@ namespace DynamicVisitor {
 
         bool innerCall(string method_name, out WalkaboutOp new_method, bool is_last)
         {
-            MethodInfo mi = visitor_type.GetMethod(method_name, no_params);
+            MethodInfo mi = GetMethod(method_name, no_params);
 
             if (mi != null) {
                 Object new_visitor = mi.Invoke(visitor, no_args);
@@ -340,16 +350,20 @@ namespace DynamicVisitor {
         void accept_inline(NameTypeValue parent, WalkaboutOp op)
         {
             if (!op.parent(parent)) {
-                accept_each(parent, op);
+                if (!parent.type.FullName.StartsWith("System")) {
+                    accept_each(parent, op);
+                }
             }
         }
 
         void new_accept(NameTypeValue parent, WalkaboutOp op)
         {
             if (!op.parent(parent)) {
-                op.begin();
-                accept_each(parent, op);
-                op.end();
+                if (!parent.type.FullName.StartsWith("System")) {
+                    op.begin();
+                    accept_each(parent, op);
+                    op.end();
+                }
             }
         }
     }

@@ -40,7 +40,7 @@
     <Compile Include="Sexp\MultiVisitor.cs" />
     <Compile Include="Flat\Common.cs" />
     <Compile Include="Sexp\Datum.cs" />
-    <Compile Include="Util\CodeFile1.cs" />
+    <Compile Include="Util\TxtLocation.cs" />
     <Compile Include="Util\FileWriter.cs" />
     <Compile Include="Flat2Pirate\Flat2Pirate.cs" />
     <Compile Include="DynamicVisitor\VisitSiteSeer.cs" />

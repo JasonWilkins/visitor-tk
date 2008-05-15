@@ -1,17 +1,15 @@
 using System;
 using System.Text;
 
+using Util;
+
 namespace Sexp {
     public class Parser {
         Scanner m_scanner;
         Attributes m_attrib;
         VectorVisitor m_visitor;
         int m_errors = 0;
-
-        Token lookahead
-        {
-            get { return m_attrib.token; }
-        }
+        TxtLocation m_loc;
 
         public int errors
         {
@@ -19,14 +17,24 @@ namespace Sexp {
         }
 
         public Parser(Reader reader, VectorVisitor visitor)
+            : this(reader, visitor, null)
+        { }
+
+        public Parser(Reader reader, VectorVisitor visitor, TxtLocation loc)
         {
             m_scanner = new Scanner(reader);
             m_visitor = visitor;
+            m_loc = loc;
         }
 
         public void read()
         {
             start_read();
+        }
+
+        Token lookahead
+        {
+            get { return m_attrib.token; }
         }
 
         Token[] pack(params Token[] tokens)
@@ -63,6 +71,12 @@ namespace Sexp {
         void next()
         {
             m_attrib = m_scanner.scan();
+
+            if (m_loc != null) {
+                m_loc.path   = m_attrib.path;
+                m_loc.column = m_attrib.column;
+                m_loc.line   = m_attrib.line;
+            }
         }
 
         void match(Token tok)

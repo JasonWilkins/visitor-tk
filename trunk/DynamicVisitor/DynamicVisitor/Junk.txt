@@ -591,3 +591,46 @@ namespace CodeBuilder {
         public override LambdaListVisitor visit_lambdas() { return new LambdaListPirateBuilder(); }
     }
 }
+
+
+
+
+
+
+
+
+
+        public override void visit_value(Boolean o)
+        {
+            Console.WriteLine("bool {0} ", Literal.literal(o));
+        }
+
+        public override void visit_value(Char o)
+        {
+            Console.WriteLine("char {0} ", Literal.literal(o));
+        }
+
+        public override void visit_value(Int64 o)
+        {
+            Console.WriteLine("int {0} ", Literal.literal(o));
+        }
+
+        public override void visit_value(Double o)
+        {
+            Console.WriteLine("double {0} ", Literal.literal(o));
+        }
+
+        public override void visit_value(String o)
+        {
+            Console.WriteLine("string {0} ", Literal.literal(o));
+        }
+
+        public override void visit_value(Symbol o)
+        {
+            Console.WriteLine("symbol {0} ", Literal.literal(o));
+        }
+
+        //public override void visit_value(object o)
+        //{
+        //    Console.WriteLine("{0} {1} ", o.GetType().FullName, o.ToString());
+        //}

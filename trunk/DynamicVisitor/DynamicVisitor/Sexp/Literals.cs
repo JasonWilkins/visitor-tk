@@ -61,5 +61,51 @@ namespace Sexp {
         {
             return v.name;
         }
+
+        public static string literal(Object[] v)
+        {
+            bool is_first = true;
+
+            StringBuilder sb = new StringBuilder("#(");
+
+            foreach (object o in v) {
+                if (is_first) {
+                    is_first = false;
+                } else {
+                    sb.Append(" ");
+                }
+
+                sb.Append(literal(o));
+            }
+
+            sb.Append(")");
+
+            return sb.ToString();
+        }
+
+        public static string literal(object o)
+        {
+            if (o is Boolean) {
+                return literal((Boolean)o);
+            } else if (o is Char) {
+                return literal((Char)o);
+            } else if (o is Int64) {
+                return literal((Int64)o);
+            } else if (o is Double) {
+                return literal((Double)o);
+            } else if (o is String) {
+                return literal((String)o);
+            } else if (o is Symbol) {
+                return literal((Symbol)o);
+            } else if (o is Object[]) {
+                return literal((Object[])o);
+            } else {
+                if (o != null) {
+                    return o.ToString();
+                } else {
+                    return "nil";
+                }
+            }
+        }
     }
 }

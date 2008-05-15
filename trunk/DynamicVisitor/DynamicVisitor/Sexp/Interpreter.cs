@@ -5,6 +5,31 @@ using System.Text;
 using Util;
 
 namespace Sexp {
+    public class InterpreterException : Exception {
+        public InterpreterException(string message)
+            : this(message, null, null)
+        { }
+
+        public InterpreterException(string message, TxtLocation loc)
+            : this(message, null, loc)
+        { }
+
+        public InterpreterException(string message, Exception innerException)
+            : base(message, innerException)
+        { }
+
+        public InterpreterException(string message, Exception innerException, TxtLocation loc)
+            : base(message, innerException)
+        {
+            if (loc != null) {
+                Data.Add("path", loc.path);
+                Data.Add("column", loc.column);
+                Data.Add("line", loc.line);
+                Data.Add("context", loc.context);
+            }
+        }
+    }
+
     public delegate object Closure(List<object> args);
 
     public class Environment {
@@ -20,33 +45,30 @@ namespace Sexp {
             m_parent = parent;
         }
 
-        public object apply(TxtLocation loc, Symbol sym, params object[] args)
+        public object apply(TxtLocation loc, Closure fn, params object[] args)
         {
             return null;
         }
 
-        public object apply(TxtLocation loc, Symbol sym, List<object> args)
+        public Closure lookup_fn(TxtLocation loc, Symbol sym)
         {
             Closure fn;
 
-            if (sym != null) {
-                if (closures.TryGetValue(sym, out fn)) {
-                    return fn(args);
-                } else if (m_parent != null) {
-                    try {
-                        return m_parent.apply(loc, sym, args);
-                    } catch (Exception e) {
-                        if (loc != null) {
-                            throw new Exception(loc.path + " [" + loc.line + ", " + loc.column + "] " + e.Message);
-                        } else {
-                            throw e;
-                        }
-                    }
-                } else {
-                    throw new Exception("cannot apply undefined symbol: " + ((Symbol)(args[0])).name);
-                }
+            if (closures.TryGetValue(sym, out fn)) {
+                return fn;
+            } else if (m_parent != null) {
+                return m_parent.lookup_fn(loc, sym);
             } else {
-                throw new Exception("cannot apply nil");
+                throw new InterpreterException(sym.name + " is either undefined or not a procedure", loc);
+            }
+        }
+
+        public object apply(TxtLocation loc, Closure fn, List<object> args)
+        {
+            try {
+                return fn(args);
+            } catch (Exception e) {
+                throw new InterpreterException("exception occured in method: " + fn.Method.Name, e, loc);
             }
         }
 
@@ -278,7 +300,7 @@ namespace Sexp {
 
         public override void visit_value(Symbol o)
         {
-            m_args.Add(o);
+            m_args.Add(m_env.lookup_fn(m_loc, o));
         }
 
         public override void visit_value(string o)
@@ -287,11 +309,21 @@ namespace Sexp {
         }
     }
 
+            //if (closures.TryGetValue(sym, out fn)) {
+            //    return fn(args);
+            //} else if (m_parent != null) {
+            //    try {
+            //        return m_parent.apply(loc, sym, args);
+            //    } catch (Exception e) {
+            //        throw new InterpreterException("exception occured in method: " + fn.Method.Name, e, loc);
+            //    }
+            //} else {
+            //    throw new InterpreterException("cannot apply undefined symbol: " + ((Symbol)(args[0])).name, loc);
+            //}
     public class CombinationInterpreter : ConsVisitor {
         Environment m_env;
         TxtLocation m_loc;
 
-        protected Symbol m_sym;
         protected List<object> m_args;
 
         List<object> m_new_args = new List<object>();
@@ -308,15 +340,15 @@ namespace Sexp {
         public override void visitEnd()
         {
             if (m_new_args.Count > 0) {
-                if (m_new_args[0] is Symbol) {
-                    m_sym = (Symbol)m_new_args[0];
+                if (m_new_args[0] is Closure) {
+                    Closure fn = (Closure)m_new_args[0];
                     m_new_args.RemoveAt(0);
-                    m_args.Add(m_env.apply(m_loc, m_sym, m_new_args));
+                    m_args.Add(m_env.apply(m_loc, fn, m_new_args));
                 } else {
                     throw new Exception("cannot apply object <" + m_new_args[0].GetType().FullName + "> " + Literal.literal(m_new_args[0]));
                 }
             } else {
-                m_args.Add(new Cons(null, null));
+                m_args.Add(null);
             }
         }
 

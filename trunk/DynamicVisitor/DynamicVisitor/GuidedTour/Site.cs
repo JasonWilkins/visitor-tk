@@ -28,53 +28,46 @@ namespace GuidedTour {
     class SiteList : IEnumerable<Site> {
         List<Site> m_list = new List<Site>();
 
-        public SiteList(Site graph)
-            : this(graph.value)
+        public SiteList(Site site)
+            : this(site.value)
         { }
 
-        public SiteList(object graph)
+        public SiteList(object value)
         {
-            Type graph_type = graph.GetType();
+            if (value != null) {
+                Type type = value.GetType();
 
-            Type face = graph_type.GetInterface("IEnumerable`1");
+                Type face = type.GetInterface("IEnumerable`1");
 
-            if (null == face) {
-                face = graph_type.GetInterface("IEnumerable");
-            }
-
-            if (face != null) {
-                foreach (object v in graph as IEnumerable) {
-                    if (v != null) {
-                        Type t = v.GetType();
-                        m_list.Add(new Site(null, t, v));
-                    } else {
-                        Type[] args = face.GetGenericArguments();
-                        Trace.Verbose("debug: item in {0}{1} is null, skipping", graph_type.FullName, args.Length > 0 ? "<"+args[0]+">" : "");
-                    }
+                if (null == face) {
+                    face = type.GetInterface("IEnumerable");
                 }
-            } else {
-                MemberInfo[] graph_props = graph_type.FindMembers(MemberTypes.Property|MemberTypes.Field, BindingFlags.Public|BindingFlags.Instance, null, null);
 
-                foreach (MemberInfo p in graph_props) {
-                    object v;
-
-                    if (MemberTypes.Field == p.MemberType) {
-                        FieldInfo fi = graph_type.GetField(p.Name);
-                        v = fi.GetValue(graph);
-                    } else {
-                        PropertyInfo pi = graph_type.GetProperty(p.Name);
-                        if (0 == pi.GetIndexParameters().Length) {
-                            v = pi.GetValue(graph, null);
-                        } else {
-                            continue;
-                        }
+                if (face != null) {
+                    foreach (object part in value as IEnumerable) {
+                        m_list.Add(new Site(null, part != null ? part.GetType() : typeof(object), part));
                     }
+                } else {
+                    MemberInfo[] members = type.FindMembers(MemberTypes.Property|MemberTypes.Field, BindingFlags.Public|BindingFlags.Instance, null, null);
 
-                    if (v != null) {
-                        Type t = v.GetType();
-                        m_list.Add(new Site(p.Name, t, v));
-                    } else {
-                        Trace.Verbose("debug: property/field {0}.{1} is null, skipping", graph_type.FullName, p.Name);
+                    foreach (MemberInfo mi in members) {
+                        object part;
+
+                        if (MemberTypes.Field == mi.MemberType) {
+                            FieldInfo fi = type.GetField(mi.Name);
+                            part = fi.GetValue(value);
+                        } else {
+                            PropertyInfo pi = type.GetProperty(mi.Name);
+
+                            // TODO: write a filter delegate for FindMembers that checks this
+                            if (0 == pi.GetIndexParameters().Length) {
+                                part = pi.GetValue(value, null);
+                            } else {
+                                continue;
+                            }
+                        }
+
+                        m_list.Add(new Site(mi.Name, part != null ? part.GetType() : typeof(object), part));
                     }
                 }
             }

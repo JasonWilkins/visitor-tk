@@ -59,7 +59,7 @@ namespace Sexp {
             m_errors++;
 
             Console.WriteLine(
-                "{0}[{2}, {3}] {1}: expecting {4}got {5}",
+                "{0} [{2}, {3}] {1}: expecting {4}got {5}",
                 m_attrib.path,
                 context,
                 m_attrib.line,
@@ -138,8 +138,10 @@ namespace Sexp {
                 atom.visit();
                 simple_datum(atom);
                 atom.visitEnd();
+            } else if (Token.OPEN_PAREN == lookahead) {
+                match(Token.OPEN_PAREN);
+                top_list(top);
             } else if (
-                Token.OPEN_PAREN == lookahead ||
                 Token.SINGLE_QUOTE == lookahead ||
                 Token.BACKQUOTE == lookahead ||
                 Token.COMMA == lookahead ||
@@ -147,7 +149,7 @@ namespace Sexp {
 
                 ConsVisitor cons = top.visitItem_Cons();
                 cons.visit();
-                compound_datum(cons);
+                abbreviation(cons);
                 cons.visitEnd();
             } else if (Token.VECTOR == lookahead) {
                 VectorVisitor vec = top.visitItem_Vector();
@@ -157,6 +159,35 @@ namespace Sexp {
             } else {
                 // ERROR
                 expecting("top_datum", pack(Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE));
+            }
+        }
+
+        void top_list(VectorVisitor top)
+        {
+            if (Token.CLOSE_PAREN == lookahead) {
+                match(Token.CLOSE_PAREN);
+                top.visitItem(null);
+            } else if (
+                Token.BOOL == lookahead ||
+                Token.NUM == lookahead ||
+                Token.CHAR == lookahead ||
+                Token.STRING == lookahead ||
+                Token.ID == lookahead ||
+                Token.OPEN_PAREN == lookahead ||
+                Token.SINGLE_QUOTE == lookahead ||
+                Token.BACKQUOTE == lookahead ||
+                Token.COMMA == lookahead ||
+                Token.SPLICE == lookahead ||
+                Token.VECTOR == lookahead) {
+
+                ConsVisitor cons = top.visitItem_Cons();
+                cons.visit();
+                list_contents(cons);
+                cons.visitEnd();
+                match(Token.CLOSE_PAREN);
+            } else {
+                // ERROR
+                expecting("top_nil_or_list", pack(Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE, Token.VECTOR));
             }
         }
 
@@ -172,8 +203,10 @@ namespace Sexp {
                 atom.visit();
                 simple_datum(atom);
                 atom.visitEnd();
+            } else if (Token.OPEN_PAREN == lookahead) {
+                match(Token.OPEN_PAREN);
+                list(cons, set_car);
             } else if (
-                Token.OPEN_PAREN == lookahead ||
                 Token.SINGLE_QUOTE == lookahead ||
                 Token.BACKQUOTE == lookahead ||
                 Token.COMMA == lookahead ||
@@ -181,7 +214,7 @@ namespace Sexp {
 
                 ConsVisitor new_cons = set_car ? cons.visit_Cons_car() : cons.visit_Cons_cdr();
                 new_cons.visit();
-                compound_datum(new_cons);
+                abbreviation(new_cons);
                 new_cons.visitEnd();
             } else if (Token.VECTOR == lookahead) {
                 VectorVisitor vec = set_car ? cons.visit_Vector_car() : cons.visit_Vector_cdr();
@@ -224,61 +257,43 @@ namespace Sexp {
             }
         }
 
-        //void symbol(AtomVisitor atom)
-        //{
-        //    if (Token.ID == lookahead) {
-        //        SymbolVisitor symbol = atom.visit_value();
-        //        symbol.visit();
-        //        symbol.visit_name(((Symbol)m_attrib.value).name);
-        //        symbol.visitEnd();
-        //        match(Token.ID);
-        //    } else {
-        //        // ERROR
-        //        expecting("symbol", pack(Token.ID));
-        //    }
-        //}
-
-        void compound_datum(ConsVisitor cons)
+        void list(ConsVisitor cons, bool set_car)
         {
-            if (Token.OPEN_PAREN == lookahead ||
-                Token.SINGLE_QUOTE == lookahead ||
-                Token.BACKQUOTE == lookahead ||
-                Token.COMMA == lookahead ||
-                Token.SPLICE == lookahead) {
-
-                list(cons);
-            } else {
-                // ERROR
-                expecting("compound_datum", pack(Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE, Token.VECTOR));
-            }
-
-        }
-
-        void list(ConsVisitor cons)
-        {
-            if (Token.OPEN_PAREN == lookahead) {
-                match(Token.OPEN_PAREN);
-                list_contents(cons);
+            if (Token.CLOSE_PAREN == lookahead) {
                 match(Token.CLOSE_PAREN);
+
+                if (set_car) {
+                    cons.visit_car(null);
+                } else {
+                    cons.visit_cdr(null);
+                }
             } else if (
+                Token.BOOL == lookahead ||
+                Token.NUM == lookahead ||
+                Token.CHAR == lookahead ||
+                Token.STRING == lookahead ||
+                Token.ID == lookahead ||
+                Token.OPEN_PAREN == lookahead ||
                 Token.SINGLE_QUOTE == lookahead ||
                 Token.BACKQUOTE == lookahead ||
                 Token.COMMA == lookahead ||
-                Token.SPLICE == lookahead) {
+                Token.SPLICE == lookahead ||
+                Token.VECTOR == lookahead) {
 
-                abbreviation(cons);
+                ConsVisitor new_cons = set_car ? cons.visit_Cons_car() : cons.visit_Cons_cdr();
+                new_cons.visit();
+                list_contents(new_cons);
+                new_cons.visitEnd();
+                match(Token.CLOSE_PAREN);
             } else {
                 // ERROR
-                expecting("list", pack(Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE));
+                expecting("nil_or_list", pack(Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE, Token.VECTOR));
             }
         }
 
         void list_contents(ConsVisitor cons)
         {
-            if (Token.CLOSE_PAREN == lookahead) {
-                // EPSILON
-            } else if (
-                Token.BOOL == lookahead ||
+            if (Token.BOOL == lookahead ||
                 Token.NUM == lookahead ||
                 Token.CHAR == lookahead ||
                 Token.STRING == lookahead ||
@@ -361,16 +376,16 @@ namespace Sexp {
         void abbrev_prefix(ConsVisitor abbrev)
         {
             if (Token.SINGLE_QUOTE == lookahead) {
-                abbrev_helper(abbrev, "quote");
+                expand_abbrev(abbrev, "quote");
                 match(Token.SINGLE_QUOTE);
             } else if (Token.BACKQUOTE == lookahead) {
-                abbrev_helper(abbrev, "quasiquotation");
+                expand_abbrev(abbrev, "quasiquotation");
                 match(Token.BACKQUOTE);
             } else if (Token.COMMA == lookahead) {
-                abbrev_helper(abbrev, "unquote");
+                expand_abbrev(abbrev, "unquote");
                 match(Token.COMMA);
             } else if (Token.SPLICE == lookahead) {
-                abbrev_helper(abbrev, "unquote-splicing");
+                expand_abbrev(abbrev, "unquote-splicing");
                 match(Token.SPLICE);
             } else {
                 // ERROR
@@ -378,7 +393,7 @@ namespace Sexp {
             }
         }
 
-        void abbrev_helper(ConsVisitor abbrev, string name)
+        void expand_abbrev(ConsVisitor abbrev, string name)
         {
             AtomVisitor atom = abbrev.visit_Atom_car();
             atom.visit();

@@ -71,7 +71,8 @@ namespace Sexp {
                 if (null == e1 || null == e2) {
                     Console.WriteLine("{0} entries compared.", count);
                     Console.WriteLine("no differences found");
-                    break;
+                    Console.WriteLine("OK");
+                    return;
                 }
 
                 if (e1.class_name != e2.class_name) {
@@ -89,6 +90,8 @@ namespace Sexp {
                     break;
                 }
             }
+
+            Console.WriteLine("FAILED!");
         }
     }
 

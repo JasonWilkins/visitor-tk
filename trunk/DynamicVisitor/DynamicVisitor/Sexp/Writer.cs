@@ -22,7 +22,12 @@ namespace Sexp {
         public void write(Writer writer)
         {
             foreach (IWritable w in top) {
-                w.write(writer);
+                if (w != null) {
+                    w.write(writer);
+                } else {
+                    writer.Append("()");
+                }
+
                 writer.End().Begin();
                 writer.End().Begin();
             }
@@ -53,6 +58,15 @@ namespace Sexp {
             top.Add(vect);
             return vect;
         }
+
+        public override void visitItem(object o)
+        {
+            if (null == o) {
+                top.Add(null);
+            } else {
+                throw new Exception();
+            }
+        }
     }
 
     public class VectorWriter : VectorVisitor, IWritable {
@@ -71,7 +85,11 @@ namespace Sexp {
                     writer.Append(' ');
                 }
 
-                w.write(writer);
+                if (w != null) {
+                    w.write(writer);
+                } else {
+                    writer.Append("()");
+                }
             }
 
             writer.Append(")");
@@ -96,6 +114,15 @@ namespace Sexp {
             VectorWriter new_vect = new VectorWriter();
             vect.Add(new_vect);
             return new_vect;
+        }
+
+        public override void visitItem(object o)
+        {
+            if (null == o) {
+                vect.Add(null);
+            } else {
+                throw new Exception();
+            }
         }
     }
 
@@ -196,8 +223,10 @@ namespace Sexp {
                 writer.Indent();
                 writer.Append("(");
 
-                if (null != car) {
+                if (car != null) {
                     car.write(writer);
+                } else {
+                    writer.Append("()");
                 }
 
                 if (cdr != null) {
@@ -256,6 +285,16 @@ namespace Sexp {
             cdr = vect;
             return vect;
         }
+
+        public override void visit_car(object o)
+        {
+            if (o != null) throw new Exception();
+        }
+
+        public override void visit_cdr(object o)
+        {
+            if (o != null) throw new Exception();
+        }
     }
 
     public class ConsWriter : ConsVisitor, IWritable {
@@ -266,6 +305,8 @@ namespace Sexp {
         {
             if (car != null) {
                 car.write(writer);
+            } else {
+                writer.Append("()");
             }
 
             if (cdr != null) {
@@ -314,6 +355,16 @@ namespace Sexp {
             VectorWriter vect = new VectorWriter();
             cdr = vect;
             return vect;
+        }
+
+        public override void visit_car(object o)
+        {
+            if (o != null) throw new Exception();
+        }
+
+        public override void visit_cdr(object o)
+        {
+            if (o != null) throw new Exception();
         }
     }
 }

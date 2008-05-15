@@ -27,7 +27,8 @@ namespace Sexp {
                 a2 = m_s2.scan();
 
                 if (a1.token != a2.token) {
-                    differ("token", a1, a2); 
+                    differ("token", a1, a2);
+                    Console.WriteLine("FAILED!");
                     break; // if tokens differ it is probably impossible to continue sanely
                 }
 
@@ -47,6 +48,7 @@ namespace Sexp {
 
                 if (Token.EOF == a1.token || Token.EOF == a2.token) {
                     Console.WriteLine("{0} and {1} scan the same", a1.path, a2.path);
+                    Console.WriteLine("OK");
                     break;
                 }
             }

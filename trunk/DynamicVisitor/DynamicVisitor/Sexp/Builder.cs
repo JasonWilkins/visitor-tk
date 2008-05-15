@@ -21,7 +21,11 @@ namespace Sexp {
             m_vect = new Vector();
 
             foreach (DatumBuilder o in m_datum) {
-                m_vect.Add(o.getDatum());
+                if (o != null) {
+                    m_vect.Add(o.getDatum());
+                } else {
+                    m_vect.Add(null);
+                }
             }
         }
 
@@ -44,6 +48,15 @@ namespace Sexp {
             VectorBuilder vect = new VectorBuilder();
             m_datum.Add(vect);
             return vect;
+        }
+
+        public override void visitItem(object o)
+        {
+            if (o == null) {
+                m_datum.Add(null);
+            } else {
+                throw new Exception();
+            }
         }
     }
 
@@ -155,6 +168,16 @@ namespace Sexp {
         {
             m_cdr = new VectorBuilder();
             return m_cdr as VectorBuilder;
+        }
+
+        public override void visit_car(object o)
+        {
+            if (o != null) throw new Exception();
+        }
+
+        public override void visit_cdr(object o)
+        {
+            if (o != null) throw new Exception();
         }
     }
 }

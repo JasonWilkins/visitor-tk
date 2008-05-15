@@ -563,18 +563,22 @@ namespace Main {
 
         static void parse_and_write(string in_path, string out_path)
         {
+            Console.WriteLine("parsing {0} and writing it out to {1}", in_path, out_path);
             using (Reader file = new Reader(in_path)) {
                 using (FileWriter writer = new FileWriter(out_path)) {
                     TopLevelWriter visitor = new TopLevelWriter(writer);
                     Parser parser = new Parser(file, visitor);
                     parser.read();
                     Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
+                    Console.WriteLine(parser.errors == 0 ? "OK" : "FAILED!");
                 }
             }
+            Console.WriteLine();
         }
 
         static void compare_files(string path1, string path2)
         {
+            Console.WriteLine("comparing the token stream of {0} and {1}", path1, path2);
             using (Reader file1 = new Reader(path1)) {
                 using (Reader file2 = new Reader(path2)) {
                     Scanner s1 = new Scanner(file1);
@@ -583,6 +587,7 @@ namespace Main {
                     comp.run();
                 }
             }
+            Console.WriteLine();
         }
 
         static Vector build(string path)
@@ -594,20 +599,24 @@ namespace Main {
                 Console.WriteLine("parsing: {0}", path);
                 parser.read();
                 Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
+                Console.WriteLine(parser.errors == 0 ? "OK" : "FAILED!");
                 return visitor.getTopLevel();
             }
         }
 
         static void parse_build_write(string in_path, string out_path)
         {
+            Console.WriteLine("parsing {0} into memory then writing it out to {1}", in_path, out_path);
             using (FileWriter writer = new FileWriter(out_path)) {
                 Vector top = build(in_path);
                 DynamicVisitor.accept(top, new TopLevelWriter(writer));
             }
+            Console.WriteLine();
         }
 
         static void compare_logs(string path1, string path2)
         {
+            Console.WriteLine("comparing the visitation logs for files {0} and {1}", path1, path2);
             using (Reader file1 = new Reader(path1)) {
                 using (Reader file2 = new Reader(path2)) {
                     Log log1 = new Log();
@@ -621,10 +630,12 @@ namespace Main {
                     LogComparer.compare_logs(log1, log2);
                 }
             }
+            Console.WriteLine();
         }
 
         static void compare_logs2(string path1, string path2)
         {
+            Console.WriteLine("testing the multivisitor with files {0} and {1}", path1, path2);
             using (Reader file1 = new Reader(path1)) {
                 using (Reader file2 = new Reader(path2)) {
                     Log log1 = new Log();
@@ -637,10 +648,12 @@ namespace Main {
                     LogComparer.compare_logs(log1, log2);
                 }
             }
+            Console.WriteLine();
         }
 
         static void compare_logs(string path)
         {
+            Console.WriteLine("comparing the visitation logs for the parser and dynamic visitor for file {0}", path);
             Log log1 = new Log();
 
             using (Reader file = new Reader(path)) {
@@ -662,6 +675,8 @@ namespace Main {
             }
 
             LogComparer.compare_logs(log1, log2);
+
+            Console.WriteLine();
         }
 #endif
         static void code_builder_test1()
@@ -827,25 +842,26 @@ namespace Main {
             //test_safe_parse("test2.txt");
 #endif
 
-#if false
-            parse_and_write("test.txt", "test-output1.txt");
-            parse_and_write("test-output1.txt", "test-output2.txt");
-            compare_files("test.txt", "test-output1.txt");
-            compare_files("test-output1.txt", "test-output2.txt");
-            compare_logs("test.txt", "test-output1.txt");
-            compare_logs("test-output1.txt", "test-output2.txt");
+#if true
+            //parse_and_write("test.txt", "test-output1.txt");
+            //parse_and_write("test-output1.txt", "test-output2.txt");
+            //compare_files("test.txt", "test-output1.txt");
+            //compare_files("test-output1.txt", "test-output2.txt");
+            //compare_logs("test.txt", "test-output1.txt");
+            //compare_logs("test-output1.txt", "test-output2.txt");
             parse_build_write("test.txt", "test-output3.txt");
             compare_files("test.txt", "test-output3.txt");
-            compare_logs("test.txt", "test-output3.txt");
-            compare_logs2("test.txt", "test-output3.txt");
-            compare_logs("test.txt");
-            compare_logs("test-output1.txt");
-            compare_logs("test-output2.txt");
-            compare_logs("test-output3.txt");
-            compare_logs("test.txt", "test2.txt");
-            code_builder_test1();
-            code_builder_test2();
+            //compare_logs("test.txt", "test-output3.txt");
+            //compare_logs2("test.txt", "test-output3.txt");
+            //compare_logs("test.txt");
+            //compare_logs("test-output1.txt");
+            //compare_logs("test-output2.txt");
+            //compare_logs("test-output3.txt");
+            ////compare_logs("test.txt", "test2.txt");
+            //code_builder_test1();
+            //code_builder_test2();
 #endif
+#if false
             //System.IO.TextWriter my_out = new System.IO.StreamWriter("output.txt");
             //Console.SetOut(my_out);
             Reader f = new Reader("test3.txt");
@@ -853,8 +869,9 @@ namespace Main {
             Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new TestEnvironment(), loc)), loc);
             p.read();
             //Vector v = build("test.txt");
-//            DynamicVisitor.accept(v, new IntVisitor());
+            //DynamicVisitor.accept(v, new IntVisitor());
             //DynamicVisitor.accept(v, new Interpreter(new TestEnvironment(), null));
+#endif
         }
     }
 }

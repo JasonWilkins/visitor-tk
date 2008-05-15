@@ -10,6 +10,7 @@ namespace Sexp {
         public virtual AtomVisitor visitItem_Atom() { return null; }
         public virtual ConsVisitor visitItem_Cons() { return null; }
         public virtual VectorVisitor visitItem_Vector() { return null; }
+        public virtual void visitItem(object o) { }
     }
 
     public class AtomVisitor : DatumVisitor {
@@ -30,5 +31,7 @@ namespace Sexp {
         public virtual AtomVisitor visit_Atom_cdr() { return null; }
         public virtual ConsVisitor visit_Cons_cdr() { return null; }
         public virtual VectorVisitor visit_Vector_cdr() { return null; }
+        public virtual void visit_car(object o) { }
+        public virtual void visit_cdr(object o) { }
     }
 }

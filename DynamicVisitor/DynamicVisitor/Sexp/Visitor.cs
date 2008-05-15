@@ -23,6 +23,7 @@ namespace Sexp {
     }
 
     public class ConsVisitor : DatumVisitor {
+//        public virtual KeywordVisitor visit_Keyword_car() { return null; }
         public virtual AtomVisitor visit_Atom_car() { return null; }
         public virtual ConsVisitor visit_Cons_car() { return null; }
         public virtual VectorVisitor visit_Vector_car() { return null; }

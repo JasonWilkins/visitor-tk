@@ -846,9 +846,15 @@ namespace Main {
             code_builder_test1();
             code_builder_test2();
 #endif
-
-            Vector v = build("test.txt");
-            DynamicVisitor.accept(v, new IntVisitor());
+            //System.IO.TextWriter my_out = new System.IO.StreamWriter("output.txt");
+            //Console.SetOut(my_out);
+            Reader f = new Reader("test3.txt");
+            Util.TxtLocation loc = new Util.TxtLocation();
+            Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new TestEnvironment(), loc)), loc);
+            p.read();
+            //Vector v = build("test.txt");
+//            DynamicVisitor.accept(v, new IntVisitor());
+            //DynamicVisitor.accept(v, new Interpreter(new TestEnvironment(), null));
         }
     }
 }

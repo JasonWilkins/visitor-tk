@@ -40,6 +40,7 @@
     <Compile Include="Sexp\MultiVisitor.cs" />
     <Compile Include="Flat\Common.cs" />
     <Compile Include="Sexp\Datum.cs" />
+    <Compile Include="Sexp\Symbol.cs" />
     <Compile Include="Util\TxtLocation.cs" />
     <Compile Include="Util\FileWriter.cs" />
     <Compile Include="Flat2Pirate\Flat2Pirate.cs" />

@@ -136,6 +136,11 @@ namespace Sexp {
             m_log.Add(m_sequence++, m_class_name, "visitItem_Vector");
             return new VectorLogger(m_log, m_next.visitItem_Vector());
         }
+
+        public override void visitItem(object o)
+        {
+            m_log.Add(m_sequence++, m_class_name, "visitItem");
+        }
     }
 
     public class AtomLogger : AtomVisitor {
@@ -189,12 +194,6 @@ namespace Sexp {
         public override void visit_value(Char o)
         {
             m_log.Add(m_sequence++, m_class_name, "visit_value(Char)");
-            m_next.visit_value(o);
-        }
-
-        public override void visit_value(Object o)
-        {
-            m_log.Add(m_sequence++, m_class_name, "visit_value(Object)");
             m_next.visit_value(o);
         }
 
@@ -260,6 +259,16 @@ namespace Sexp {
         {
             m_log.Add(m_sequence++, m_class_name, "visit_Vector_cdr()");
             return new VectorLogger(m_log, m_next.visit_Vector_cdr());
+        }
+
+        public override void visit_car(object o)
+        {
+            m_log.Add(m_sequence++, m_class_name, "visit_car(object o)");
+        }
+
+        public override void visit_cdr(object o)
+        {
+            m_log.Add(m_sequence++, m_class_name, "visit_cdr(object o)");
         }
     }
 }

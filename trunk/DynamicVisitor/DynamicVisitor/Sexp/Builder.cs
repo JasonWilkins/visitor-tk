@@ -106,11 +106,6 @@ namespace Sexp {
             m_value = o;
         }
 
-        public override void visit_value(Object o)
-        {
-            m_value = o;
-        }
-
         public override void visit_value(Symbol o)
         {
             m_value = o;

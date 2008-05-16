@@ -16,6 +16,7 @@ namespace Sexp {
         public override AtomVisitor visitItem_Atom() { return new AtomMultiVisitor(car.visitItem_Atom(), cdr.visitItem_Atom()); }
         public override ConsVisitor visitItem_Cons() { return new ConsMultiVisitor(car.visitItem_Cons(), cdr.visitItem_Cons()); }
         public override VectorVisitor visitItem_Vector() { return new VectorMultiVisitor(car.visitItem_Vector(), cdr.visitItem_Vector()); }
+        public override void visitItem(object o) { car.visitItem(o); cdr.visitItem(o); }
     }
 
     public class AtomMultiVisitor : AtomVisitor {
@@ -35,7 +36,6 @@ namespace Sexp {
         public override void visit_value(Double o) { car.visit_value(o); cdr.visit_value(o); }
         public override void visit_value(String o) { car.visit_value(o); cdr.visit_value(o); }
         public override void visit_value(Char o) { car.visit_value(o); cdr.visit_value(o); }
-        public override void visit_value(Object o) { car.visit_value(o); cdr.visit_value(o); }
         public override void visit_value(Symbol o) { car.visit_value(o); cdr.visit_value(o); }
     }
 
@@ -57,5 +57,7 @@ namespace Sexp {
         public override AtomVisitor visit_Atom_cdr() { return new AtomMultiVisitor(car.visit_Atom_cdr(), cdr.visit_Atom_cdr()); }
         public override ConsVisitor visit_Cons_cdr() { return new ConsMultiVisitor(car.visit_Cons_cdr(), cdr.visit_Cons_cdr()); }
         public override VectorVisitor visit_Vector_cdr() { return new VectorMultiVisitor(car.visit_Vector_cdr(), cdr.visit_Vector_cdr()); }
+        public override void visit_car(object o) { car.visit_car(o); cdr.visit_car(o); }
+        public override void visit_cdr(object o) { car.visit_cdr(o); cdr.visit_cdr(o); }
     }
 }

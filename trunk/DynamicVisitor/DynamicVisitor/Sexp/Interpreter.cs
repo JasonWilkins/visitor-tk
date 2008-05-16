@@ -30,11 +30,20 @@ namespace Sexp {
         }
     }
 
-    public delegate object Closure(List<object> args);
+    public class Closure {
+        public delegate object Fn(List<object> args);
+
+        public Fn fn;
+
+        public Closure(Fn fn)
+        {
+            this.fn = fn;
+        }
+    }
 
     public class Environment {
         Environment m_parent;
-        Dictionary<Symbol, Closure> closures = new Dictionary<Symbol, Closure>();
+        Dictionary<Symbol, object> definitions = new Dictionary<Symbol, object>();
 
         public Environment()
             : this(null)
@@ -50,31 +59,36 @@ namespace Sexp {
             return null;
         }
 
-        public Closure lookup_fn(TxtLocation loc, Symbol sym)
+        public object lookup(TxtLocation loc, Symbol sym)
         {
-            Closure fn;
+            object def;
 
-            if (closures.TryGetValue(sym, out fn)) {
-                return fn;
+            if (definitions.TryGetValue(sym, out def)) {
+                return def;
             } else if (m_parent != null) {
-                return m_parent.lookup_fn(loc, sym);
+                return m_parent.lookup(loc, sym);
             } else {
-                throw new InterpreterException(sym.name + " is either undefined or not a procedure", loc);
+                throw new InterpreterException(sym.name + " is undefined", loc);
             }
         }
 
         public object apply(TxtLocation loc, Closure fn, List<object> args)
         {
             try {
-                return fn(args);
+                return fn.fn(args);
             } catch (Exception e) {
-                throw new InterpreterException("exception occured in method: " + fn.Method.Name, e, loc);
+                throw new InterpreterException("exception occured in method: " + fn.fn.Method.Name, e, loc);
             }
         }
 
-        public void Add(Symbol sym, Closure fn)
+        public void Add(Symbol sym, object def)
         {
-            closures.Add(sym, fn);
+            definitions.Add(sym, def);
+        }
+
+        public void Add(Symbol sym, Closure.Fn fn)
+        {
+            definitions.Add(sym, new Closure(fn));
         }
     }
 
@@ -103,8 +117,6 @@ namespace Sexp {
 
         static object fn_eqv_pred(List<object> args)
         {
-            if (args.Count != 2) throw new ArgumentException("eqv has been called with " + args.Count + " argument, but it takes exactly 2 arguments");
-
             if (args[0].Equals(args[1])) {
                 return true;
             } else {
@@ -114,8 +126,6 @@ namespace Sexp {
 
         static object fn_eq_pred(List<object> args)
         {
-            if (args.Count != 2) throw new ArgumentException("eq has been called with " + args.Count + " argument, but it takes exactly 2 arguments");
-
             if (args[0] == args[1]) {
                 return true;
             } else {
@@ -125,7 +135,7 @@ namespace Sexp {
 
         static object fn_add(List<object> args)
         {
-            Object total = 0L;
+            object total = 0L;
 
             foreach (object o in args) {
                 if ((total is Int64) && (o is Int64)) {
@@ -146,28 +156,200 @@ namespace Sexp {
 
         static object fn_sub(List<object> args)
         {
-            return null;
+            if (args.Count > 1) {
+                object total = args[0];
+                args.RemoveAt(0);
+
+                foreach (object o in args) {
+                    if ((total is Int64) && (o is Int64)) {
+                        total = (Int64)total - (Int64)o;
+                    } else if ((total is Double) && (o is Double)) {
+                        total = (Double)total - (Double)o;
+                    } else {
+                        if (total is Double) {
+                            total = (Double)total - (Int64)o;
+                        } else {
+                            total = (Int64)total - (Double)o;
+                        }
+                    }
+                }
+
+                return total;
+            } else {
+                object rv = args[0];
+
+                if (rv is Int64) {
+                    return -(Int64)rv;
+                }
+                else {
+                    return -(Double)rv;
+                }
+            }
         }
 
         static object fn_mul(List<object> args)
         {
-            return null;
+            object total = 1L;
+
+            foreach (object o in args) {
+                if ((total is Int64) && (o is Int64)) {
+                    total = (Int64)total * (Int64)o;
+                } else if ((total is Double) && (o is Double)) {
+                    total = (Double)total * (Double)o;
+                } else {
+                    if (total is Double) {
+                        total = (Double)total * (Int64)o;
+                    } else {
+                        total = (Int64)total * (Double)o;
+                    }
+                }
+            }
+
+            return total;
         }
 
         static object fn_div(List<object> args)
         {
-            return null;
+            if (args.Count > 1) {
+                object total = args[0];
+                args.RemoveAt(0);
+
+                foreach (object o in args) {
+                    if ((total is Int64) && (o is Int64)) {
+                        total = (Int64)total / (Int64)o;
+                    } else if ((total is Double) && (o is Double)) {
+                        total = (Double)total / (Double)o;
+                    } else {
+                        if (total is Double) {
+                            total = (Double)total / (Int64)o;
+                        } else {
+                            total = (Int64)total / (Double)o;
+                        }
+                    }
+                }
+
+                return total;
+            } else {
+                object rv = args[0];
+
+                if (rv is Int64) {
+                    return 1/(Int64)rv;
+                } else {
+                    return 1/(Double)rv;
+                }
+            }
+        }
+
+        static object fn_boolean_pred(List<object> args)
+        {
+            return args[0] is Boolean;
+        }
+
+        static object fn_char_pred(List<object> args)
+        {
+            return args[0] is Char;
+        }
+
+        static object fn_null_pred(List<object> args)
+        {
+            return args[0] == null;
+        }
+
+        static object fn_number_pred(List<object> args)
+        {
+            return args[0] is Int64 || args[0] is Double;
+        }
+
+        static object fn_pair_pred(List<object> args)
+        {
+            return args[0] is Cons;
+        }
+
+        static object fn_procedure_pred(List<object> args)
+        {
+            return args[0] is Closure;
+        }
+
+        static object fn_string_pred(List<object> args)
+        {
+            return args[0] is String;
+        }
+
+        static object fn_symbol_pred(List<object> args)
+        {
+            return args[0] is Symbol;
+        }
+
+        static object fn_vector_pred(List<object> args)
+        {
+            return args[0] is Object[];
+        }
+
+        static object fn_integer_pred(List<object> args)
+        {
+            return args[0] is Int64;
+        }
+
+        static object fn_real_pred(List<object> args)
+        {
+            return args[0] is Int64 || args[0] is Double;
+        }
+
+        static object fn_exact_pred(List<object> args)
+        {
+            return args[0] is Int64;
+        }
+
+        static object fn_inexact_pred(List<object> args)
+        {
+            return args[0] is Double;
+        }
+
+        static object fn_zero_pred(List<object> args)
+        {
+            object num = args[0];
+            if (num is Int64) {
+                return (Int64)num == 0;
+            } else {
+                return (Double)num == 0;
+            }
+        }
+
+        static object fn_complex_pred(List<object> args)
+        {
+            return args[0] is Int64 || args[0] is Double;
+        }
+
+        static object fn_rational_pred(List<object> args)
+        {
+            return args[0] is Int64;
         }
 
         public TestEnvironment()
         {
-            Add(new Symbol("eqv?"), fn_eqv_pred);
-            Add(new Symbol("eq?"), fn_eq_pred);
-            Add(new Symbol("="), fn_eq);
-            Add(new Symbol("+"), fn_add);
-            Add(new Symbol("-"), fn_sub);
-            Add(new Symbol("*"), fn_mul);
-            Add(new Symbol("/"), fn_div);
+            Add(Symbol.get_symbol("eqv?"), fn_eqv_pred);
+            Add(Symbol.get_symbol("eq?"), fn_eq_pred);
+            Add(Symbol.get_symbol("="), fn_eq);
+            Add(Symbol.get_symbol("+"), fn_add);
+            Add(Symbol.get_symbol("-"), fn_sub);
+            Add(Symbol.get_symbol("*"), fn_mul);
+            Add(Symbol.get_symbol("/"), fn_div);
+            Add(Symbol.get_symbol("boolean?"), fn_boolean_pred);
+            Add(Symbol.get_symbol("char?"), fn_char_pred);
+            Add(Symbol.get_symbol("complex?"), fn_complex_pred);
+            Add(Symbol.get_symbol("number?"), fn_number_pred);
+            Add(Symbol.get_symbol("rational?"), fn_rational_pred);
+            Add(Symbol.get_symbol("null?"), fn_null_pred);
+            Add(Symbol.get_symbol("pair?"), fn_pair_pred);
+            Add(Symbol.get_symbol("procedure?"), fn_procedure_pred);
+            Add(Symbol.get_symbol("string?"), fn_string_pred);
+            Add(Symbol.get_symbol("symbol?"), fn_symbol_pred);
+            Add(Symbol.get_symbol("vector?"), fn_vector_pred);
+            Add(Symbol.get_symbol("real?"), fn_real_pred);
+            Add(Symbol.get_symbol("integer?"), fn_integer_pred);
+            Add(Symbol.get_symbol("inexact?"), fn_inexact_pred);
+            Add(Symbol.get_symbol("exact?"), fn_exact_pred);
+            Add(Symbol.get_symbol("zero?"), fn_zero_pred);
         }
     }
 
@@ -212,6 +394,13 @@ namespace Sexp {
         public override VectorVisitor visitItem_Vector()
         {
             return new TopLevelVectInterpreter(m_env, m_loc, m_print, new List<object>());
+        }
+
+        public override void visitItem(object o)
+        {
+            List<object> m_args = new List<object>();
+            m_args.Add(null);
+            m_print.print(m_args);
         }
     }
 
@@ -300,7 +489,7 @@ namespace Sexp {
 
         public override void visit_value(Symbol o)
         {
-            m_args.Add(m_env.lookup_fn(m_loc, o));
+            m_args.Add(m_env.lookup(m_loc, o));
         }
 
         public override void visit_value(string o)
@@ -309,17 +498,6 @@ namespace Sexp {
         }
     }
 
-            //if (closures.TryGetValue(sym, out fn)) {
-            //    return fn(args);
-            //} else if (m_parent != null) {
-            //    try {
-            //        return m_parent.apply(loc, sym, args);
-            //    } catch (Exception e) {
-            //        throw new InterpreterException("exception occured in method: " + fn.Method.Name, e, loc);
-            //    }
-            //} else {
-            //    throw new InterpreterException("cannot apply undefined symbol: " + ((Symbol)(args[0])).name, loc);
-            //}
     public class CombinationInterpreter : ConsVisitor {
         Environment m_env;
         TxtLocation m_loc;
@@ -381,6 +559,16 @@ namespace Sexp {
         {
             throw new Exception("combination must be a proper list");
         }
+
+        public override void visit_car(object o)
+        {
+            m_new_args.Add(o);
+        }
+
+        public override void visit_cdr(object o)
+        {
+            throw new Exception("combination must be a proper list");
+        }
     }
 
     class ConsInterpreter : ConsVisitor {
@@ -425,6 +613,16 @@ namespace Sexp {
         {
             throw new Exception("combination must be a proper list");
         }
+
+        public override void visit_car(object o)
+        {
+            m_args.Add(o);
+        }
+
+        public override void visit_cdr(object o)
+        {
+            throw new Exception("combination must be a proper list");
+        }
     }
 
     class VectInterpreter : VectorVisitor {
@@ -462,6 +660,11 @@ namespace Sexp {
         public override VectorVisitor visitItem_Vector()
         {
             return new VectInterpreter(m_env, m_loc, m_vect);
+        }
+
+        public override void visitItem(object o)
+        {
+            m_args.Add(o);
         }
     }
 }

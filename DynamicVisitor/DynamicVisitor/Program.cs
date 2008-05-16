@@ -621,10 +621,11 @@ namespace Main {
                 using (Reader file2 = new Reader(path2)) {
                     Log log1 = new Log();
                     Log log2 = new Log();
-                    VectorLogger logger1 = new VectorLogger(log1, new SafeVectorVisitor(null));
-                    VectorLogger logger2 = new VectorLogger(log2, new SafeVectorVisitor(null));
-                    Parser p1 = new Parser(file1, logger1);
-                    Parser p2 = new Parser(file2, logger2);
+                    Util.TxtLocation loc = new Util.TxtLocation();
+                    VectorLogger logger1 = new VectorLogger(log1, loc, new SafeVectorVisitor(null));
+                    VectorLogger logger2 = new VectorLogger(log2, loc, new SafeVectorVisitor(null));
+                    Parser p1 = new Parser(file1, logger1, loc);
+                    Parser p2 = new Parser(file2, logger2, loc);
                     p1.read();
                     p2.read();
                     LogComparer.compare_logs(log1, log2);
@@ -640,10 +641,11 @@ namespace Main {
                 using (Reader file2 = new Reader(path2)) {
                     Log log1 = new Log();
                     Log log2 = new Log();
-                    VectorLogger logger1 = new VectorLogger(log1, new SafeVectorVisitor(null));
-                    VectorLogger logger2 = new VectorLogger(log2, new SafeVectorVisitor(null));
+                    Util.TxtLocation loc = new Util.TxtLocation();
+                    VectorLogger logger1 = new VectorLogger(log1, loc, new SafeVectorVisitor(null));
+                    VectorLogger logger2 = new VectorLogger(log2, loc, new SafeVectorVisitor(null));
                     VectorMultiVisitor mv = new VectorMultiVisitor(logger1, logger2);
-                    Parser p1 = new Parser(file1, mv);
+                    Parser p1 = new Parser(file1, mv, loc);
                     p1.read();
                     LogComparer.compare_logs(log1, log2);
                 }
@@ -654,11 +656,13 @@ namespace Main {
         static void compare_logs(string path)
         {
             Console.WriteLine("comparing the visitation logs for the parser and dynamic visitor for file {0}", path);
+
             Log log1 = new Log();
 
             using (Reader file = new Reader(path)) {
-                VectorLogger logger = new VectorLogger(log1, new SafeVectorVisitor(null));
-                Parser p = new Parser(file, logger);
+                Util.TxtLocation loc = new Util.TxtLocation();
+                VectorLogger logger = new VectorLogger(log1, loc, new SafeVectorVisitor(null));
+                Parser p = new Parser(file, logger, loc);
                 p.read();
             }
 
@@ -667,10 +671,11 @@ namespace Main {
             using (Reader file = new Reader(path)) {
                 TopLevelBuilder builder = new TopLevelBuilder();
                 Parser p = new Parser(file, builder);
+                Util.TxtLocation loc = new Util.TxtLocation();
                 p.read();
 
                 Vector top = builder.getTopLevel();
-                VectorLogger logger = new VectorLogger(log2, new SafeVectorVisitor(null));
+                VectorLogger logger = new VectorLogger(log2, loc, new SafeVectorVisitor(null));
                 DynamicVisitor.accept(top, logger);
             }
 

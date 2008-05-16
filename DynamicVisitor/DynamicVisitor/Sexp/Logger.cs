@@ -2,26 +2,37 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 
+using Util;
+
 namespace Sexp {
     public class Entry {
         public int sequence;
         public string class_name;
         public string func_name;
+        public TxtLocation loc;
 
-        public Entry(int sequence, string class_name, string func_name)
+        public Entry(int sequence, TxtLocation loc, string class_name, string func_name)
         {
             this.sequence = sequence;
             this.class_name = class_name;
             this.func_name = func_name;
+            this.loc = loc.clone();
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(loc.ToString()).Append(" ").Append(sequence).Append(" ").Append(class_name).Append(" ").Append(func_name).Append(" ").Append(func_name);
+            return sb.ToString();
         }
     }
 
     public class Log : IEnumerable<Entry> {
         List<Entry> log = new List<Entry>();
 
-        public void Add(int sequence, string class_name, string func_name)
+        public void Add(int sequence, TxtLocation loc, string class_name, string func_name)
         {
-            Entry item = new Entry(sequence, class_name, func_name);
+            Entry item = new Entry(sequence, loc, class_name, func_name);
             log.Add(item);
         }
 
@@ -56,17 +67,6 @@ namespace Sexp {
 
                 Entry e1 = el1.Current;
                 Entry e2 = el2.Current;
-                count++;
-
-                if (null == e1 && e2 != null) {
-                    Console.WriteLine("Log 1 terminates before Log 2");
-                    break;
-                }
-
-                if (null != e1 && e2 == null) {
-                    Console.WriteLine("Log 2 terminates before Log 1");
-                    break;
-                }
 
                 if (null == e1 && null == e2) {
                     Console.WriteLine("{0} entries compared.", count);
@@ -75,18 +75,39 @@ namespace Sexp {
                     return;
                 }
 
+                count++;
+
+                if (null == e1) {
+                    Console.WriteLine("Log 1 terminates before Log 2");
+                    Console.WriteLine(e2.ToString());
+                    break;
+                }
+
+                if (null == e2) {
+                    Console.WriteLine("Log 2 terminates before Log 1");
+                    Console.WriteLine(e1.ToString());
+                    break;
+                }
+
                 if (e1.class_name != e2.class_name) {
                     Console.WriteLine("class names do not match: {0} << >> {1}", e1.class_name, e2.class_name);
+                    Console.WriteLine(e1.ToString());
+                    Console.WriteLine(e2.ToString());
                     break;
                 }
 
                 if (e1.func_name != e2.func_name) {
+                    Console.WriteLine("class name: {0}", e1.class_name);
                     Console.WriteLine("function names do not match: {0} << >> {1}", e1.func_name, e2.func_name);
+                    Console.WriteLine(e1.ToString());
+                    Console.WriteLine(e2.ToString());
                     break;
                 }
 
                 if (e1.sequence != e2.sequence) {
                     Console.WriteLine("sequence numbers do not match: {0} << >> {1}", e1.sequence, e2.sequence);
+                    Console.WriteLine(e1.ToString());
+                    Console.WriteLine(e2.ToString());
                     break;
                 }
             }
@@ -100,46 +121,48 @@ namespace Sexp {
         int m_sequence = 0;
         string m_class_name = "VectorLogger";
         Log m_log = new Log();
+        TxtLocation m_loc;
 
-        public VectorLogger(Log log, VectorVisitor next)
+        public VectorLogger(Log log, TxtLocation loc, VectorVisitor next)
         {
             m_log = log;
             m_next = next;
+            m_loc = loc;
         }
 
         public override void visit()
         {
-            m_log.Add(m_sequence++, m_class_name, "visit()");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit()");
             m_next.visit();
         }
 
         public override void visitEnd()
         {
-            m_log.Add(m_sequence++, m_class_name, "visitEnd()");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visitEnd()");
             m_next.visitEnd();
         }
 
         public override AtomVisitor visitItem_Atom()
         {
-            m_log.Add(m_sequence++, m_class_name, "visitItem_Atom");
-            return new AtomLogger(m_log, m_next.visitItem_Atom());
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visitItem_Atom");
+            return new AtomLogger(m_log, m_loc, m_next.visitItem_Atom());
         }
 
         public override ConsVisitor visitItem_Cons()
         {
-            m_log.Add(m_sequence++, m_class_name, "visitItem_Cons");
-            return new ConsLogger(m_log, m_next.visitItem_Cons());
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visitItem_Cons");
+            return new ConsLogger(m_log, m_loc, m_next.visitItem_Cons());
         }
 
         public override VectorVisitor visitItem_Vector()
         {
-            m_log.Add(m_sequence++, m_class_name, "visitItem_Vector");
-            return new VectorLogger(m_log, m_next.visitItem_Vector());
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visitItem_Vector");
+            return new VectorLogger(m_log, m_loc, m_next.visitItem_Vector());
         }
 
         public override void visitItem(object o)
         {
-            m_log.Add(m_sequence++, m_class_name, "visitItem");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visitItem");
         }
     }
 
@@ -148,58 +171,60 @@ namespace Sexp {
         int m_sequence = 0;
         Log m_log = new Log();
         string m_class_name = "AtomLogger";
+        TxtLocation m_loc;
 
-        public AtomLogger(Log log, AtomVisitor next)
+        public AtomLogger(Log log, TxtLocation loc, AtomVisitor next)
         {
             m_log = log;
             m_next = next;
+            m_loc =  loc;
         }
 
         public override void visit()
         {
-            m_log.Add(m_sequence++, m_class_name, "visit()");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit()");
             m_next.visit();
         }
 
         public override void visitEnd()
         {
-            m_log.Add(m_sequence++, m_class_name, "visitEnd()");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visitEnd()");
             m_next.visitEnd();
         }
 
         public override void visit_value(Boolean o)
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_value(Boolean)");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Boolean)");
             m_next.visit_value(o);
         }
 
         public override void visit_value(Int64 o)
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_value(Int64)");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Int64)");
             m_next.visit_value(o);
         }
 
         public override void visit_value(Double o)
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_value(Double)");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Double)");
             m_next.visit_value(o);
         }
 
         public override void visit_value(String o)
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_value(String)");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(String)");
             m_next.visit_value(o);
         }
 
         public override void visit_value(Char o)
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_value(Char)");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Char)");
             m_next.visit_value(o);
         }
 
         public override void visit_value(Symbol o)
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_value(Symbol)");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Symbol)");
             m_next.visit_value(o);
         }
     }
@@ -209,66 +234,68 @@ namespace Sexp {
         int m_sequence = 0;
         string m_class_name = "ConsLogger";
         Log m_log = new Log();
+        TxtLocation m_loc;
 
-        public ConsLogger(Log log, ConsVisitor next)
+        public ConsLogger(Log log, TxtLocation loc, ConsVisitor next)
         {
             m_log = log;
             m_next = next;
+            m_loc = loc;
         }
 
         public override void visit()
         {
-            m_log.Add(m_sequence++, m_class_name, "visit()");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit()");
             m_next.visit();
         }
 
         public override void visitEnd()
         {
-            m_log.Add(m_sequence++, m_class_name, "visitEnd()");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visitEnd()");
             m_next.visitEnd();
         }
 
         public override AtomVisitor visit_Atom_car()
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_Atom_car()");
-            return new AtomLogger(m_log, m_next.visit_Atom_car());
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_Atom_car()");
+            return new AtomLogger(m_log, m_loc, m_next.visit_Atom_car());
         }
         public override ConsVisitor visit_Cons_car()
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_Cons_car()");
-            return new ConsLogger(m_log, m_next.visit_Cons_car());
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_Cons_car()");
+            return new ConsLogger(m_log, m_loc, m_next.visit_Cons_car());
         }
         public override VectorVisitor visit_Vector_car()
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_Vector_car()");
-            return new VectorLogger(m_log, m_next.visit_Vector_car());
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_Vector_car()");
+            return new VectorLogger(m_log, m_loc, m_next.visit_Vector_car());
         }
         public override AtomVisitor visit_Atom_cdr()
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_Atom_cdr()");
-            return new AtomLogger(m_log, m_next.visit_Atom_cdr());
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_Atom_cdr()");
+            return new AtomLogger(m_log, m_loc, m_next.visit_Atom_cdr());
         }
 
         public override ConsVisitor visit_Cons_cdr()
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_Cons_cdr()");
-            return new ConsLogger(m_log, m_next.visit_Cons_cdr());
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_Cons_cdr()");
+            return new ConsLogger(m_log, m_loc, m_next.visit_Cons_cdr());
         }
 
         public override VectorVisitor visit_Vector_cdr()
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_Vector_cdr()");
-            return new VectorLogger(m_log, m_next.visit_Vector_cdr());
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_Vector_cdr()");
+            return new VectorLogger(m_log, m_loc, m_next.visit_Vector_cdr());
         }
 
         public override void visit_car(object o)
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_car(object o)");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_car(object o) <" + (null == o ? "null" : o.GetType().FullName) + ">");
         }
 
         public override void visit_cdr(object o)
         {
-            m_log.Add(m_sequence++, m_class_name, "visit_cdr(object o)");
+            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_cdr(object o) <" + (null == o ? "null" : o.GetType().FullName) + ">");
         }
     }
 }

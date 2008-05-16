@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Util {
     public class TxtLocation {
         public string path = "";
@@ -19,6 +21,13 @@ namespace Util {
         public TxtLocation clone()
         {
             return new TxtLocation(path, column, line, context);
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(path).Append("(").Append(line).Append(",").Append(column).Append(")");
+            return sb.ToString();
         }
     }
 }

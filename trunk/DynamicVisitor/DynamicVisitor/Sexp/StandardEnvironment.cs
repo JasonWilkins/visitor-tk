@@ -30,7 +30,7 @@ namespace Sexp {
             object a = args[0];
             object b = args[1];
 
-            return a == b || a.Equals(b);
+            return a == b || (a != null && a.Equals(b));
         }
 
         static object fn_eq_pred(List<object> args)
@@ -169,7 +169,12 @@ namespace Sexp {
 
         static object fn_pair_pred(List<object> args)
         {
-            return args[0] is Pair;
+            return args[0] is Pair || args[0] is List<object>;
+        }
+
+        static object fn_list_pred(List<object> args)
+        {
+            return (bool)fn_null_pred(args) || (bool)fn_pair_pred(args);
         }
 
         static object fn_procedure_pred(List<object> args)
@@ -248,16 +253,30 @@ namespace Sexp {
             object a = args[0];
             object b = args[1];
 
+            if (a == b) return true;
+
+            if (a == null || b == null) return false;
+
             if (a.GetType() == b.GetType()) {
                 if (a is Pair) {
-                    return fn_eqv_pred(pack(((Pair)a).head, ((Pair)b).tail));
-                } else if (a is object[]) {
+                    return (bool)fn_equal_pred(pack(((Pair)a).head, ((Pair)b).head)) && (bool)fn_equal_pred(pack(((Pair)a).tail, ((Pair)b).tail));
+                } else if (a is object[] || a is List<object>) {
                     IEnumerator<object> ai = ((IEnumerable<object>)a).GetEnumerator();
                     IEnumerator<object> bi = ((IEnumerable<object>)b).GetEnumerator();
 
-                    if (((object[])a).Length == ((object[])b).Length) {
+                    int al, bl;
+
+                    if (a is object[]) {
+                        al = ((object[])a).Length;
+                        bl = ((object[])b).Length;
+                    } else {
+                        al = ((List<object>)a).Count;
+                        bl = ((List<object>)b).Count;
+                    }
+
+                    if (al == bl) {
                         while (ai.MoveNext() && bi.MoveNext()) {
-                            if (!(Boolean)fn_eqv_pred(pack(ai.Current, bi.Current))) return false;
+                            if (!(bool)fn_eqv_pred(pack(ai.Current, bi.Current))) return false;
                         }
 
                         return true;
@@ -274,28 +293,7 @@ namespace Sexp {
 
         static object fn_list(List<object> args)
         {
-            Pair rv = null;
-
-            if (args.Count > 0) {
-                Pair current = new Pair();
-                current.head = args[0];
-                current.tail = null;
-
-                args.RemoveAt(0);
-
-                rv = current;
-
-                foreach (object o in args) {
-                    current.tail = new Pair();
-
-                    current = (Pair)current.tail;
-
-                    current.head = o;
-                    current.tail = null;
-                }
-            }
-
-            return rv;
+            return args;
         }
 
         public StandardEnvironment()
@@ -315,6 +313,7 @@ namespace Sexp {
             Add(Symbol.get_symbol("rational?"), fn_rational_pred);
             Add(Symbol.get_symbol("null?"), fn_null_pred);
             Add(Symbol.get_symbol("pair?"), fn_pair_pred);
+            Add(Symbol.get_symbol("list?"), fn_list_pred);
             Add(Symbol.get_symbol("procedure?"), fn_procedure_pred);
             Add(Symbol.get_symbol("string?"), fn_string_pred);
             Add(Symbol.get_symbol("symbol?"), fn_symbol_pred);

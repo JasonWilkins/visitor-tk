@@ -309,7 +309,7 @@ namespace Sexp {
                 list_contents_tail(cons);
             } else {
                 // ERROR
-                expecting("list_contents", pack(Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE));
+                expecting("list_contents", pack(Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE));
             }
         }
 
@@ -317,6 +317,7 @@ namespace Sexp {
         {
             if (Token.CLOSE_PAREN == lookahead) {
                 // EPSILON
+                cons.visit_cdr(null);
             } else if (
                 Token.BOOL == lookahead ||
                 Token.NUM == lookahead ||

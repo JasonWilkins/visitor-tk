@@ -32,6 +32,8 @@ namespace Sexp {
             list.Add(o);
         }
 
+        public int Count { get { return list.Count; } }
+
         #region IEnumerable Members
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()

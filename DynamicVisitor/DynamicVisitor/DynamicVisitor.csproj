@@ -29,17 +29,22 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GuidedTour\Guide.cs" />
     <Compile Include="GuidedTour\ISiteseer.cs" />
     <Compile Include="GuidedTour\Site.cs" />
+    <Compile Include="Sexp\Closure.cs" />
+    <Compile Include="Sexp\Environment.cs" />
     <Compile Include="Sexp\Literals.cs" />
     <Compile Include="Flat\Flat.cs" />
     <Compile Include="Sexp\MultiVisitor.cs" />
     <Compile Include="Flat\Common.cs" />
     <Compile Include="Sexp\Datum.cs" />
+    <Compile Include="Sexp\Pair.cs" />
+    <Compile Include="Sexp\StandardEnvironment.cs" />
     <Compile Include="Sexp\Symbol.cs" />
     <Compile Include="Util\TxtLocation.cs" />
     <Compile Include="Util\FileWriter.cs" />

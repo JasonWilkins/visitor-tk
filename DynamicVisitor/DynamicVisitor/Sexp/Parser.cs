@@ -398,7 +398,7 @@ namespace Sexp {
             AtomVisitor atom = abbrev.visit_Atom_car();
             atom.visit();
 
-            Symbol sym = new Symbol(name);
+            Symbol sym = Symbol.get_symbol(name);
             atom.visit_value(sym);
 
             atom.visitEnd();

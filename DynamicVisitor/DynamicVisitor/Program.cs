@@ -533,7 +533,7 @@ namespace Main {
             using (Reader file = new Reader(path)) {
                 //StringWriter writer = new StringWriter();
                 //TopLevelWriter visitor = new TopLevelWriter(writer);
-                VectorVisitor visitor = new SafeVectorVisitor(new VectorVisitor());
+                VectorVisitor visitor = new SafeVectorVisitor(null);
                 Parser parser = new Parser(file, visitor);
 
                 Console.WriteLine("parsing: {0}", path);
@@ -842,26 +842,26 @@ namespace Main {
             //test_safe_parse("test2.txt");
 #endif
 
-#if true
-            //parse_and_write("test.txt", "test-output1.txt");
-            //parse_and_write("test-output1.txt", "test-output2.txt");
-            //compare_files("test.txt", "test-output1.txt");
-            //compare_files("test-output1.txt", "test-output2.txt");
-            //compare_logs("test.txt", "test-output1.txt");
-            //compare_logs("test-output1.txt", "test-output2.txt");
+#if false
+            parse_and_write("test.txt", "test-output1.txt");
+            parse_and_write("test-output1.txt", "test-output2.txt");
+            compare_files("test.txt", "test-output1.txt");
+            compare_files("test-output1.txt", "test-output2.txt");
+            compare_logs("test.txt", "test-output1.txt");
+            compare_logs("test-output1.txt", "test-output2.txt");
             parse_build_write("test.txt", "test-output3.txt");
             compare_files("test.txt", "test-output3.txt");
-            //compare_logs("test.txt", "test-output3.txt");
-            //compare_logs2("test.txt", "test-output3.txt");
-            //compare_logs("test.txt");
-            //compare_logs("test-output1.txt");
-            //compare_logs("test-output2.txt");
-            //compare_logs("test-output3.txt");
-            ////compare_logs("test.txt", "test2.txt");
-            //code_builder_test1();
-            //code_builder_test2();
+            compare_logs("test.txt", "test-output3.txt");
+            compare_logs2("test.txt", "test-output3.txt");
+            compare_logs("test.txt");
+            compare_logs("test-output1.txt");
+            compare_logs("test-output2.txt");
+            compare_logs("test-output3.txt");
+            //compare_logs("test.txt", "test2.txt");
+            code_builder_test1();
+            code_builder_test2();
 #endif
-#if false
+#if true
             //System.IO.TextWriter my_out = new System.IO.StreamWriter("output.txt");
             //Console.SetOut(my_out);
             Reader f = new Reader("test3.txt");

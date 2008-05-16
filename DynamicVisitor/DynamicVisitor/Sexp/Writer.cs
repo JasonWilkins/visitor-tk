@@ -170,11 +170,6 @@ namespace Sexp {
             m_literal = Literal.literal(v);
             value = v;
         }
-
-        public override void visit_value(Object o)
-        {
-            throw new InvalidOperationException("values of type " + o.GetType().Name + " are not supported");
-        }
     }
 
     public class ListWriter : ConsVisitor, IWritable {

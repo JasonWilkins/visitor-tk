@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Globalization;
+
 namespace Sexp {
     public class Reader : IDisposable {
         System.IO.TextReader m_reader;
@@ -171,7 +173,7 @@ namespace Sexp {
 
             if ('#' == num[0]) {
                 if ('x' == num[1] || 'X' == num[1]) {
-                    if (Int64.TryParse(num.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out result1)) {
+                    if (Int64.TryParse(num.Substring(2), NumberStyles.HexNumber, null, out result1)) {
                         value = new Int64();
                         value = result1;
                         return true;
@@ -184,12 +186,10 @@ namespace Sexp {
                     return false;
                 }
             } else {
-                if (Int64.TryParse(num, System.Globalization.NumberStyles.Integer, null, out result1)) {
-                    value = new Int64();
+                if (Int64.TryParse(num, NumberStyles.Integer|NumberStyles.AllowDecimalPoint, null, out result1)) {
                     value = result1;
                     return true;
-                } else if (Double.TryParse(num, System.Globalization.NumberStyles.Float, null, out result2)) {
-                    value = new Double();
+                } else if (Double.TryParse(num, NumberStyles.Float, null, out result2)) {
                     value = result2;
                     return true;
                 } else {
@@ -488,7 +488,7 @@ namespace Sexp {
                     attrib.value = attrib.literal;
                     attrib.token = Token.KEYWORD;
                 } else {
-                    attrib.value = new Symbol(attrib.literal);
+                    attrib.value = Symbol.get_symbol(attrib.literal);
                 }
             } else if (Token.ERROR == attrib.token) {
                 // leave it alone

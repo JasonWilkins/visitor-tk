@@ -63,12 +63,12 @@ namespace Sexp {
                     break;
                 }
 
-                if (null == e1 && e2 != null) {
+                if (null != e1 && e2 == null) {
                     Console.WriteLine("Log 2 terminates before Log 1");
                     break;
                 }
 
-                if (null == e1 || null == e2) {
+                if (null == e1 && null == e2) {
                     Console.WriteLine("{0} entries compared.", count);
                     Console.WriteLine("no differences found");
                     Console.WriteLine("OK");

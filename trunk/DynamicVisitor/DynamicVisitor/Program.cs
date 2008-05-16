@@ -866,7 +866,7 @@ namespace Main {
             //Console.SetOut(my_out);
             Reader f = new Reader("test3.txt");
             Util.TxtLocation loc = new Util.TxtLocation();
-            Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new TestEnvironment(), loc)), loc);
+            Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new StandardEnvironment(), loc)), loc);
             p.read();
             //Vector v = build("test.txt");
             //DynamicVisitor.accept(v, new IntVisitor());

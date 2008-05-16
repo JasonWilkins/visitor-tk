@@ -59,13 +59,20 @@ namespace Sexp {
             m_errors++;
 
             Console.WriteLine(
-                "{0} [{2}, {3}] {1}: expecting {4}got {5}",
-                m_attrib.path,
+                "{0}: {1}: expecting {2}got {3}",
+                m_loc.ToString(),
                 context,
-                m_attrib.line,
-                m_attrib.column,
                 token_string(tokens),
                 Enum.GetName(lookahead.GetType(), lookahead));
+
+            //Console.WriteLine(
+            //    "{0} [{2}, {3}] {1}: expecting {4}got {5}",
+            //    m_attrib.path,
+            //    context,
+            //    m_attrib.line,
+            //    m_attrib.column,
+            //    token_string(tokens),
+            //    Enum.GetName(lookahead.GetType(), lookahead));
         }
 
         void next()
@@ -287,7 +294,7 @@ namespace Sexp {
                 match(Token.CLOSE_PAREN);
             } else {
                 // ERROR
-                expecting("nil_or_list", pack(Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE, Token.VECTOR));
+                expecting("list", pack(Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE, Token.VECTOR));
             }
         }
 
@@ -367,6 +374,7 @@ namespace Sexp {
                 ConsVisitor cdr = cons.visit_Cons_cdr();
                 cdr.visit();
                 datum(cdr, true);
+                cdr.visit_cdr(null);
                 cdr.visitEnd();
             } else {
                 // ERROR

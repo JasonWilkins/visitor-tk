@@ -244,7 +244,7 @@ namespace Sexp {
 
         public override void visit_cdr(object o)
         {
-            throw new Exception("combination must be a proper list");
+            if (o != null) throw new Exception("combination must be a proper list");
         }
     }
 
@@ -298,7 +298,7 @@ namespace Sexp {
 
         public override void visit_cdr(object o)
         {
-            throw new Exception("combination must be a proper list");
+            if (o != null) throw new Exception("combination must be a proper list");
         }
     }
 
@@ -319,9 +319,7 @@ namespace Sexp {
 
         public override void visitEnd()
         {
-            object[] rv = new object[m_vect.Count];
-            m_vect.CopyTo(rv);
-            m_args.Add(rv);
+            m_args.Add(m_vect.ToArray());
         }
 
         public override AtomVisitor visitItem_Atom()

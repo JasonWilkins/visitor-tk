@@ -634,3 +634,33 @@ namespace CodeBuilder {
         //{
         //    Console.WriteLine("{0} {1} ", o.GetType().FullName, o.ToString());
         //}
+
+
+
+
+
+
+
+            
+            //Pair rv = null;
+
+            //if (args.Count > 0) {
+            //    Pair current = new Pair();
+            //    current.head = args[0];
+            //    current.tail = null;
+
+            //    args.RemoveAt(0);
+
+            //    rv = current;
+
+            //    foreach (object o in args) {
+            //        current.tail = new Pair();
+
+            //        current = (Pair)current.tail;
+
+            //        current.head = o;
+            //        current.tail = null;
+            //    }
+            //}
+
+            //return rv;

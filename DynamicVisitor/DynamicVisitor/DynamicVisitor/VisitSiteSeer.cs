@@ -12,15 +12,36 @@ namespace DynamicVisitor {
         static Type[]   no_params = { };
         static object[] no_args   = { };
 
-        Object visitor;
-        Type   visitor_type;
+        Object m_visitor;
+        Type   m_visitor_type;
+
+        Dictionary<string, string> m_aliases;
 
         public VisitSiteseer(Object visitor)
         {
+            init(visitor);
+            m_aliases = new Dictionary<string, string>();
+        }
+
+        VisitSiteseer(Object visitor, Dictionary<string, string> aliases)
+        {
+            if (null == aliases) throw new ArgumentNullException("aliases");
+
+            init(visitor);
+            m_aliases = aliases;
+        }
+
+        void init(Object visitor)
+        {
             if (null == visitor) throw new ArgumentNullException("visitor");
 
-            this.visitor = visitor;
-            this.visitor_type = visitor.GetType();
+            m_visitor = visitor;
+            m_visitor_type = visitor.GetType();
+        }
+
+        public void AddAlias(string typename, string tag)
+        {
+            m_aliases.Add(typename, tag);
         }
 
         public bool view_whole(Site node)
@@ -30,12 +51,12 @@ namespace DynamicVisitor {
 
             if (mi != null) {
                 Object[] arg = { node.value };
-                mi.Invoke(visitor, arg);
+                mi.Invoke(m_visitor, arg);
                 return true;
             } else {
-                Trace.Verbose("debug: could not find method {0}.visit({1}), skipping", visitor_type.FullName, node.type.FullName);
+                Trace.Verbose("debug: could not find method {0}.visit({1}), skipping", m_visitor_type.FullName, node.type.FullName);
 
-                return node.type.FullName.StartsWith("System");
+                return false;
             }
         }
 
@@ -44,9 +65,9 @@ namespace DynamicVisitor {
             MethodInfo mi = GetMethod("visit", no_params);
 
             if (mi != null) {
-                mi.Invoke(visitor, no_args);
+                mi.Invoke(m_visitor, no_args);
             } else {
-                Trace.Verbose("debug: could not find method {0}.visit(), skipping", visitor_type.FullName);
+                Trace.Verbose("debug: could not find method {0}.visit(), skipping", m_visitor_type.FullName);
             }
         }
 
@@ -55,9 +76,9 @@ namespace DynamicVisitor {
             MethodInfo mi = GetMethod("visitEnd", no_params);
 
             if (mi != null) {
-                mi.Invoke(visitor, no_args);
+                mi.Invoke(m_visitor, no_args);
             } else {
-                Trace.Verbose("debug: could not find method {0}.visitEnd(), skipping", visitor_type.FullName);
+                Trace.Verbose("debug: could not find method {0}.visitEnd(), skipping", m_visitor_type.FullName);
             }
         }
 
@@ -79,7 +100,7 @@ namespace DynamicVisitor {
 
         MethodInfo GetMethod(string name, Type[] param)
         {
-            return visitor_type.GetMethod(
+            return m_visitor_type.GetMethod(
                 name,
                 BindingFlags.Public|BindingFlags.Instance|BindingFlags.ExactBinding,
                 null,
@@ -136,18 +157,18 @@ namespace DynamicVisitor {
                 MethodInfo mi = GetMethod(method_name, param_array);
 
                 if (mi != null) {
-                    Object new_visitor = mi.Invoke(visitor, arg_array);
+                    Object new_visitor = mi.Invoke(m_visitor, arg_array);
 
                     if (null == new_visitor) {
                         new_op = null;
-                        Trace.Warning("debug: {0}.{1}({2}) did not return a new visitor", visitor_type.FullName, method_name, make_type_string(param_array));
+                        Trace.Warning("debug: {0}.{1}({2}) did not return a new visitor", m_visitor_type.FullName, method_name, make_type_string(param_array));
                     } else {
-                        new_op = new VisitSiteseer(new_visitor);
+                        new_op = new VisitSiteseer(new_visitor, m_aliases);
                     }
 
                     return true;
                 } else {
-                    Trace.Warning("debug: could not find method {0}.{1}({2}), skipping", visitor_type.FullName, method_name, make_type_string(param_array));
+                    Trace.Warning("debug: could not find method {0}.{1}({2}), skipping", m_visitor_type.FullName, method_name, make_type_string(param_array));
                 }
             }
 
@@ -164,18 +185,18 @@ namespace DynamicVisitor {
 
                 if (mi != null) {
                     object[] args = { value };
-                    Object new_visitor = mi.Invoke(visitor, args);
+                    Object new_visitor = mi.Invoke(m_visitor, args);
 
                     if (null == new_visitor) {
                         new_op = null;
-                        Trace.Warning("debug: {0}.{1}({2}) did not return a new visitor", visitor_type.FullName, method_name, type.FullName);
+                        Trace.Warning("debug: {0}.{1}({2}) did not return a new visitor", m_visitor_type.FullName, method_name, type.FullName);
                     } else {
-                        new_op = new VisitSiteseer(new_visitor);
+                        new_op = new VisitSiteseer(new_visitor, m_aliases);
                     }
 
                     return true;
                 } else {
-                    Trace.Warning("debug: could not find method {0}.{1}({2}), skipping", visitor_type.FullName, method_name, type.FullName);
+                    Trace.Warning("debug: could not find method {0}.{1}({2}), skipping", m_visitor_type.FullName, method_name, type.FullName);
                     type = type.BaseType;
                 }
             }
@@ -190,30 +211,43 @@ namespace DynamicVisitor {
             MethodInfo mi = GetMethod(method_name, no_params);
 
             if (mi != null) {
-                Object new_visitor = mi.Invoke(visitor, no_args);
+                Object new_visitor = mi.Invoke(m_visitor, no_args);
 
                 if (null == new_visitor) {
                     new_method = null;
                     Trace.Verbose("debug: {0} did not return a new visitor", method_name);
                 } else {
-                    new_method = new VisitSiteseer(new_visitor);
+                    new_method = new VisitSiteseer(new_visitor, m_aliases);
                 }
 
                 return true;
             } else {
                 if (is_last) {
-                    Trace.Warning("debug: could not find method {0}.{1}(), skipping", visitor_type.FullName, method_name);
+                    Trace.Warning("debug: could not find method {0}.{1}(), skipping", m_visitor_type.FullName, method_name);
                 }
                 new_method = null;
                 return false;
             }
         }
 
+        string getMethodTag(Type type)
+        {
+            string alias_tag;
+
+            if (m_aliases.TryGetValue(type.FullName, out alias_tag)) {
+                return alias_tag;
+            } else {
+                return type.HasElementType || type.IsGenericType ? null : type.Name;
+            }
+        }
+
         bool invokeNonTerminal(string prefix, Type type, string name, out ISiteseer new_method)
         {
             while (type.BaseType != null) {
-                if (!type.IsGenericType) {
-                    if (innerCall(prefix+"_"+type.Name+(name!=null?"_"+name:""), out new_method, false)) {
+                string type_name = getMethodTag(type);
+
+                if (type_name != null) {
+                    if (innerCall(prefix+"_"+type_name+(name!=null?"_"+name:""), out new_method, false)) {
                         return true;
                     }
                 }

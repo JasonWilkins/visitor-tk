@@ -354,12 +354,14 @@ namespace Sexp {
 
         public override void visit_car(object o)
         {
-            if (o != null) throw new Exception();
+            if (o != null) 
+                throw new Exception();
         }
 
         public override void visit_cdr(object o)
         {
-            if (o != null) throw new Exception();
+            if (o != null) 
+                throw new Exception();
         }
     }
 }

@@ -590,7 +590,7 @@ namespace Main {
             Console.WriteLine();
         }
 
-        static Vector build(string path)
+        static object[] build(string path)
         {
             using (Reader file = new Reader(path)) {
                 TopLevelBuilder visitor = new TopLevelBuilder();
@@ -608,7 +608,7 @@ namespace Main {
         {
             Console.WriteLine("parsing {0} into memory then writing it out to {1}", in_path, out_path);
             using (FileWriter writer = new FileWriter(out_path)) {
-                Vector top = build(in_path);
+                object[] top = build(in_path);
                 DynamicVisitor.accept(top, new TopLevelWriter(writer));
             }
             Console.WriteLine();
@@ -674,7 +674,7 @@ namespace Main {
                 Util.TxtLocation loc = new Util.TxtLocation();
                 p.read();
 
-                Vector top = builder.getTopLevel();
+                object[] top = builder.getTopLevel();
                 VectorLogger logger = new VectorLogger(log2, loc, new SafeVectorVisitor(null));
                 DynamicVisitor.accept(top, logger);
             }

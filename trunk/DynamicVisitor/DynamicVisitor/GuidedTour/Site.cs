@@ -47,7 +47,7 @@ namespace GuidedTour {
                     foreach (object part in value as IEnumerable) {
                         m_list.Add(new Site(null, part != null ? part.GetType() : typeof(object), part));
                     }
-                } else {
+                } else if (!type.FullName.StartsWith("System")) {
                     MemberInfo[] members = type.FindMembers(MemberTypes.Property|MemberTypes.Field, BindingFlags.Public|BindingFlags.Instance, null, null);
 
                     foreach (MemberInfo mi in members) {
@@ -69,6 +69,8 @@ namespace GuidedTour {
 
                         m_list.Add(new Site(mi.Name, part != null ? part.GetType() : typeof(object), part));
                     }
+                } else {
+                    Trace.Warning("refusing to break system type {0} into parts", type.FullName);
                 }
             }
         }

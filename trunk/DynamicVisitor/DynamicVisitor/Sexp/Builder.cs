@@ -4,21 +4,21 @@ using System.Text;
 
 namespace Sexp {
     public interface DatumBuilder {
-        Datum getDatum();
+        object getDatum();
     }
 
     public class VectorBuilder : VectorVisitor, DatumBuilder {
         List<DatumVisitor> m_datum = new List<DatumVisitor>();
-        Vector m_vect;
+        List<object> m_vect;
 
-        public Datum getDatum()
+        public object getDatum()
         {
-            return m_vect;
+            return m_vect.ToArray();
         }
 
         public override void visitEnd()
         {
-            m_vect = new Vector();
+            m_vect = new List<object>();
 
             foreach (DatumBuilder o in m_datum) {
                 if (o != null) {
@@ -61,9 +61,9 @@ namespace Sexp {
     }
 
     public class TopLevelBuilder : VectorBuilder {
-        public Vector getTopLevel()
+        public object[] getTopLevel()
         {
-            return getDatum() as Vector;
+            return getDatum() as object[];
         }
     }
 
@@ -71,7 +71,7 @@ namespace Sexp {
         object m_value;
         Atom m_atom;
 
-        public Datum getDatum()
+        public object getDatum()
         {
             return m_atom;
         }
@@ -117,7 +117,7 @@ namespace Sexp {
         DatumBuilder m_cdr;
         Cons m_cons;
 
-        public Datum getDatum()
+        public object getDatum()
         {
             return m_cons;
         }

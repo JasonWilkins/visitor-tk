@@ -2,9 +2,7 @@ using System;
 using System.Collections;
 
 namespace Sexp {
-    public interface Datum { }
-
-    public class Atom : Datum {
+    public class Atom {
         public object value;
 
         public Atom(object value)
@@ -13,18 +11,18 @@ namespace Sexp {
         }
     }
 
-    public class Cons : Datum {
-        public Datum car;
-        public Datum cdr;
+    public class Cons {
+        public object car;
+        public object cdr;
 
-        public Cons(Datum car, Datum cdr)
+        public Cons(object car, object cdr)
         {
             this.car = car;
             this.cdr = cdr;
         }
     }
 
-    public class Vector : Datum, IEnumerable {
+/*    public class Vector : Datum, IEnumerable {
         ArrayList list = new ArrayList();
 
         public void Add(object o)
@@ -42,5 +40,5 @@ namespace Sexp {
         }
 
         #endregion
-    }
+    }*/
 }

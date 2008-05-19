@@ -3,18 +3,22 @@ using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
 
+using Util;
+
 namespace Sexp {
     public class Reader : IDisposable {
         System.IO.TextReader m_reader;
-        public int line = 1;
-        public int column = 0;
-        public string path;
+
+        TxtLocation m_loc;
+        public TxtLocation loc { get { return m_loc; } }
+
         public int tabsize = 4;
 
         public Reader(string path)
         {
-            this.path = path;
             m_reader = new System.IO.StreamReader(path);
+            m_loc = new TxtLocation();
+            m_loc.path = path;
         }
 
         public int getc()
@@ -22,13 +26,13 @@ namespace Sexp {
             int cin = m_reader.Read();
 
             if (cin != -1) {
-                column++;
+                m_loc.column++;
 
                 if ('\n' == cin) {
-                    line++;
-                    column = 0;
+                    m_loc.line++;
+                    m_loc.column = 0;
                 } else if ('\t' == cin) {
-                    column += tabsize;
+                    m_loc.column += tabsize;
                 }
             }
 
@@ -57,59 +61,9 @@ namespace Sexp {
         char peek;
         bool is_eof = false;
 
-        List<string> m_keywords;
-
-        static List<string> default_keywords()
-        {
-            List<string> kw = new List<string>();
-
-            kw.Add("access");
-            kw.Add("and");
-            kw.Add("begin");
-            kw.Add("case");
-            kw.Add("cond");
-            kw.Add("cons-stream");
-            kw.Add("declare");
-            kw.Add("default-object?");
-            kw.Add("define");
-            kw.Add("define-integrable");
-            kw.Add("define-structure");
-            kw.Add("define-syntax");
-            kw.Add("delay");
-            kw.Add("do");
-            kw.Add("er-macro-transformer");
-            kw.Add("fluid-let");
-            kw.Add("if");
-            kw.Add("lambda");
-            kw.Add("let");
-            kw.Add("let*");
-            kw.Add("let*-syntax");
-            kw.Add("let-syntax");
-            kw.Add("letrec");
-            kw.Add("letrec-syntax");
-            kw.Add("local-declare");
-            kw.Add("named-lambda");
-            kw.Add("non-hygienic-macro-transformer");
-            kw.Add("or");
-            kw.Add("quasiquote");
-            kw.Add("quote");
-            kw.Add("rsc-macro-transformer");
-            kw.Add("sc-macro-transformer");
-            kw.Add("set!");
-            kw.Add("syntax-rules");
-            kw.Add("the-environment");
-
-            return kw;
-        }
-
         public Scanner(Reader reader)
-            : this(reader, null)
-        { }
-
-        public Scanner(Reader reader, List<string> keywords)
         {
             m_reader = reader;
-            m_keywords = keywords;
         }
 
         char getc()
@@ -199,15 +153,6 @@ namespace Sexp {
             }
         }
 
-        bool is_keyword(string keyword)
-        {
-            if (m_keywords != null) {
-                return m_keywords.Contains(keyword);
-            } else {
-                return false;
-            }
-        }
-
         void line_comment()
         {
             if (';' == cin) {
@@ -253,10 +198,7 @@ namespace Sexp {
             getc();
 
             Attributes attrib = new Attributes();
-
-            attrib.path = m_reader.path;
-            attrib.line = m_reader.line;
-            attrib.column = m_reader.column;
+            attrib.loc = m_reader.loc.clone();
 
             while (';' == cin || ('#' == cin && '|' == peek) || is_whitespace(cin)) {
                 line_comment();
@@ -271,8 +213,7 @@ namespace Sexp {
                 }
             }
 
-            attrib.line = m_reader.line;
-            attrib.column = m_reader.column;
+            attrib.loc.copy(m_reader.loc);
 
             if (is_eof) {
                 attrib.token = Token.EOF;
@@ -484,9 +425,6 @@ namespace Sexp {
                 } else if (parse_number(attrib.literal, out value)) {
                     attrib.value = value;
                     attrib.token = Token.NUM;
-                } else if (is_keyword(attrib.literal)) {
-                    attrib.value = attrib.literal;
-                    attrib.token = Token.KEYWORD;
                 } else {
                     attrib.value = Symbol.get_symbol(attrib.literal);
                 }

@@ -664,3 +664,74 @@ namespace CodeBuilder {
             //}
 
             //return rv;
+
+
+
+        List<string> m_keywords;
+
+        public Scanner(Reader reader)
+            : this(reader, null)
+        { }
+
+        public Scanner(Reader reader, List<string> keywords)
+        {
+            m_reader = reader;
+            m_keywords = keywords;
+        }
+        static List<string> default_keywords()
+        {
+            List<string> kw = new List<string>();
+
+            kw.Add("access");
+            kw.Add("and");
+            kw.Add("begin");
+            kw.Add("case");
+            kw.Add("cond");
+            kw.Add("cons-stream");
+            kw.Add("declare");
+            kw.Add("default-object?");
+            kw.Add("define");
+            kw.Add("define-integrable");
+            kw.Add("define-structure");
+            kw.Add("define-syntax");
+            kw.Add("delay");
+            kw.Add("do");
+            kw.Add("er-macro-transformer");
+            kw.Add("fluid-let");
+            kw.Add("if");
+            kw.Add("lambda");
+            kw.Add("let");
+            kw.Add("let*");
+            kw.Add("let*-syntax");
+            kw.Add("let-syntax");
+            kw.Add("letrec");
+            kw.Add("letrec-syntax");
+            kw.Add("local-declare");
+            kw.Add("named-lambda");
+            kw.Add("non-hygienic-macro-transformer");
+            kw.Add("or");
+            kw.Add("quasiquote");
+            kw.Add("quote");
+            kw.Add("rsc-macro-transformer");
+            kw.Add("sc-macro-transformer");
+            kw.Add("set!");
+            kw.Add("syntax-rules");
+            kw.Add("the-environment");
+
+            return kw;
+        }
+
+        bool is_keyword(string keyword)
+        {
+            if (m_keywords != null) {
+                return m_keywords.Contains(keyword);
+            } else {
+                return false;
+            }
+        }
+
+        KEYWORD,
+
+                } else if (is_keyword(attrib.literal)) {
+                    attrib.value = attrib.literal;
+                    attrib.token = Token.KEYWORD;

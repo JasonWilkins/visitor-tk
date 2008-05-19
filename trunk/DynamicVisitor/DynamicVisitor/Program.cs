@@ -495,7 +495,7 @@ namespace Main {
         static void test_scan(string path)
         {
             using (Reader file = new Reader(path)) {
-                Scanner scanner = new Scanner(file, null);
+                Scanner scanner = new Scanner(file);
                 Attributes attrib;
 
                 Console.WriteLine("scanning: {0}", path);
@@ -504,10 +504,10 @@ namespace Main {
 
                     if (attrib.token != Token.ERROR) {
                         if (Token.NUM == attrib.token) {
-                            Console.WriteLine("[{0}, {1}] {2} {3} {4}", attrib.line, attrib.column, Enum.GetName(attrib.token.GetType(), attrib.token), (attrib.literal==null)?(""):("= "+attrib.literal), (attrib.error == null)?(""):("warning: "+attrib.error));
+                            Console.WriteLine("{0} {1} {3} {4}", attrib.loc.PathPoint(), Enum.GetName(attrib.token.GetType(), attrib.token), (attrib.literal==null)?(""):("= "+attrib.literal), (attrib.error == null)?(""):("warning: "+attrib.error));
                         }
                     } else {
-                        Console.WriteLine("[{0}, {1}] error: {2} = {3}", attrib.line, attrib.column, attrib.error, attrib.literal);
+                        Console.WriteLine("{0} error: {1} = {2}", attrib.loc.PathPoint(), attrib.error, attrib.literal);
                     }
 
                 } while (attrib.token != Token.EOF);

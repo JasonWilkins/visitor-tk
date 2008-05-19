@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+
+using Util;
+
 namespace Sexp {
 
     public class Attributes {
-        public string path;
-        public int line;
-        public int column;
+        public TxtLocation loc;
         public string literal;
         public object value;
         public string error;
@@ -35,7 +36,6 @@ namespace Sexp {
         SPLICE,
         COMMA,
         CLOSE_SQUARE,
-        KEYWORD,
         DOT,
     }
 }

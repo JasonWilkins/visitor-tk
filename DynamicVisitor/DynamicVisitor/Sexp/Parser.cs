@@ -79,11 +79,7 @@ namespace Sexp {
         {
             m_attrib = m_scanner.scan();
 
-            if (m_loc != null) {
-                m_loc.path   = m_attrib.path;
-                m_loc.column = m_attrib.column;
-                m_loc.line   = m_attrib.line;
-            }
+            if (m_loc != null) m_loc.copy(m_attrib.loc);
         }
 
         void match(Token tok)

@@ -13,8 +13,12 @@ namespace Sexp {
 
         void differ(string what, Attributes a1, Attributes a2)
         {
-            System.Console.WriteLine("{0}[{1}, {2}] {7} << {3} >> {8} {4}[{5}, {6}]",
-                a1.path, a1.line, a1.column, what, a2.path, a2.line, a2.column, Enum.GetName(a1.token.GetType(), a1.token), Enum.GetName(a2.token.GetType(), a2.token));
+            System.Console.WriteLine("{0} {1} << {2} >> {3} {4}",
+                a1.loc.PathPoint(),
+                Enum.GetName(a1.token.GetType(), a1.token),
+                what,
+                a2.loc.PathPoint(),
+                Enum.GetName(a2.token.GetType(), a2.token));
         }
 
         public void run()
@@ -47,7 +51,7 @@ namespace Sexp {
                 }
 
                 if (Token.EOF == a1.token || Token.EOF == a2.token) {
-                    Console.WriteLine("{0} and {1} scan the same", a1.path, a2.path);
+                    Console.WriteLine("{0} and {1} scan the same", a1.loc.path, a2.loc.path);
                     Console.WriteLine("OK");
                     break;
                 }

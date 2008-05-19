@@ -7,7 +7,7 @@ namespace Main {
     using GuidedTour;
     using Pirate;
     using PirateType=Pirate.Type;
-    using Utils;
+    using Util;
     using Sexp;
     using Flat;
     using Flat2Pirate;

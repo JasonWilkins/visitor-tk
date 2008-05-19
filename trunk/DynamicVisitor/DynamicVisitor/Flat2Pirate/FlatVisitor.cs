@@ -1,7 +1,7 @@
 #define WARNING
 
 using System;
-using Utils;
+using Util;
 
 namespace Flat2Pirate {
     abstract class TypeVisitor {

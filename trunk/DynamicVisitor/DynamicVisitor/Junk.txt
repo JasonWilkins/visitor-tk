@@ -735,3 +735,19 @@ namespace CodeBuilder {
                 } else if (is_keyword(attrib.literal)) {
                     attrib.value = attrib.literal;
                     attrib.token = Token.KEYWORD;
+
+
+            {
+                bool first = true;
+                foreach (string s in list)
+                {
+                    if (!first) Append(delim);
+
+                    Append(s);
+
+                    if (first) first = false;
+                }
+            }
+
+            return this;
+        }

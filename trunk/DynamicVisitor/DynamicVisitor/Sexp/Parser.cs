@@ -60,7 +60,7 @@ namespace Sexp {
 
             Console.WriteLine(
                 "{0}: {1}: expecting {2}got {3}",
-                m_loc.ToString(),
+                m_attrib.loc.ToString(),
                 context,
                 token_string(tokens),
                 Enum.GetName(lookahead.GetType(), lookahead));

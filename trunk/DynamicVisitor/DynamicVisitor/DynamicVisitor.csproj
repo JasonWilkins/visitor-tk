@@ -38,6 +38,7 @@
     <Compile Include="GuidedTour\Site.cs" />
     <Compile Include="Sexp\Closure.cs" />
     <Compile Include="Sexp\Environment.cs" />
+    <Compile Include="Sexp\GetC.cs" />
     <Compile Include="Sexp\Literals.cs" />
     <Compile Include="Flat\Flat.cs" />
     <Compile Include="Sexp\MultiVisitor.cs" />
@@ -46,6 +47,7 @@
     <Compile Include="Sexp\Pair.cs" />
     <Compile Include="Sexp\StandardEnvironment.cs" />
     <Compile Include="Sexp\Symbol.cs" />
+    <Compile Include="Util\StringUtil.cs" />
     <Compile Include="Util\TxtLocation.cs" />
     <Compile Include="Util\FileWriter.cs" />
     <Compile Include="Flat2Pirate\Flat2Pirate.cs" />

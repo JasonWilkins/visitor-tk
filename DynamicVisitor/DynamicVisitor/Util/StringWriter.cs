@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Utils
+namespace Util
 {
     public class StringWriter : Writer
     {
@@ -19,32 +19,25 @@ namespace Utils
 
         public override Writer Begin()
         {
-            for (int i = 0; i < m_indent_count; i++)
-            {
-                m_sb.Append(m_indent_string);
-            }
-
+            m_sb.Append(make_indent());
             return this;
         }
 
         public override Writer End()
         {
             m_sb.AppendLine();
-
             return this;
         }
 
         public override Writer Append(string s)
         {
             m_sb.Append(s);
-
             return this;
         }
 
         public override Writer Append(char c)
         {
             m_sb.Append(c);
-
             return this;
         }
 

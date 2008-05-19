@@ -6,54 +6,6 @@ using System.Globalization;
 using Util;
 
 namespace Sexp {
-    public class Reader : IDisposable {
-        System.IO.TextReader m_reader;
-
-        TxtLocation m_loc;
-        public TxtLocation loc { get { return m_loc; } }
-
-        public int tabsize = 4;
-
-        public Reader(string path)
-        {
-            m_reader = new System.IO.StreamReader(path);
-            m_loc = new TxtLocation();
-            m_loc.path = path;
-        }
-
-        public int getc()
-        {
-            int cin = m_reader.Read();
-
-            if (cin != -1) {
-                m_loc.column++;
-
-                if ('\n' == cin) {
-                    m_loc.line++;
-                    m_loc.column = 0;
-                } else if ('\t' == cin) {
-                    m_loc.column += tabsize;
-                }
-            }
-
-            return cin;
-        }
-
-        public int peek()
-        {
-            return m_reader.Peek();
-        }
-
-        #region IDisposable Members
-
-        void IDisposable.Dispose()
-        {
-            m_reader.Close();
-        }
-
-        #endregion
-    }
-
     public class Scanner {
         Reader m_reader;
 

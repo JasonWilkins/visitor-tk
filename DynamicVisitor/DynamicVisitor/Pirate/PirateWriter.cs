@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using Writer = Utils.Writer;
+using Writer = Util.Writer;
 
 namespace Pirate {
     class PirateWriter {

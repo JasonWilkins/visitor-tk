@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Utils
-{
-    public abstract class Writer
-    {
+namespace Util {
+    public abstract class Writer {
         protected string m_indent_string;
         protected int m_indent_count;
 
@@ -23,6 +21,11 @@ namespace Utils
         public abstract Writer Append(string s);
         public abstract Writer Append(char c);
 
+        protected string make_indent()
+        {
+            return StringUtil.repeat(m_indent_string, m_indent_count);
+        }
+
         public void Indent()
         {
             m_indent_count++;
@@ -37,18 +40,7 @@ namespace Utils
 
         public Writer AppendList(List<string> list, string delim)
         {
-            if (list != null)
-            {
-                bool first = true;
-                foreach (string s in list)
-                {
-                    if (!first) Append(delim);
-
-                    Append(s);
-
-                    if (first) first = false;
-                }
-            }
+            if (list != null) Append(String.Join(delim, list.ToArray()));
 
             return this;
         }
@@ -113,7 +105,7 @@ namespace Utils
                         Append("\\v");
                         break;
 
-                    default:                        
+                    default:
                         Append(c);
                         break;
                 }

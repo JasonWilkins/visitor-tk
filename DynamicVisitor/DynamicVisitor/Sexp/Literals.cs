@@ -103,7 +103,7 @@ namespace Sexp {
                 if (o != null) {
                     return o.ToString();
                 } else {
-                    return "nil";
+                    return "()";
                 }
             }
         }

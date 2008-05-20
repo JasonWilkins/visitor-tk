@@ -160,9 +160,9 @@ namespace Sexp {
             return new VectorLogger(m_log, m_loc, m_next.visitItem_Vector());
         }
 
-        public override void visitItem(object o)
+        public override void visitItem()
         {
-            m_log.Add(m_sequence++, m_loc,  m_class_name, "visitItem");
+            m_log.Add(m_sequence++, m_loc, m_class_name, "visitItem");
         }
     }
 
@@ -180,53 +180,59 @@ namespace Sexp {
             m_loc =  loc;
         }
 
-        public override void visit()
+        //public override void visit()
+        //{
+        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit()");
+        //    m_next.visit();
+        //}
+
+        //public override void visitEnd()
+        //{
+        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visitEnd()");
+        //    m_next.visitEnd();
+        //}
+
+        public override void visit(object o)
         {
-            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit()");
-            m_next.visit();
+            m_log.Add(m_sequence++, m_loc, m_class_name, "visit_value(object)");
+            m_next.visit(o);
         }
 
-        public override void visitEnd()
-        {
-            m_log.Add(m_sequence++, m_loc,  m_class_name, "visitEnd()");
-            m_next.visitEnd();
-        }
+        //public override void visit_value(Boolean o)
+        //{
+        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Boolean)");
+        //    m_next.visit_value(o);
+        //}
 
-        public override void visit_value(Boolean o)
-        {
-            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Boolean)");
-            m_next.visit_value(o);
-        }
+        //public override void visit_value(Int64 o)
+        //{
+        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Int64)");
+        //    m_next.visit_value(o);
+        //}
 
-        public override void visit_value(Int64 o)
-        {
-            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Int64)");
-            m_next.visit_value(o);
-        }
+        //public override void visit_value(Double o)
+        //{
+        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Double)");
+        //    m_next.visit_value(o);
+        //}
 
-        public override void visit_value(Double o)
-        {
-            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Double)");
-            m_next.visit_value(o);
-        }
+        //public override void visit_value(String o)
+        //{
+        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(String)");
+        //    m_next.visit_value(o);
+        //}
 
-        public override void visit_value(String o)
-        {
-            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(String)");
-            m_next.visit_value(o);
-        }
+        //public override void visit_value(Char o)
+        //{
+        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Char)");
+        //    m_next.visit_value(o);
+        //}
 
-        public override void visit_value(Char o)
-        {
-            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Char)");
-            m_next.visit_value(o);
-        }
-
-        public override void visit_value(Symbol o)
-        {
-            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Symbol)");
-            m_next.visit_value(o);
-        }
+        //public override void visit_value(Symbol o)
+        //{
+        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Symbol)");
+        //    m_next.visit_value(o);
+        //}
     }
 
     public class ConsLogger : ConsVisitor {
@@ -288,14 +294,14 @@ namespace Sexp {
             return new VectorLogger(m_log, m_loc, m_next.visit_Vector_cdr());
         }
 
-        public override void visit_car(object o)
+        public override void visit_car()
         {
-            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_car(object o) <" + (null == o ? "null" : o.GetType().FullName) + ">");
+            m_log.Add(m_sequence++, m_loc, m_class_name, "visit_car()");
         }
 
-        public override void visit_cdr(object o)
+        public override void visit_cdr()
         {
-            m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_cdr(object o) <" + (null == o ? "null" : o.GetType().FullName) + ">");
+            m_log.Add(m_sequence++, m_loc, m_class_name, "visit_cdr()");
         }
     }
 }

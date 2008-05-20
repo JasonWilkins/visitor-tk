@@ -73,7 +73,7 @@ namespace Sexp {
             return new TopLevelVectInterpreter(m_env, m_loc, m_print, new List<object>());
         }
 
-        public override void visitItem(object o)
+        public override void visitItem()
         {
             List<object> m_args = new List<object>();
             m_args.Add(null);
@@ -92,11 +92,17 @@ namespace Sexp {
             m_print = print;
         }
 
-        public override void visitEnd()
+        public override void visit(object o)
         {
-            base.visitEnd();
+            base.visit(o);
             m_print.print(m_args);
         }
+
+        //public override void visitEnd()
+        //{
+        //    base.visitEnd();
+        //    m_print.print(m_args);
+        //}
     }
 
     class TopLevelConsInterpreter : CombinationInterpreter {
@@ -144,35 +150,44 @@ namespace Sexp {
             m_args = args;
         }
 
-        public override void visit_value(bool o)
+        public override void visit(object o)
         {
-            m_args.Add(o);
+            if (o is Symbol) {
+                m_args.Add(m_env.lookup(m_loc, (Symbol)o));
+            } else {
+                m_args.Add(o);
+            }
         }
 
-        public override void visit_value(char o)
-        {
-            m_args.Add(o);
-        }
+        //public override void visit_value(bool o)
+        //{
+        //    m_args.Add(o);
+        //}
 
-        public override void visit_value(double o)
-        {
-            m_args.Add(o);
-        }
+        //public override void visit_value(char o)
+        //{
+        //    m_args.Add(o);
+        //}
 
-        public override void visit_value(long o)
-        {
-            m_args.Add(o);
-        }
+        //public override void visit_value(double o)
+        //{
+        //    m_args.Add(o);
+        //}
 
-        public override void visit_value(Symbol o)
-        {
-            m_args.Add(m_env.lookup(m_loc, o));
-        }
+        //public override void visit_value(long o)
+        //{
+        //    m_args.Add(o);
+        //}
 
-        public override void visit_value(string o)
-        {
-            m_args.Add(o);
-        }
+        //public override void visit_value(Symbol o)
+        //{
+        //    m_args.Add(m_env.lookup(m_loc, o));
+        //}
+
+        //public override void visit_value(string o)
+        //{
+        //    m_args.Add(o);
+        //}
     }
 
     public class CombinationInterpreter : ConsVisitor {
@@ -237,15 +252,13 @@ namespace Sexp {
             throw new Exception("combination must be a proper list");
         }
 
-        public override void visit_car(object o)
+        public override void visit_car()
         {
-            m_new_args.Add(o);
+            m_new_args.Add(null);
         }
 
-        public override void visit_cdr(object o)
-        {
-            if (o != null) throw new Exception("combination must be a proper list");
-        }
+        public override void visit_cdr()
+        { }
     }
 
     class ConsInterpreter : ConsVisitor {
@@ -291,15 +304,13 @@ namespace Sexp {
             throw new Exception("combination must be a proper list");
         }
 
-        public override void visit_car(object o)
+        public override void visit_car()
         {
-            m_args.Add(o);
+            m_args.Add(null);
         }
 
-        public override void visit_cdr(object o)
-        {
-            if (o != null) throw new Exception("combination must be a proper list");
-        }
+        public override void visit_cdr()
+        { }
     }
 
     class VectInterpreter : VectorVisitor {
@@ -337,9 +348,9 @@ namespace Sexp {
             return new VectInterpreter(m_env, m_loc, m_vect);
         }
 
-        public override void visitItem(object o)
+        public override void visitItem()
         {
-            m_args.Add(o);
+            m_args.Add(null);
         }
     }
 }

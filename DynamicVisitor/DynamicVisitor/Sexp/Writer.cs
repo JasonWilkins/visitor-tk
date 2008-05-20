@@ -59,13 +59,9 @@ namespace Sexp {
             return vect;
         }
 
-        public override void visitItem(object o)
+        public override void visitItem()
         {
-            if (null == o) {
-                top.Add(null);
-            } else {
-                throw new Exception();
-            }
+            top.Add(null);
         }
     }
 
@@ -116,13 +112,9 @@ namespace Sexp {
             return new_vect;
         }
 
-        public override void visitItem(object o)
+        public override void visitItem()
         {
-            if (null == o) {
-                vect.Add(null);
-            } else {
-                throw new Exception();
-            }
+            vect.Add(null);
         }
     }
 
@@ -135,41 +127,49 @@ namespace Sexp {
             writer.Append(m_literal);
         }
 
-        public override void visit_value(Boolean v)
+        public override void visit(object v)
         {
+            if (v == null) throw new Exception();
+
             m_literal = Literal.literal(v);
             value = v;
         }
 
-        public override void visit_value(Int64 v)
-        {
-            m_literal = Literal.literal(v);
-            value = v;
-        }
+        //public override void visit_value(Boolean v)
+        //{
+        //    m_literal = Literal.literal(v);
+        //    value = v;
+        //}
 
-        public override void visit_value(Double v)
-        {
-            m_literal = Literal.literal(v);
-            value = v;
-        }
+        //public override void visit_value(Int64 v)
+        //{
+        //    m_literal = Literal.literal(v);
+        //    value = v;
+        //}
 
-        public override void visit_value(Char v)
-        {
-            m_literal = Literal.literal(v);
-            value = v;
-        }
+        //public override void visit_value(Double v)
+        //{
+        //    m_literal = Literal.literal(v);
+        //    value = v;
+        //}
 
-        public override void visit_value(String v)
-        {
-            m_literal = Literal.literal(v);
-            value = v;
-        }
+        //public override void visit_value(Char v)
+        //{
+        //    m_literal = Literal.literal(v);
+        //    value = v;
+        //}
 
-        public override void visit_value(Symbol v)
-        {
-            m_literal = Literal.literal(v);
-            value = v;
-        }
+        //public override void visit_value(String v)
+        //{
+        //    m_literal = Literal.literal(v);
+        //    value = v;
+        //}
+
+        //public override void visit_value(Symbol v)
+        //{
+        //    m_literal = Literal.literal(v);
+        //    value = v;
+        //}
     }
 
     public class ListWriter : ConsVisitor, IWritable {
@@ -281,15 +281,11 @@ namespace Sexp {
             return vect;
         }
 
-        public override void visit_car(object o)
-        {
-            if (o != null) throw new Exception();
-        }
+        public override void visit_car()
+        { }
 
-        public override void visit_cdr(object o)
-        {
-            if (o != null) throw new Exception();
-        }
+        public override void visit_cdr()
+        { }
     }
 
     public class ConsWriter : ConsVisitor, IWritable {
@@ -352,16 +348,14 @@ namespace Sexp {
             return vect;
         }
 
-        public override void visit_car(object o)
+        public override void visit_car()
         {
-            if (o != null) 
-                throw new Exception();
+            car = null;
         }
 
-        public override void visit_cdr(object o)
+        public override void visit_cdr()
         {
-            if (o != null) 
-                throw new Exception();
+            cdr = null;
         }
     }
 }

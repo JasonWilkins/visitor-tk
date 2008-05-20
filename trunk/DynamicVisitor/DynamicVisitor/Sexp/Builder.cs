@@ -3,176 +3,223 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace Sexp {
-    public interface DatumBuilder {
-        object getDatum();
-    }
+    public class VectorBuilder : VectorVisitor {
+        protected List<object> m_vect = new List<object>();
+        protected List<object> m_args;
 
-    public class VectorBuilder : VectorVisitor, DatumBuilder {
-        List<DatumVisitor> m_datum = new List<DatumVisitor>();
-        List<object> m_vect;
-
-        public object getDatum()
+        public VectorBuilder(List<object> args)
         {
-            return m_vect.ToArray();
+            m_args = args;
         }
 
         public override void visitEnd()
         {
-            m_vect = new List<object>();
-
-            foreach (DatumBuilder o in m_datum) {
-                if (o != null) {
-                    m_vect.Add(o.getDatum());
-                } else {
-                    m_vect.Add(null);
-                }
-            }
+            m_args.Add(m_vect.ToArray());
         }
 
         public override AtomVisitor visitItem_Atom()
         {
-            AtomBuilder atom = new AtomBuilder();
-            m_datum.Add(atom);
-            return atom;
+            return new AtomBuilder(m_vect);
         }
 
         public override ConsVisitor visitItem_Cons()
         {
-            ConsBuilder cons = new ConsBuilder();
-            m_datum.Add(cons);
-            return cons;
+            return new ConsBuilder(m_vect);
         }
 
         public override VectorVisitor visitItem_Vector()
         {
-            VectorBuilder vect = new VectorBuilder();
-            m_datum.Add(vect);
-            return vect;
+            return new VectorBuilder(m_vect);
         }
 
-        public override void visitItem(object o)
+        public override void visitItem()
         {
-            if (o == null) {
-                m_datum.Add(null);
-            } else {
-                throw new Exception();
-            }
+            m_vect.Add(null);
         }
     }
 
     public class TopLevelBuilder : VectorBuilder {
+        public TopLevelBuilder()
+            : base(new List<object>())
+        { }
+
         public object[] getTopLevel()
         {
-            return getDatum() as object[];
+            return m_args.Count > 0 ? (object[])m_args[0] : null;
         }
     }
 
-    public class AtomBuilder : AtomVisitor, DatumBuilder {
-        object m_value;
-        Atom m_atom;
+    public class AtomBuilder : AtomVisitor {
+        List<object> m_args;
 
-        public object getDatum()
+        public AtomBuilder(List<object> args)
         {
-            return m_atom;
+            m_args = args;
+        }
+
+        public override void visit(object o)
+        {
+            if (o == null) throw new Exception();
+            m_args.Add(o);
+        }
+
+        //public override void visit_value(Boolean o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(Int64 o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(Double o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(Char o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(String o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(Symbol o)
+        //{
+        //    m_args.Add(o);
+        //}
+    }
+
+    public class ConsBuilder : ConsVisitor {
+        List<object> m_car = new List<object>();
+        List<object> m_cdr = new List<object>();
+        List<object> m_args;
+
+        public ConsBuilder(List<object> args)
+        {
+            m_args = args;
         }
 
         public override void visitEnd()
         {
-            m_atom = new Atom(m_value);
-        }
-
-        public override void visit_value(Boolean o)
-        {
-            m_value = o;
-        }
-
-        public override void visit_value(Int64 o)
-        {
-            m_value = o;
-        }
-
-        public override void visit_value(Double o)
-        {
-            m_value = o;
-        }
-
-        public override void visit_value(Char o)
-        {
-            m_value = o;
-        }
-
-        public override void visit_value(String o)
-        {
-            m_value = o;
-        }
-
-        public override void visit_value(Symbol o)
-        {
-            m_value = o;
-        }
-    }
-
-    public class ConsBuilder : ConsVisitor, DatumBuilder {
-        DatumBuilder m_car;
-        DatumBuilder m_cdr;
-        Cons m_cons;
-
-        public object getDatum()
-        {
-            return m_cons;
-        }
-
-        public override void visitEnd()
-        {
-            m_cons = new Cons(
-                m_car != null ? m_car.getDatum() : null,
-                m_cdr != null ? m_cdr.getDatum() : null);
+            m_args.Add(new Cons(
+                /*m_car.Count > 0 ?*/ m_car[0] /*: null*/,
+                /*m_cdr.Count > 0 ?*/ m_cdr[0] /*: null*/));
         }
 
         public override AtomVisitor visit_Atom_car()
         {
-            m_car = new AtomBuilder();
-            return m_car as AtomBuilder;
+            return new AtomBuilder(m_car);
         }
 
         public override ConsVisitor visit_Cons_car()
         {
-            m_car = new ConsBuilder();
-            return m_car as ConsBuilder;
+            return new ConsBuilder(m_car);
         }
 
         public override VectorVisitor visit_Vector_car()
         {
-            m_car = new VectorBuilder();
-            return m_car as VectorBuilder;
+            return new VectorBuilder(m_car);
         }
 
         public override AtomVisitor visit_Atom_cdr()
         {
-            m_cdr = new AtomBuilder();
-            return m_cdr as AtomBuilder;
+            return new AtomBuilder(m_cdr);
         }
 
         public override ConsVisitor visit_Cons_cdr()
         {
-            m_cdr = new ConsBuilder();
-            return m_cdr as ConsBuilder;
+            return new ConsBuilder(m_cdr);
         }
 
         public override VectorVisitor visit_Vector_cdr()
         {
-            m_cdr = new VectorBuilder();
-            return m_cdr as VectorBuilder;
+            return new VectorBuilder(m_cdr);
         }
 
-        public override void visit_car(object o)
+        public override void visit_car()
         {
-            if (o != null) throw new Exception();
+            m_car.Add(null);
         }
 
-        public override void visit_cdr(object o)
+        public override void visit_cdr()
         {
-            if (o != null) throw new Exception();
+            m_cdr.Add(null);
         }
     }
+
+    //public class ListBuilder : ConsVisitor {
+    //    List<object> m_list = new List<object>();
+    //    List<object> m_tail;
+    //    List<object> m_args;
+
+    //    public ListBuilder(List<object> args)
+    //    {
+    //        m_args = args;
+    //    }
+
+    //    public override void visitEnd()
+    //    {
+    //        if (m_tail != null) {
+    //            int last = m_list.Count-1;
+    //            Cons cons = new Cons(m_list[last], m_tail[0]);
+    //            m_list.RemoveAt(last);
+    //            m_list.Add(cons);
+    //        }
+
+    //        m_args.Add(m_list);
+    //    }
+
+    //    public override AtomVisitor visit_Atom_car()
+    //    {
+    //        return new AtomBuilder(m_list);
+    //    }
+
+    //    public override ConsVisitor visit_Cons_car()
+    //    {
+    //        return new ConsBuilder(m_list);
+    //    }
+
+    //    public override VectorVisitor visit_Vector_car()
+    //    {
+    //        return new VectorBuilder(m_list);
+    //    }
+
+    //    public override AtomVisitor visit_Atom_cdr()
+    //    {
+    //        m_tail = new List<object>();
+    //        return new AtomBuilder(m_tail);
+    //    }
+
+    //    public override ConsVisitor visit_Cons_cdr()
+    //    {
+    //        return new ConsBuilder(m_list);
+    //    }
+
+    //    public override VectorVisitor visit_Vector_cdr()
+    //    {
+    //        m_tail = new List<object>();
+    //        return new VectorBuilder(m_tail);
+    //    }
+
+    //    public override void visit_car(object o)
+    //    {
+    //        if (o != null)
+    //            throw new Exception();
+
+    //        m_args.Add(o);
+    //    }
+
+    //    public override void visit_cdr(object o)
+    //    {
+    //        if (o != null)
+    //            throw new Exception();
+
+    //        m_args.Add(o);
+    //    }
+    //}
 }

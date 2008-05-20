@@ -14,7 +14,7 @@ namespace Sexp {
         public override AtomVisitor visitItem_Atom() { return new SafeAtomVisitor(m_vect != null ? m_vect.visitItem_Atom() : null); }
         public override ConsVisitor visitItem_Cons() { return new SafeConsVisitor(m_vect != null ? m_vect.visitItem_Cons() : null); }
         public override VectorVisitor visitItem_Vector() { return new SafeVectorVisitor(m_vect != null ? m_vect.visitItem_Vector() : null); }
-        public override void visitItem(object o) { if (m_vect != null) m_vect.visitItem(o); }
+        public override void visitItem() { if (m_vect != null) m_vect.visitItem(); }
     }
 
     public class SafeAtomVisitor : AtomVisitor {
@@ -25,14 +25,15 @@ namespace Sexp {
             m_atom = atom;
         }
 
-        public override void visit() { if (m_atom != null) m_atom.visit(); }
-        public override void visitEnd() { if (m_atom != null) m_atom.visitEnd(); }
-        public override void visit_value(Boolean o) { if (m_atom != null) m_atom.visit_value(o); }
-        public override void visit_value(Int64 o) { if (m_atom != null) m_atom.visit_value(o); }
-        public override void visit_value(Double o) { if (m_atom != null) m_atom.visit_value(o); }
-        public override void visit_value(String o) { if (m_atom != null) m_atom.visit_value(o); }
-        public override void visit_value(Char o) { if (m_atom != null) m_atom.visit_value(o); }
-        public override void visit_value(Symbol o) { if (m_atom != null) m_atom.visit_value(o); }
+        //public override void visit() { if (m_atom != null) m_atom.visit(); }
+        //public override void visitEnd() { if (m_atom != null) m_atom.visitEnd(); }
+        public override void visit(object o) { if (m_atom != null) m_atom.visit(o); }
+        //public override void visit_value(Boolean o) { if (m_atom != null) m_atom.visit_value(o); }
+        //public override void visit_value(Int64 o) { if (m_atom != null) m_atom.visit_value(o); }
+        //public override void visit_value(Double o) { if (m_atom != null) m_atom.visit_value(o); }
+        //public override void visit_value(String o) { if (m_atom != null) m_atom.visit_value(o); }
+        //public override void visit_value(Char o) { if (m_atom != null) m_atom.visit_value(o); }
+        //public override void visit_value(Symbol o) { if (m_atom != null) m_atom.visit_value(o); }
     }
 
     public class SafeConsVisitor : ConsVisitor {
@@ -51,7 +52,7 @@ namespace Sexp {
         public override AtomVisitor visit_Atom_cdr() { return new SafeAtomVisitor(m_cons != null ? m_cons.visit_Atom_cdr() : null); }
         public override ConsVisitor visit_Cons_cdr() { return new SafeConsVisitor(m_cons != null ? m_cons.visit_Cons_cdr() : null); }
         public override VectorVisitor visit_Vector_cdr() { return new SafeVectorVisitor(m_cons != null ? m_cons.visit_Vector_cdr() : null); }
-        public override void visit_car(object o) { if (m_cons != null) m_cons.visit_car(o); }
-        public override void visit_cdr(object o) { if (m_cons != null) m_cons.visit_cdr(o); }
+        public override void visit_car() { if (m_cons != null) m_cons.visit_car(); }
+        public override void visit_cdr() { if (m_cons != null) m_cons.visit_cdr(); }
     }
 }

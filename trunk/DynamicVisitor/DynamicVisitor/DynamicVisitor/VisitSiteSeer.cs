@@ -9,11 +9,11 @@ using GuidedTour;
 
 namespace DynamicVisitor {
     public class VisitSiteseer : ISiteseer {
-        static Type[]   no_params = { };
+        static Type[] no_params = { };
         static object[] no_args   = { };
 
         Object m_visitor;
-        Type   m_visitor_type;
+        Type m_visitor_type;
 
         Dictionary<string, string> m_aliases;
 
@@ -46,18 +46,24 @@ namespace DynamicVisitor {
 
         public bool view_whole(Site node)
         {
-            Type[] param = { node.type };
-            MethodInfo mi = GetMethod("visit", param);
+            Type type = node.type;
 
-            if (mi != null) {
-                Object[] arg = { node.value };
-                mi.Invoke(m_visitor, arg);
-                return true;
-            } else {
-                Trace.Verbose("debug: could not find method {0}.visit({1}), skipping", m_visitor_type.FullName, node.type.FullName);
+            while (type != null) {
+                Type[] param = { type };
+                MethodInfo mi = GetMethod("visit", param);
 
-                return false;
+                if (mi != null) {
+                    Object[] arg = { node.value };
+                    mi.Invoke(m_visitor, arg);
+                    return true;
+                } else {
+                    Trace.Verbose("debug: could not find method {0}.visit({1}), skipping", m_visitor_type.FullName, node.type.FullName);
+                }
+
+                type = type.BaseType;
             }
+
+            return false;
         }
 
         public void begin()
@@ -243,7 +249,7 @@ namespace DynamicVisitor {
 
         bool invokeNonTerminal(string prefix, Type type, string name, out ISiteseer new_method)
         {
-            while (type.BaseType != null) {
+            while (type != null) {
                 string type_name = getMethodTag(type);
 
                 if (type_name != null) {

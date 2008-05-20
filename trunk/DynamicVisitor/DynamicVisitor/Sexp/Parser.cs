@@ -138,9 +138,9 @@ namespace Sexp {
                 Token.ID == lookahead) {
 
                 AtomVisitor atom = top.visitItem_Atom();
-                atom.visit();
+                //atom.visit();
                 simple_datum(atom);
-                atom.visitEnd();
+                //atom.visitEnd();
             } else if (Token.OPEN_PAREN == lookahead) {
                 match(Token.OPEN_PAREN);
                 top_list(top);
@@ -169,7 +169,7 @@ namespace Sexp {
         {
             if (Token.CLOSE_PAREN == lookahead) {
                 match(Token.CLOSE_PAREN);
-                top.visitItem(null);
+                top.visitItem();
             } else if (
                 Token.BOOL == lookahead ||
                 Token.NUM == lookahead ||
@@ -203,9 +203,9 @@ namespace Sexp {
                 Token.ID == lookahead) {
 
                 AtomVisitor atom = set_car ? cons.visit_Atom_car() : cons.visit_Atom_cdr();
-                atom.visit();
+                //atom.visit();
                 simple_datum(atom);
-                atom.visitEnd();
+                //atom.visitEnd();
             } else if (Token.OPEN_PAREN == lookahead) {
                 match(Token.OPEN_PAREN);
                 list(cons, set_car);
@@ -233,26 +233,26 @@ namespace Sexp {
         void simple_datum(AtomVisitor atom)
         {
             if (Token.BOOL == lookahead) {
-                atom.visit_value((Boolean)m_attrib.value);
+                atom.visit((Boolean)m_attrib.value);
                 match(Token.BOOL);
             } else if (Token.NUM == lookahead) {
                 if (m_attrib.value is Int64) {
-                    atom.visit_value((Int64)m_attrib.value);
+                    atom.visit((Int64)m_attrib.value);
                 } else if (m_attrib.value is Double) {
-                    atom.visit_value((Double)m_attrib.value);
+                    atom.visit((Double)m_attrib.value);
                 } else {
                     throw new InvalidOperationException();
                 }
 
                 match(Token.NUM);
             } else if (Token.CHAR == lookahead) {
-                atom.visit_value((Char)m_attrib.value);
+                atom.visit((Char)m_attrib.value);
                 match(Token.CHAR);
             } else if (Token.STRING == lookahead) {
-                atom.visit_value((String)m_attrib.value);
+                atom.visit((String)m_attrib.value);
                 match(Token.STRING);
             } else if (Token.ID == lookahead) {
-                atom.visit_value((Symbol)m_attrib.value);
+                atom.visit((Symbol)m_attrib.value);
                 match(Token.ID);
             } else {
                 // ERROR
@@ -266,9 +266,9 @@ namespace Sexp {
                 match(Token.CLOSE_PAREN);
 
                 if (set_car) {
-                    cons.visit_car(null);
+                    cons.visit_car();
                 } else {
-                    cons.visit_cdr(null);
+                    cons.visit_cdr();
                 }
             } else if (
                 Token.BOOL == lookahead ||
@@ -320,7 +320,7 @@ namespace Sexp {
         {
             if (Token.CLOSE_PAREN == lookahead) {
                 // EPSILON
-                cons.visit_cdr(null);
+                cons.visit_cdr();
             } else if (
                 Token.BOOL == lookahead ||
                 Token.NUM == lookahead ||
@@ -370,7 +370,7 @@ namespace Sexp {
                 ConsVisitor cdr = cons.visit_Cons_cdr();
                 cdr.visit();
                 datum(cdr, true);
-                cdr.visit_cdr(null);
+                cdr.visit_cdr();
                 cdr.visitEnd();
             } else {
                 // ERROR
@@ -401,12 +401,12 @@ namespace Sexp {
         void expand_abbrev(ConsVisitor abbrev, string name)
         {
             AtomVisitor atom = abbrev.visit_Atom_car();
-            atom.visit();
+            //atom.visit();
 
             Symbol sym = Symbol.get_symbol(name);
-            atom.visit_value(sym);
+            atom.visit(sym);
 
-            atom.visitEnd();
+            //atom.visitEnd();
         }
 
         void vector(VectorVisitor vec)

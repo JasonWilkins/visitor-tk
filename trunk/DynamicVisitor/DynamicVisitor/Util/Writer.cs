@@ -38,25 +38,16 @@ namespace Util {
             m_indent_count--;
         }
 
-        public Writer Join(List<string> value, string seperator)
+        public Writer AppendList(List<string> list, string delim)
         {
-            return Join(value.ToArray(), seperator);
-        }
+            if (list != null) Append(String.Join(delim, list.ToArray()));
 
-        public Writer Join(List<string> value)
-        {
-            return Join(value.ToArray(), ", ");
-        }
-
-        public Writer Join(string[] value)
-        {
-            return Join(value, ", ");
-        }
-
-        public Writer Join(string[] value, string seperator)
-        {
-            if (value != null) Append(String.Join(seperator, value));
             return this;
+        }
+
+        public Writer AppendList(List<string> list)
+        {
+            return AppendList(list, ", ");
         }
 
         public Writer EscapeChar(char input)

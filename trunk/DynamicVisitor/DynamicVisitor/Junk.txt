@@ -936,3 +936,448 @@ namespace CodeBuilder {
     public class SuperAtomWriter : AtomWriter {
     }
 
+
+
+
+
+
+    public static class MakeConfig {
+        public static SexpWriterConfig make_basic_config(Writer writer)
+        {
+            SexpWriterConfig rv = new SexpWriterConfig();
+
+            SexpWriter top = new SexpWriter(writer, rv);
+            top.abbreviate = true;
+            top.indent = false;
+            top.head = "";
+            top.headline = 0;
+            top.sep = "";
+            top.sepline = 2;
+            top.foot = "";
+            top.footline = 1;
+
+            SexpWriter cons = new SexpWriter(writer, rv);
+            //cons.abbreviate = true;
+            cons.indent = true;
+            cons.head = "(";
+            //cons.headline = 0;
+            //cons.sep = "";
+            //cons.sepline = 0;
+            cons.foot = ")";
+            cons.footline = 0;
+
+            SexpWriter first_car_cons = new SexpWriter(writer, rv);
+            //first_car_cons.abbreviate = true;
+            first_car_cons.indent = false;
+            first_car_cons.head = "(";
+            first_car_cons.headline = 0;
+            //first_car_cons.sep = "";
+            //first_car_cons.sepline = 0;
+            first_car_cons.foot = ")";
+            first_car_cons.footline = 0;
+
+            SexpWriter first_cdr_cons = new SexpWriter(writer, rv);
+            //first_cdr_cons.abbreviate = true;
+            first_cdr_cons.indent = false;
+            first_cdr_cons.head = " ";
+            first_cdr_cons.headline = 0;
+            //first_cdr_cons.sep = "";
+            //first_cdr_cons.sepline = 0;
+            first_cdr_cons.foot = "";
+            first_cdr_cons.footline = 0;
+
+            SexpWriter cdr_cons = new SexpWriter(writer, rv);
+            //cdr_cons.abbreviate = true;
+            cdr_cons.indent = false;
+            cdr_cons.head = "";
+            cdr_cons.headline = 1;
+            //cdr_cons.sep = "";
+            //cdr_cons.sepline = 0;
+            cdr_cons.foot = "";
+            cdr_cons.footline = 0;
+
+            SexpWriter top_vect = new SexpWriter(writer, rv);
+            //top_vect.abbreviate = true;
+            top_vect.indent = false;
+            top_vect.head = "#(";
+            top_vect.headline = 0;
+            top_vect.sep = " ";
+            top_vect.sepline = 0;
+            top_vect.foot = ")";
+            top_vect.footline = 1;
+
+            SexpWriter vect = new SexpWriter(writer, rv);
+            //vect.abbreviate = true;
+            vect.indent = false;
+            vect.head = " #(";
+            vect.headline = 1;
+            vect.sep = " ";
+            vect.sepline = 0;
+            vect.foot = ")";
+            vect.footline = 0;
+
+            SexpWriter cdr_vect = new SexpWriter(writer, rv);
+            //cdr_vect.abbreviate = true;
+            cdr_vect.indent = false;
+            cdr_vect.head = " . #(";
+            cdr_vect.headline = 0;
+            cdr_vect.sep = " ";
+            cdr_vect.sepline = 0;
+            cdr_vect.foot = ")";
+            cdr_vect.footline = 0;
+
+            SexpWriter atom = new SexpWriter(writer, rv);
+            //atom.abbreviate = true;
+            atom.indent = false;
+            atom.head = "";
+            atom.headline = 0;
+            //atom.sep = " ";
+            //atom.sepline = 0;
+            atom.foot = "";
+            atom.footline = 0;
+
+            SexpWriter cdr_atom = new SexpWriter(writer, rv);
+            //cdr_atom.abbreviate = true;
+            cdr_atom.indent = false;
+            cdr_atom.head = " . ";
+            cdr_atom.headline = 0;
+            //cdr_atom.sep = " ";
+            //cdr_atom.sepline = 0;
+            cdr_atom.foot = "";
+            cdr_atom.footline = 0;
+
+            SexpWriter quote_cons = new SexpWriter(writer, rv);
+            //quote_cons.abbreviate = true;
+            quote_cons.indent = false;
+            quote_cons.head = " ";
+            //quote_cons.headline = 0;
+            //quote_cons.sep = "";
+            //quote_cons.sepline = 0;
+            quote_cons.foot = "";
+            quote_cons.footline = 0;
+
+            SexpWriter quote_vect = new SexpWriter(writer, rv);
+            //quote_vect.abbreviate = true;
+            quote_vect.indent = false;
+            quote_vect.head = "#(";
+            quote_vect.headline = 0;
+            quote_vect.sep = " ";
+            quote_vect.sepline = 0;
+            quote_vect.foot = ")";
+            quote_vect.footline = 0;
+
+            rv.top = top;
+            rv.top_vect = top_vect;
+            rv.top_cons = cons;
+            rv.top_atom = atom;
+            rv.car_vect = vect;
+            rv.car_cons = cons;
+            rv.car_atom = atom;
+            rv.cdr_cons = cdr_cons;
+            rv.cdr_vect = cdr_vect;
+            rv.cdr_atom = cdr_atom;
+            rv.quote_cons = quote_cons;
+            rv.quote_vect = quote_vect;
+            rv.quote_atom = atom;
+            rv.item_vect = vect;
+            rv.item_cons = cons;
+            rv.item_atom = atom;
+            rv.car_item_vect = vect;
+            rv.car_item_cons = cons;
+            rv.car_item_atom = atom;
+            rv.cdr_item_vect = cdr_vect;
+            rv.cdr_item_cons = cdr_cons;
+            rv.cdr_item_atom = cdr_atom;
+            rv.first_car_cons = first_car_cons;
+            rv.first_cdr_cons = first_cdr_cons;
+            return rv;
+        }
+    }
+
+    public enum State {
+        TOP,
+        TOP_VECT,
+        CAR_VECT,
+        CDR_VECT,
+        ITEM_VECT,
+        TOP_CONS,
+        CAR_CONS,
+        CDR_CONS,
+        ITEM_CONS,
+        QUOTE_CONS,
+        QUOTE_ATOM,
+        QUOTE_VECT,
+        CAR_ATOM,
+        TOP_ATOM,
+        ITEM_ATOM,
+        ABBREV,
+        CDR_ITEM_VECT,
+        CDR_ITEM_CONS,
+        CDR_ITEM_ATOM,
+        CDR_ATOM,
+        CAR_ITEM_VECT,
+        CAR_ITEM_CONS,
+        CAR_ITEM_ATOM,
+        FIRST_CAR_CONS,
+        FIRST_CDR_CONS,
+        COUNT
+    }
+
+    public class SexpWriter {
+        public bool? abbreviate;
+        public bool? indent;
+        public string head;
+        public int? headline;
+        public string sep;
+        public int? sepline;
+        public string foot;
+        public int? footline;
+
+        Writer m_writer;
+
+        SexpWriterConfig m_cfg;
+
+        public SexpWriter(Writer writer, SexpWriterConfig cfg)
+        {
+            m_writer = writer;
+            m_cfg = cfg;
+        }
+
+        SexpWriter cascade(SexpWriter next_cfg)
+        {
+            SexpWriter new_cfg = new SexpWriter(m_writer, m_cfg);
+
+            new_cfg.abbreviate = next_cfg.abbreviate ?? this.abbreviate;
+            new_cfg.indent = next_cfg.indent ?? this.indent;
+            new_cfg.head = next_cfg.head ?? this.head;
+            new_cfg.headline = next_cfg.headline ?? this.headline;
+            new_cfg.sep = next_cfg.sep ?? this.sep;
+            new_cfg.sepline = next_cfg.sepline ?? this.sepline;
+            new_cfg.foot = next_cfg.foot ?? this.foot;
+            new_cfg.footline = next_cfg.footline ?? this.footline;
+
+            return new_cfg;
+        }
+
+        public VectorWriter nextItemVectorWriter(State s)
+        {
+            if (State.TOP == s) {
+                return new VectorWriter(m_cfg.top_vect, State.TOP_VECT);
+            } else if (
+                State.TOP_VECT == s ||
+                State.ITEM_VECT == s ||
+                State.CAR_VECT == s ||
+                State.CAR_ITEM_VECT == s ||
+                State.CDR_VECT == s ||
+                State.CDR_ITEM_VECT == s ||
+                State.QUOTE_VECT == s) {
+
+                return new VectorWriter(m_cfg.item_vect, State.ITEM_VECT);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public ConsWriter nextItemConsWriter(State s)
+        {
+            if (State.TOP == s) {
+                return new ConsWriter(cascade(m_cfg.top_cons), State.TOP_CONS);
+            } else if (
+                State.TOP_VECT == s ||
+                State.ITEM_VECT == s ||
+                State.CAR_VECT == s ||
+                State.CAR_ITEM_VECT == s ||
+                State.CDR_VECT == s ||
+                State.CDR_ITEM_VECT == s ||
+                State.QUOTE_VECT == s) {
+
+                return new ConsWriter(cascade(m_cfg.item_cons), State.ITEM_CONS);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public AtomWriter nextItemAtomWriter(State s)
+        {
+            if (State.TOP == s) {
+                return new AtomWriter(cascade(m_cfg.top_atom), State.TOP_ATOM);
+            } else if (
+                State.TOP_VECT == s ||
+                State.ITEM_VECT == s ||
+                State.CAR_VECT == s ||
+                State.CAR_ITEM_VECT == s ||
+                State.CDR_VECT == s ||
+                State.CDR_ITEM_VECT == s ||
+                State.QUOTE_VECT == s) {
+
+                return new AtomWriter(cascade(m_cfg.item_atom), State.ITEM_ATOM);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public VectorWriter nextCarVectorWriter(State s)
+        {
+            if (State.QUOTE_CONS == s) {
+                return new VectorWriter(cascade(m_cfg.quote_vect), State.QUOTE_VECT);
+            } else if (State.ITEM_CONS == s) {
+                return new VectorWriter(cascade(m_cfg.item_vect), State.ITEM_VECT);
+            } else if (State.TOP_CONS == s || State.FIRST_CAR_CONS == s || State.FIRST_CDR_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s) {
+                return new VectorWriter(cascade(m_cfg.car_vect), State.CAR_VECT);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public ConsWriter nextCarConsWriter(State s)
+        {
+            if (State.ITEM_CONS == s) {
+                return new ConsWriter(cascade(m_cfg.item_cons), State.ITEM_CONS);
+            } else if (State.TOP_CONS == s || State.CAR_CONS == s || State.FIRST_CAR_CONS == s || State.FIRST_CDR_CONS == s) {
+                return new ConsWriter(cascade(m_cfg.first_car_cons), State.FIRST_CAR_CONS);
+            } else if (State.CDR_CONS == s || State.QUOTE_CONS == s) {
+                return new ConsWriter(cascade(m_cfg.car_cons), State.CAR_CONS);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public AtomVisitor nextCarAtomWriter(State s, out AtomCtor atom)
+        {
+            //if (abbreviate) {
+            atom = new AtomCtor();
+            return new AtomBuilder(atom);
+            //} else {
+            //if (State.ABBREV == s) {
+            //    return new AtomWriter(cascade(m_cfg.quote_atom), State.QUOTE_ATOM);
+            //} else if (State.ITEM_CONS == s) {
+            //    return new AtomWriter(cascade(m_cfg.item_atom), State.ITEM_ATOM);
+            //} else if (State.TOP_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s || State.QUOTE_CONS == s) {
+            //    return new AtomWriter(cascade(m_cfg.car_atom), State.CAR_ATOM);
+            //} else {
+            //    throw new Exception();
+            //}
+            //}
+        }
+
+        public VectorWriter nextCdrVectorWriter(State s)
+        {
+            if (State.ITEM_CONS == s) {
+                return new VectorWriter(cascade(m_cfg.cdr_item_vect), State.CDR_ITEM_VECT);
+            } else if (State.TOP_CONS == s || State.FIRST_CAR_CONS == s || State.FIRST_CDR_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s) {
+                return new VectorWriter(cascade(m_cfg.cdr_vect), State.CDR_VECT);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public ConsWriter nextCdrConsWriter(State s)
+        {
+            if (State.ABBREV == s) {
+                return new ConsWriter(cascade(m_cfg.quote_cons), State.QUOTE_CONS);
+            } else if (State.ITEM_CONS == s) {
+                return new ConsWriter(cascade(m_cfg.cdr_item_cons), State.CDR_ITEM_CONS);
+            } else if (State.FIRST_CAR_CONS == s|| State.FIRST_CDR_CONS == s) {
+                return new ConsWriter(cascade(m_cfg.first_cdr_cons), State.FIRST_CDR_CONS);
+            } else if (State.TOP_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s || State.QUOTE_CONS == s) {
+                return new ConsWriter(cascade(m_cfg.cdr_cons), State.CDR_CONS);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public AtomWriter nextCdrAtomWriter(State s)
+        {
+            if (State.ITEM_CONS == s) {
+                return new AtomWriter(cascade(m_cfg.cdr_item_atom), State.CDR_ITEM_ATOM);
+            } else if (State.TOP_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s || State.QUOTE_CONS == s || State.FIRST_CAR_CONS == s || State.FIRST_CDR_CONS == s) {
+                return new AtomWriter(cascade(m_cfg.cdr_atom), State.CDR_ATOM);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public SexpWriter Append(string s)
+        {
+            m_writer.Append(s);
+            return this;
+        }
+
+        void lines(int c)
+        {
+            for (int i = 0; i < c; i++) {
+                m_writer.End();
+            }
+
+            if (c > 0) m_writer.Begin();
+        }
+
+        public SexpWriter Head()
+        {
+            m_writer.Append(head ?? "");
+            lines(headline ?? 0);
+
+            if (indent ?? false) m_writer.Indent();
+
+            return this;
+        }
+
+        public SexpWriter Delimiter(ref bool is_first)
+        {
+            if (is_first) {
+                is_first = false;
+            } else {
+                m_writer.Append(sep ?? " ");
+                lines(sepline ?? 0);
+            }
+
+            return this;
+        }
+
+        public SexpWriter Foot()
+        {
+            if (indent ?? false) m_writer.Unindent();
+
+            m_writer.Append(foot ?? "");
+            lines(footline ?? 0);
+
+            return this;
+        }
+
+        public SexpWriter Car(AtomCtor atom)
+        {
+            if (atom != null) {
+                return Head().Append(Literal.literal(atom.value));
+            }
+
+            return this;
+        }
+
+        public SexpWriter Abbrev(AtomCtor atom, out bool is_quote)
+        {
+            if (abbreviate ?? false) {
+                if (atom != null && atom.value is Symbol) {
+                    if (((Symbol)atom.value).name == "quote") {
+                        m_writer.Append("'");
+                        is_quote = true;
+                        return this;
+                    } else if (((Symbol)atom.value).name == "quasiquotation") {
+                        m_writer.Append("`");
+                        is_quote = true;
+                        return this;
+                    } else if (((Symbol)atom.value).name == "unquote") {
+                        m_writer.Append(",");
+                        is_quote = true;
+                        return this;
+                    } else if (((Symbol)atom.value).name == "unquote-splicing") {
+                        m_writer.Append(",@");
+                        is_quote = true;
+                        return this;
+                    }
+                }
+            }
+
+            is_quote = false;
+            return Car(atom);
+        }
+    }

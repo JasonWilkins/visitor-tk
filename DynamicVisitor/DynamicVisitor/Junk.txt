@@ -751,3 +751,188 @@ namespace CodeBuilder {
 
             return this;
         }
+
+
+
+        //public override void visit_value(Boolean o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(Int64 o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(Double o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(Char o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(String o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(Symbol o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+
+
+
+        //public override void visit_value(Boolean v)
+        //{
+        //    m_literal = Literal.literal(v);
+        //    value = v;
+        //}
+
+        //public override void visit_value(Int64 v)
+        //{
+        //    m_literal = Literal.literal(v);
+        //    value = v;
+        //}
+
+        //public override void visit_value(Double v)
+        //{
+        //    m_literal = Literal.literal(v);
+        //    value = v;
+        //}
+
+        //public override void visit_value(Char v)
+        //{
+        //    m_literal = Literal.literal(v);
+        //    value = v;
+        //}
+
+        //public override void visit_value(String v)
+        //{
+        //    m_literal = Literal.literal(v);
+        //    value = v;
+        //}
+
+        //public override void visit_value(Symbol v)
+        //{
+        //    m_literal = Literal.literal(v);
+        //    value = v;
+        //}
+
+
+        public override void visit_car()
+        {
+            car = null;
+        }
+
+        public override void visit_cdr()
+        {
+            cdr = null;
+        }
+
+
+
+        public override void visit_car()
+        { }
+
+        public override void visit_cdr()
+        { }
+
+
+            //Monad2<List<object>> m_args2;
+            //Monad2<object[]> m_vect2;
+            //Monad2<object[]>.Fn fn = delegate(object[] o1) { m_args2.bind(delegate(List<object> o2) { o2.Add(o1); return m_args2; }); return m_vect2; };
+            //m_vect2.bind(fn);
+            
+            
+                public class Monad2<T> {
+        public Monad2(T o)
+        {
+        }
+
+        public delegate Monad2<T> Fn(T o);
+
+        public Monad2<T> bind(Fn fn)
+        {
+            return null;
+        }
+    }
+
+
+
+    public interface ObjectCell {
+        object value { get; }
+        void bind(object o);
+    }
+
+    public abstract class Cell<T> : ObjectCell {
+        T m_contents;
+
+        T value 
+        { 
+            get { return m_contents; }
+            set { m_contents = value; }
+        }
+
+        delegate void Fn(T o);
+
+        public void bind(Fn o)
+        {
+
+        }
+
+        #region ObjectCell Members
+
+        object ObjectCell.value
+        {
+            get { return m_value; }
+        }
+
+        #endregion
+    }
+
+
+
+    public class SuperVectorWriter : VectorVisitor {
+        Writer m_writer;
+        string m_delim;
+        string m_eol;
+
+        public SuperVectorWriter(Writer writer, string delim, string eol)
+        {
+            m_writer = writer;
+            m_delim = delim;
+            m_eol = eol;
+        }
+
+        public override AtomVisitor visitItem_Atom()
+        {
+            return new TopAtomWriter(m_writer, m_delim, m_eol);
+        }
+
+        public override ConsVisitor visitItem_Cons()
+        {
+            return new TopConsWriter(m_writer, m_delim, m_eol);
+        }
+
+        public override VectorVisitor visitItem_Vector()
+        {
+            return new TopVectorWriter(m_writer);
+        }
+
+        public override void visitItem()
+        {
+            m_writer.Append("()").Append(m_eol);
+        }
+    }
+
+    public class SuperConsWriter : ConsVisitor {
+    }
+
+    public class SuperAtomWriter : AtomWriter {
+    }
+

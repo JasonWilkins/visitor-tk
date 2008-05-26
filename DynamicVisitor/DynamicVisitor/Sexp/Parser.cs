@@ -138,9 +138,7 @@ namespace Sexp {
                 Token.ID == lookahead) {
 
                 AtomVisitor atom = top.visitItem_Atom();
-                //atom.visit();
                 simple_datum(atom);
-                //atom.visitEnd();
             } else if (Token.OPEN_PAREN == lookahead) {
                 match(Token.OPEN_PAREN);
                 top_list(top);

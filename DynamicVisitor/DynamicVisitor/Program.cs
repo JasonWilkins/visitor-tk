@@ -518,7 +518,7 @@ namespace Main {
         {
             using (Reader file = new Reader(path)) {
                 StringWriter writer = new StringWriter();
-                TopLevelWriter visitor = new TopLevelWriter(writer);
+                VectorVisitor visitor = GetTopLevelWriter.create(writer);
                 Parser parser = new Parser(file, visitor);
 
                 Console.WriteLine("parsing: {0}", path);
@@ -547,7 +547,7 @@ namespace Main {
         {
             using (Reader file = new Reader(path)) {
                 StringWriter writer = new StringWriter();
-                TopLevelWriter visitor = new TopLevelWriter(writer);
+                VectorVisitor visitor = GetTopLevelWriter.create(writer);
                 Parser parser = new Parser(file, visitor);
 
                 parser.read();
@@ -566,7 +566,7 @@ namespace Main {
             Console.WriteLine("parsing {0} and writing it out to {1}", in_path, out_path);
             using (Reader file = new Reader(in_path)) {
                 using (FileWriter writer = new FileWriter(out_path)) {
-                    TopLevelWriter visitor = new TopLevelWriter(writer);
+                    VectorVisitor visitor = GetTopLevelWriter.create(writer);
                     Parser parser = new Parser(file, visitor);
                     parser.read();
                     Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
@@ -593,14 +593,15 @@ namespace Main {
         static object[] build(string path)
         {
             using (Reader file = new Reader(path)) {
-                TopLevelBuilder visitor = new TopLevelBuilder();
+                AtomCtor vect = new AtomCtor();
+                VectorBuilder visitor = new VectorBuilder(vect);
                 Parser parser = new Parser(file, visitor);
 
                 Console.WriteLine("parsing: {0}", path);
                 parser.read();
                 Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
                 Console.WriteLine(parser.errors == 0 ? "OK" : "FAILED!");
-                return visitor.getTopLevel();
+                return (object[])vect.value;
             }
         }
 
@@ -609,7 +610,7 @@ namespace Main {
             Console.WriteLine("parsing {0} into memory then writing it out to {1}", in_path, out_path);
             using (FileWriter writer = new FileWriter(out_path)) {
                 object[] top = build(in_path);
-                DynamicVisitor.accept(top, new TopLevelWriter(writer));
+                DynamicVisitor.accept(top, GetTopLevelWriter.create(writer));
             }
             Console.WriteLine();
         }
@@ -669,12 +670,13 @@ namespace Main {
             Log log2 = new Log();
 
             using (Reader file = new Reader(path)) {
-                TopLevelBuilder builder = new TopLevelBuilder();
+                AtomCtor vect = new AtomCtor();
+                VectorBuilder builder = new VectorBuilder(vect);
                 Parser p = new Parser(file, builder);
                 Util.TxtLocation loc = new Util.TxtLocation();
                 p.read();
 
-                object[] top = builder.getTopLevel();
+                object[] top = (object[])vect.value;
                 VectorLogger logger = new VectorLogger(log2, loc, new SafeVectorVisitor(null));
                 DynamicVisitor.accept(top, logger);
             }

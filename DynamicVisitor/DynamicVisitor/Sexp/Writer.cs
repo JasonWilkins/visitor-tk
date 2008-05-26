@@ -13,6 +13,7 @@ namespace Sexp {
     }
 
     public class SexpWriterConfig {
+        //public SexpWriter[] cfg = new SexpWriter[(int)State.COUNT];
         public SexpWriter top;
         public SexpWriter top_vect;
         public SexpWriter top_cons;
@@ -35,6 +36,9 @@ namespace Sexp {
         public SexpWriter cdr_item_vect;
         public SexpWriter cdr_item_cons;
         public SexpWriter cdr_item_atom;
+        public SexpWriter first_car_cons;
+        public SexpWriter first_cdr_cons;
+        public SexpWriter quote_cdr_cons;
     }
 
     public static class MakeConfig {
@@ -49,13 +53,28 @@ namespace Sexp {
 
             SexpWriter cons = new SexpWriter(writer, rv);
             cons.indent = true;
+            cons.abbreviate = true;
             cons.head = "(";
             cons.foot = ")";
 
+            SexpWriter first_car_cons = new SexpWriter(writer, rv);
+            first_car_cons.indent = false;
+            first_car_cons.abbreviate = true;
+            first_car_cons.head = "(";
+            first_car_cons.foot = ")";
+
+            SexpWriter first_cdr_cons = new SexpWriter(writer, rv);
+            first_cdr_cons.head = " ";
+            first_cdr_cons.foot = "";
+
             SexpWriter cdr_cons = new SexpWriter(writer, rv);
-            cdr_cons.head = " ";
+            cdr_cons.head = "";
             cdr_cons.headline = 1;
             cdr_cons.foot = "";
+
+            SexpWriter top_vect = new SexpWriter(writer, rv);
+            top_vect.head = "#(";
+            top_vect.foot = ")";
 
             SexpWriter vect = new SexpWriter(writer, rv);
             vect.head = " #(";
@@ -70,8 +89,17 @@ namespace Sexp {
             SexpWriter cdr_atom = new SexpWriter(writer, rv);
             cdr_atom.head = " . ";
 
+            SexpWriter quote_cons = new SexpWriter(writer, rv);
+            quote_cons.abbreviate = true;
+
+            SexpWriter quote_vect = new SexpWriter(writer, rv);
+            quote_vect.head = "#(";
+            quote_vect.foot = ")";
+
+            SexpWriter quote_cdr_cons = new SexpWriter(writer, rv);
+
             rv.top = top;
-            rv.top_vect = vect;
+            rv.top_vect = top_vect;
             rv.top_cons = cons;
             rv.top_atom = atom;
             rv.car_vect = vect;
@@ -80,8 +108,8 @@ namespace Sexp {
             rv.cdr_cons = cdr_cons;
             rv.cdr_vect = cdr_vect;
             rv.cdr_atom = cdr_atom;
-            rv.quote_cons = cons;
-            rv.quote_vect = vect;
+            rv.quote_cons = quote_cons;
+            rv.quote_vect = quote_vect;
             rv.quote_atom = atom;
             rv.item_vect = vect;
             rv.item_cons = cons;
@@ -92,35 +120,40 @@ namespace Sexp {
             rv.cdr_item_vect = cdr_vect;
             rv.cdr_item_cons = cdr_cons;
             rv.cdr_item_atom = cdr_atom;
-
+            rv.first_car_cons = first_car_cons;
+            rv.first_cdr_cons = first_cdr_cons;
+            rv.quote_cdr_cons = quote_cdr_cons;
             return rv;
         }
     }
 
     public enum State {
         TOP,
-        TOP_VECT, 
+        TOP_VECT,
         CAR_VECT,
         CDR_VECT,
         ITEM_VECT,
         TOP_CONS,
         CAR_CONS,
-        CDR_CONS, 
+        CDR_CONS,
         ITEM_CONS,
         QUOTE_CONS,
         QUOTE_ATOM,
         QUOTE_VECT,
-        CAR_ATOM,
-        TOP_ATOM,
-        ITEM_ATOM,
-        ABBREV,
+        //CAR_ATOM,
+        //TOP_ATOM,
+        //ITEM_ATOM,
         CDR_ITEM_VECT,
         CDR_ITEM_CONS,
-        CDR_ITEM_ATOM,
+        //CDR_ITEM_ATOM,
         CDR_ATOM,
         CAR_ITEM_VECT,
         CAR_ITEM_CONS,
-        CAR_ITEM_ATOM 
+        //CAR_ITEM_ATOM,
+        FIRST_CAR_CONS,
+        FIRST_CDR_CONS,
+        QUOTE_CDR_CONS,
+        COUNT
     }
 
     public class SexpWriter {
@@ -134,8 +167,6 @@ namespace Sexp {
         public int footline = 0;
 
         Writer m_writer;
-
-        bool is_first = true;
 
         SexpWriterConfig m_cfg;
 
@@ -186,7 +217,7 @@ namespace Sexp {
         public AtomWriter nextItemAtomWriter(State s)
         {
             if (State.TOP == s) {
-                return new AtomWriter(m_cfg.top_atom, State.TOP_ATOM);
+                return new AtomWriter(m_cfg.top_atom);
             } else if (
                 State.TOP_VECT == s ||
                 State.ITEM_VECT == s ||
@@ -196,7 +227,7 @@ namespace Sexp {
                 State.CDR_ITEM_VECT == s ||
                 State.QUOTE_VECT == s) {
 
-                return new AtomWriter(m_cfg.item_atom, State.ITEM_ATOM);
+                return new AtomWriter(m_cfg.item_atom);
             } else {
                 throw new Exception();
             }
@@ -204,11 +235,11 @@ namespace Sexp {
 
         public VectorWriter nextCarVectorWriter(State s)
         {
-            if (State.ABBREV == s) {
+            if (State.QUOTE_CONS == s) {
                 return new VectorWriter(m_cfg.quote_vect, State.QUOTE_VECT);
             } else if (State.ITEM_CONS == s) {
                 return new VectorWriter(m_cfg.item_vect, State.ITEM_VECT);
-            } else if (State.TOP_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s || State.QUOTE_CONS == s) {
+            } else if (State.TOP_CONS == s || State.FIRST_CAR_CONS == s || State.FIRST_CDR_CONS == s || State.QUOTE_CDR_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s) {
                 return new VectorWriter(m_cfg.car_vect, State.CAR_VECT);
             } else {
                 throw new Exception();
@@ -217,47 +248,62 @@ namespace Sexp {
 
         public ConsWriter nextCarConsWriter(State s)
         {
-            if (State.ABBREV == s) {
-                return new ConsWriter(m_cfg.quote_cons, State.QUOTE_CONS);
-            } else if (State.ITEM_CONS == s) {
+            if (State.ITEM_CONS == s) {
                 return new ConsWriter(m_cfg.item_cons, State.ITEM_CONS);
-            } else if (State.TOP_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s || State.QUOTE_CONS == s) {
+            } else if (State.TOP_CONS == s || State.CAR_CONS == s || State.FIRST_CAR_CONS == s || State.FIRST_CDR_CONS == s || State.QUOTE_CDR_CONS == s) {
+                return new ConsWriter(m_cfg.first_car_cons, State.FIRST_CAR_CONS);
+            } else if (State.CDR_CONS == s || State.QUOTE_CONS == s) {
                 return new ConsWriter(m_cfg.car_cons, State.CAR_CONS);
             } else {
                 throw new Exception();
             }
         }
 
-        public AtomWriter nextCarAtomWriter(State s)
+        public AtomVisitor nextCarAtomWriter(State s, out AtomCtor atom)
         {
-            if (State.ABBREV == s) {
-                return new AtomWriter(m_cfg.quote_atom, State.QUOTE_ATOM);
-            } else if (State.ITEM_CONS == s) {
-                return new AtomWriter(m_cfg.item_atom, State.ITEM_ATOM);
-            } else if (State.TOP_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s || State.QUOTE_CONS == s) {
-                return new AtomWriter(m_cfg.car_atom, State.CAR_ATOM);
-            } else {
-                throw new Exception();
-            }
+            //if (abbreviate) {
+            atom = new AtomCtor();
+            return new AtomBuilder(atom);
+            //} else {
+            //if (State.ABBREV == s) {
+            //    return new AtomWriter(m_cfg.quote_atom, State.QUOTE_ATOM);
+            //} else if (State.ITEM_CONS == s) {
+            //    return new AtomWriter(m_cfg.item_atom, State.ITEM_ATOM);
+            //} else if (State.TOP_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s || State.QUOTE_CONS == s) {
+            //    return new AtomWriter(m_cfg.car_atom, State.CAR_ATOM);
+            //} else {
+            //    throw new Exception();
+            //}
+            //}
         }
 
         public VectorWriter nextCdrVectorWriter(State s)
         {
             if (State.ITEM_CONS == s) {
                 return new VectorWriter(m_cfg.cdr_item_vect, State.CDR_ITEM_VECT);
-            } else if (State.TOP_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s || State.QUOTE_CONS == s) {
+            } else if (State.TOP_CONS == s || State.FIRST_CAR_CONS == s || State.FIRST_CDR_CONS == s || State.QUOTE_CDR_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s) {
                 return new VectorWriter(m_cfg.cdr_vect, State.CDR_VECT);
             } else {
                 throw new Exception();
             }
         }
 
-        public ConsWriter nextCdrConsWriter(State s)
+        public ConsWriter nextCdrConsWriter(bool is_quote, State s)
         {
             if (State.ITEM_CONS == s) {
                 return new ConsWriter(m_cfg.cdr_item_cons, State.CDR_ITEM_CONS);
+            } else if (State.FIRST_CAR_CONS == s|| State.FIRST_CDR_CONS == s || State.QUOTE_CDR_CONS == s) {
+                if (is_quote) {
+                    return new ConsWriter(m_cfg.quote_cdr_cons, State.QUOTE_CDR_CONS);
+                } else {
+                    return new ConsWriter(m_cfg.first_cdr_cons, State.FIRST_CDR_CONS);
+                }
             } else if (State.TOP_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s || State.QUOTE_CONS == s) {
-                return new ConsWriter(m_cfg.cdr_cons, State.CDR_CONS);
+                if (is_quote) {
+                    return new ConsWriter(m_cfg.quote_cons, State.QUOTE_CONS);
+                } else {
+                    return new ConsWriter(m_cfg.cdr_cons, State.CDR_CONS);
+                }
             } else {
                 throw new Exception();
             }
@@ -266,9 +312,9 @@ namespace Sexp {
         public AtomWriter nextCdrAtomWriter(State s)
         {
             if (State.ITEM_CONS == s) {
-                return new AtomWriter(m_cfg.cdr_item_atom, State.CDR_ITEM_ATOM);
-            } else if (State.TOP_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s || State.QUOTE_CONS == s) {
-                return new AtomWriter(m_cfg.cdr_atom, State.CDR_ATOM);
+                return new AtomWriter(m_cfg.cdr_item_atom);
+            } else if (State.TOP_CONS == s || State.CAR_CONS == s || State.CDR_CONS == s || State.QUOTE_CONS == s || State.FIRST_CAR_CONS == s || State.FIRST_CDR_CONS == s) {
+                return new AtomWriter(m_cfg.cdr_atom);
             } else {
                 throw new Exception();
             }
@@ -299,7 +345,7 @@ namespace Sexp {
             return this;
         }
 
-        public SexpWriter Delimiter()
+        public SexpWriter Delimiter(ref bool is_first)
         {
             if (is_first) {
                 is_first = false;
@@ -320,11 +366,50 @@ namespace Sexp {
 
             return this;
         }
+
+        public SexpWriter Car(AtomCtor atom)
+        {
+            if (atom != null) {
+                return Head().Append(Literal.literal(atom.value));
+            }
+
+            return this;
+        }
+
+        public SexpWriter Abbrev(AtomCtor atom, out bool is_quote)
+        {
+            if (abbreviate) {
+                if (atom != null && atom.value is Symbol) {
+                    if (((Symbol)atom.value).name == "quote") {
+                        m_writer.Append("'");
+                        is_quote = true;
+                        return this;
+                    } else if (((Symbol)atom.value).name == "quasiquotation") {
+                        m_writer.Append("`");
+                        is_quote = true;
+                        return this;
+                    } else if (((Symbol)atom.value).name == "unquote") {
+                        m_writer.Append(",");
+                        is_quote = true;
+                        return this;
+                    } else if (((Symbol)atom.value).name == "unquote-splicing") {
+                        m_writer.Append(",@");
+                        is_quote = true;
+                        return this;
+                    }
+                }
+            }
+
+            is_quote = false;
+            return Car(atom);
+        }
     }
 
     public class VectorWriter : VectorVisitor {
         SexpWriter m_writer;
         State m_state;
+
+        bool is_first = true;
 
         public VectorWriter(SexpWriter writer, State s)
         {
@@ -344,25 +429,25 @@ namespace Sexp {
 
         public override AtomVisitor visitItem_Atom()
         {
-            m_writer.Delimiter();
+            m_writer.Delimiter(ref is_first);
             return m_writer.nextItemAtomWriter(m_state);
         }
 
         public override ConsVisitor visitItem_Cons()
         {
-            m_writer.Delimiter();
+            m_writer.Delimiter(ref is_first);
             return m_writer.nextItemConsWriter(m_state);
         }
 
         public override VectorVisitor visitItem_Vector()
         {
-            m_writer.Delimiter();
+            m_writer.Delimiter(ref is_first);
             return m_writer.nextItemVectorWriter(m_state);
         }
 
         public override void visitItem()
         {
-            m_writer.Delimiter().Append("()");
+            m_writer.Delimiter(ref is_first).Append("()");
         }
     }
 
@@ -370,65 +455,71 @@ namespace Sexp {
         SexpWriter m_writer;
         State m_state;
 
+        bool m_is_quote = false;
+        AtomCtor m_atom = null;
+
         public ConsWriter(SexpWriter writer, State s)
         {
             m_state = s;
             m_writer = writer;
         }
 
-        public override void visit()
-        {
-            m_writer.Head();
-        }
-
         public override void visitEnd()
         {
-            m_writer.Foot();
+            if (!m_is_quote) m_writer.Foot();
         }
 
         public override AtomVisitor visit_Atom_car()
         {
-            return m_writer.nextCarAtomWriter(m_state);
+            return m_writer.nextCarAtomWriter(m_state, out m_atom);
         }
 
         public override ConsVisitor visit_Cons_car()
         {
+            m_writer.Head();
             return m_writer.nextCarConsWriter(m_state);
         }
 
         public override VectorVisitor visit_Vector_car()
         {
+            m_writer.Head();
             return m_writer.nextCarVectorWriter(m_state);
+        }
+
+        public override void visit_car()
+        {
+            m_writer.Head().Append("()");
         }
 
         public override AtomVisitor visit_Atom_cdr()
         {
+            m_writer.Car(m_atom);
             return m_writer.nextCdrAtomWriter(m_state);
         }
 
         public override ConsVisitor visit_Cons_cdr()
         {
-            return m_writer.nextCdrConsWriter(m_state);
+            m_writer.Abbrev(m_atom, out m_is_quote);
+            return m_writer.nextCdrConsWriter(m_is_quote, m_state);
         }
 
         public override VectorVisitor visit_Vector_cdr()
         {
+            m_writer.Car(m_atom);
             return m_writer.nextCdrVectorWriter(m_state);
         }
 
-        public override void visit_car()
+        public override void visit_cdr()
         {
-            m_writer.Append("()");
+            m_writer.Car(m_atom);
         }
     }
 
     public class AtomWriter : AtomVisitor {
         SexpWriter m_writer;
-        State m_state;
 
-        public AtomWriter(SexpWriter writer, State s)
+        public AtomWriter(SexpWriter writer)
         {
-            m_state = s;
             m_writer = writer;
         }
 

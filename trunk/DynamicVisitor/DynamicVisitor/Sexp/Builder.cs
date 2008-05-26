@@ -3,18 +3,201 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace Sexp {
-    public class VectorBuilder : VectorVisitor {
-        protected List<object> m_vect = new List<object>();
-        protected List<object> m_args;
+#if false
+    public class Cell<T> {
+        public T Value;
+    }
 
-        public VectorBuilder(List<object> args)
+    public class VectorBuilder : VectorVisitor {
+        List<object> m_vect = new List<object>();
+
+        public object[] Value
+        {
+            get { return m_vect.ToArray(); }
+        }
+
+        public override AtomVisitor visitItem_Atom()
+        {
+            return new AtomBuilder1(m_vect);
+        }
+
+        public override ConsVisitor visitItem_Cons()
+        {
+            return new ConsBuilder1(m_vect);
+        }
+
+        public override VectorVisitor visitItem_Vector()
+        {
+            return new VectorBuilder1(m_vect);
+        }
+
+        public override void visitItem()
+        {
+            m_vect.Add(null);
+        }
+    }
+
+    public class VectorBuilder1 : VectorBuilder {
+        List<object> m_args;
+
+        public VectorBuilder1(List<object> args)
         {
             m_args = args;
         }
 
         public override void visitEnd()
         {
-            m_args.Add(m_vect.ToArray());
+            m_args.Add(Value);
+        }
+    }
+
+    public class VectorBuilder2 : VectorBuilder {
+        Cell<object> m_arg;
+
+        public VectorBuilder2(Cell<object> arg)
+        {
+            m_arg = arg;
+        }
+
+        public override void visitEnd()
+        {
+            m_arg.Value = Value;
+        }
+    }
+
+    public class AtomBuilder1 : AtomVisitor {
+        List<object> m_args;
+
+        public AtomBuilder1(List<object> args)
+        {
+            m_args = args;
+        }
+
+        public override void visit(object o)
+        {
+            m_args.Add(o);
+        }
+    }
+
+    public class AtomBuilder2 : AtomVisitor {
+        Cell<object> m_arg;
+
+        public AtomBuilder2(Cell<object> arg)
+        {
+            m_arg = arg;
+        }
+
+        public override void visit(object o)
+        {
+            m_arg.Value = o;
+        }
+    }
+
+    public class ConsBuilder : ConsVisitor {
+        Cell<object> m_car = new Cell<object>();
+        Cell<object> m_cdr = new Cell<object>();
+
+        public Cons Value
+        {
+            get { return new Cons(m_car.Value, m_cdr.Value); }
+        }
+
+        public override AtomVisitor visit_Atom_car()
+        {
+            return new AtomBuilder2(m_car);
+        }
+
+        public override ConsVisitor visit_Cons_car()
+        {
+            return new ConsBuilder2(m_car);
+        }
+
+        public override VectorVisitor visit_Vector_car()
+        {
+            return new VectorBuilder2(m_car);
+        }
+
+        public override AtomVisitor visit_Atom_cdr()
+        {
+            return new AtomBuilder2(m_cdr);
+        }
+
+        public override ConsVisitor visit_Cons_cdr()
+        {
+            return new ConsBuilder2(m_cdr);
+        }
+
+        public override VectorVisitor visit_Vector_cdr()
+        {
+            return new VectorBuilder2(m_cdr);
+        }
+    }
+
+    public class ConsBuilder1 : ConsBuilder {
+        List<object> m_args;
+
+        public ConsBuilder1(List<object> args)
+        {
+            m_args = args;
+        }
+
+        public override void visitEnd()
+        {
+            m_args.Add(Value);
+        }
+    }
+
+    public class ConsBuilder2 : ConsBuilder {
+        Cell<object> m_arg;
+
+        public ConsBuilder2(Cell<object> arg)
+        {
+            m_arg = arg;
+        }
+
+        public override void visitEnd()
+        {
+            m_arg.Value =  Value;
+        }
+    }
+
+#else
+
+    public interface Ctor {
+        object value { get; }
+        void pass(object o);
+    }
+
+    public class ListCtor : Ctor {
+        List<object> m_list = new List<object>();
+        public object value { get { return m_list; } }
+        public void pass(object o) { m_list.Add(o); }
+    }
+
+    public class VectCtor : Ctor {
+        List<object> m_vect = new List<object>();
+        public object value { get { return m_vect.ToArray(); } }
+        public void pass(object o) { m_vect.Add(o); }
+    }
+
+    public class AtomCtor : Ctor {
+        object m_object;
+        public object value { get { return m_object; } }
+        public void pass(object o) { m_object = o; }
+    }
+
+    public class VectorBuilder : VectorVisitor {
+        VectCtor m_vect = new VectCtor();
+        Ctor m_args;
+
+        public VectorBuilder(Ctor args)
+        {
+            m_args = args;
+        }
+
+        public override void visitEnd()
+        {
+            m_args.pass(m_vect.value);
         }
 
         public override AtomVisitor visitItem_Atom()
@@ -34,81 +217,37 @@ namespace Sexp {
 
         public override void visitItem()
         {
-            m_vect.Add(null);
-        }
-    }
-
-    public class TopLevelBuilder : VectorBuilder {
-        public TopLevelBuilder()
-            : base(new List<object>())
-        { }
-
-        public object[] getTopLevel()
-        {
-            return m_args.Count > 0 ? (object[])m_args[0] : null;
+            m_vect.pass(null);
         }
     }
 
     public class AtomBuilder : AtomVisitor {
-        List<object> m_args;
+        Ctor m_args;
 
-        public AtomBuilder(List<object> args)
+        public AtomBuilder(Ctor args)
         {
             m_args = args;
         }
 
         public override void visit(object o)
         {
-            if (o == null) throw new Exception();
-            m_args.Add(o);
+            m_args.pass(o);
         }
-
-        //public override void visit_value(Boolean o)
-        //{
-        //    m_args.Add(o);
-        //}
-
-        //public override void visit_value(Int64 o)
-        //{
-        //    m_args.Add(o);
-        //}
-
-        //public override void visit_value(Double o)
-        //{
-        //    m_args.Add(o);
-        //}
-
-        //public override void visit_value(Char o)
-        //{
-        //    m_args.Add(o);
-        //}
-
-        //public override void visit_value(String o)
-        //{
-        //    m_args.Add(o);
-        //}
-
-        //public override void visit_value(Symbol o)
-        //{
-        //    m_args.Add(o);
-        //}
     }
 
     public class ConsBuilder : ConsVisitor {
-        List<object> m_car = new List<object>();
-        List<object> m_cdr = new List<object>();
-        List<object> m_args;
+        AtomCtor m_car = new AtomCtor();
+        AtomCtor m_cdr = new AtomCtor();
+        Ctor m_args;
 
-        public ConsBuilder(List<object> args)
+        public ConsBuilder(Ctor args)
         {
             m_args = args;
         }
 
         public override void visitEnd()
         {
-            m_args.Add(new Cons(
-                /*m_car.Count > 0 ?*/ m_car[0] /*: null*/,
-                /*m_cdr.Count > 0 ?*/ m_cdr[0] /*: null*/));
+            m_args.pass(new Cons(m_car.value, m_cdr.value));
         }
 
         public override AtomVisitor visit_Atom_car()
@@ -140,18 +279,8 @@ namespace Sexp {
         {
             return new VectorBuilder(m_cdr);
         }
-
-        public override void visit_car()
-        {
-            m_car.Add(null);
-        }
-
-        public override void visit_cdr()
-        {
-            m_cdr.Add(null);
-        }
     }
-
+#endif
     //public class ListBuilder : ConsVisitor {
     //    List<object> m_list = new List<object>();
     //    List<object> m_tail;
@@ -206,20 +335,14 @@ namespace Sexp {
     //        return new VectorBuilder(m_tail);
     //    }
 
-    //    public override void visit_car(object o)
+    //    public override void visit_car()
     //    {
-    //        if (o != null)
-    //            throw new Exception();
-
-    //        m_args.Add(o);
+    //        m_args.Add(null);
     //    }
 
-    //    public override void visit_cdr(object o)
+    //    public override void visit_cdr()
     //    {
-    //        if (o != null)
-    //            throw new Exception();
-
-    //        m_args.Add(o);
+    //        m_args.Add(null);
     //    }
     //}
 }

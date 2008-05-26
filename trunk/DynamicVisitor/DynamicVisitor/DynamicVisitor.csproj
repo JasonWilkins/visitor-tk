@@ -36,6 +36,7 @@
     <Compile Include="GuidedTour\Guide.cs" />
     <Compile Include="GuidedTour\ISiteseer.cs" />
     <Compile Include="GuidedTour\Site.cs" />
+    <Compile Include="Sexp\Cell.cs" />
     <Compile Include="Sexp\Closure.cs" />
     <Compile Include="Sexp\Environment.cs" />
     <Compile Include="Sexp\GetC.cs" />

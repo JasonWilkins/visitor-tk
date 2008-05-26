@@ -38,28 +38,31 @@ namespace Sexp {
 
         void init_read()
         {
-            m_line = m_reader.ReadLine();
-            m_index = 0;
+            next();
             m_peek = read();
+        }
+
+        bool next()
+        {
+            string raw = m_reader.ReadLine();
+
+            if (null == raw) {
+                m_loc.context = null;
+                m_line = null;
+                return false;
+            } else {
+                m_loc.context = raw.Replace("\t", m_tab);
+                m_line = raw + System.Environment.NewLine;
+                m_index = 0;
+                return true;
+            }
         }
 
         int read()
         {
             if (null == m_line) return -1;
 
-            if (m_index >= m_line.Length) {
-                string raw = m_reader.ReadLine();
-
-                if (null == raw) {
-                    m_loc.context = null;
-                    m_line = null;
-                    return -1;
-                }
-
-                m_loc.context = raw.Replace("\t", m_tab);
-                m_line = raw + System.Environment.NewLine;
-                m_index = 0;
-            }
+            if (m_index >= m_line.Length && !next()) return -1;
 
             return m_line[m_index++];
         }

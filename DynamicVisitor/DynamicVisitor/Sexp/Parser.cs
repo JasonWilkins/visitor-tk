@@ -10,6 +10,7 @@ namespace Sexp {
         VectorVisitor m_visitor;
         int m_errors = 0;
         TxtLocation m_loc;
+        TxtLocation m_error_loc = new TxtLocation();
 
         public int errors
         {
@@ -42,13 +43,24 @@ namespace Sexp {
             return tokens;
         }
 
+        string fancy_token(Token t)
+        {
+            return '<' + Enum.GetName(t.GetType(), t).ToLower().Replace('_', '-') + '>';
+        }
+
         string token_string(Token[] tokens)
         {
             StringBuilder sb = new StringBuilder();
+            bool is_first = true;
 
             foreach (Token t in tokens) {
-                sb.Append(Enum.GetName(t.GetType(), t));
-                sb.Append(" ");
+                if (is_first) {
+                    is_first = false;
+                } else {
+                    sb.Append(", ");
+                }
+
+                sb.Append(fancy_token(t));
             }
 
             return sb.ToString();
@@ -56,23 +68,23 @@ namespace Sexp {
 
         void expecting(string context, Token[] tokens)
         {
-            m_errors++;
+            if (0 == m_errors || m_error_loc.line != m_attrib.loc.line || m_error_loc.column != m_attrib.loc.column) {
+                m_error_loc.copy(m_attrib.loc);
+                
+                Console.WriteLine(
+                    "{0}: {1}: expected {2} got {3}",
+                    m_attrib.loc.ToString(),
+                    context,
+                    token_string(tokens),
+                    fancy_token(lookahead));
 
-            Console.WriteLine(
-                "{0}: {1}: expecting {2}got {3}",
-                m_attrib.loc.ToString(),
-                context,
-                token_string(tokens),
-                Enum.GetName(lookahead.GetType(), lookahead));
+                Console.WriteLine();
+                Console.WriteLine(m_attrib.loc.context);
+                Console.WriteLine(StringUtil.repeat('_', m_attrib.loc.column-1) + '^');
+                Console.WriteLine();
 
-            //Console.WriteLine(
-            //    "{0} [{2}, {3}] {1}: expecting {4}got {5}",
-            //    m_attrib.path,
-            //    context,
-            //    m_attrib.line,
-            //    m_attrib.column,
-            //    token_string(tokens),
-            //    Enum.GetName(lookahead.GetType(), lookahead));
+                m_errors++;
+            }
         }
 
         void next()

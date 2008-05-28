@@ -26,22 +26,22 @@ namespace Sexp {
             return sb.ToString();
         }
 
-        public static string literal(Boolean v)
+        public static string format(Boolean v)
         {
             return v ? "#t" : "#f";
         }
 
-        public static string literal(Int64 v)
+        public static string format(Int64 v)
         {
             return v.ToString();
         }
         
-        public static string literal(Double v)
+        public static string format(Double v)
         {
             return v.ToString();
         }
         
-        public static string literal(Char v)
+        public static string format(Char v)
         {
             if ('\n' == v) {
                 return "#\\newline";
@@ -52,17 +52,17 @@ namespace Sexp {
             }
         }
         
-        public static string literal(String v)
+        public static string format(String v)
         {
             return '"'+escape(v)+'"';
         }
         
-        public static string literal(Symbol v)
+        public static string format(Symbol v)
         {
             return v.name;
         }
 
-        public static string literal(Object[] v)
+        public static string format(Object[] v)
         {
             bool is_first = true;
 
@@ -75,7 +75,7 @@ namespace Sexp {
                     sb.Append(" ");
                 }
 
-                sb.Append(literal(o));
+                sb.Append(format(o));
             }
 
             sb.Append(")");
@@ -83,22 +83,22 @@ namespace Sexp {
             return sb.ToString();
         }
 
-        public static string literal(object o)
+        public static string format(object o)
         {
             if (o is Boolean) {
-                return literal((Boolean)o);
+                return format((Boolean)o);
             } else if (o is Char) {
-                return literal((Char)o);
+                return format((Char)o);
             } else if (o is Int64) {
-                return literal((Int64)o);
+                return format((Int64)o);
             } else if (o is Double) {
-                return literal((Double)o);
+                return format((Double)o);
             } else if (o is String) {
-                return literal((String)o);
+                return format((String)o);
             } else if (o is Symbol) {
-                return literal((Symbol)o);
+                return format((Symbol)o);
             } else if (o is Object[]) {
-                return literal((Object[])o);
+                return format((Object[])o);
             } else {
                 if (o != null) {
                     return o.ToString();

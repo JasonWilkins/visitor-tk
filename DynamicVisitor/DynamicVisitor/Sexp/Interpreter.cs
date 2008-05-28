@@ -37,7 +37,7 @@ namespace Sexp {
                 object o = objs[0];
 
                 if (o != null) {
-                    Console.WriteLine(" => <{0}> {1}", o.GetType().FullName, Literal.literal(o));
+                    Console.WriteLine(" => <{0}> {1}", o.GetType().FullName, Literal.format(o));
                 } else {
                     Console.WriteLine(" => nil");
                 }
@@ -215,7 +215,7 @@ namespace Sexp {
                     m_new_args.RemoveAt(0);
                     m_args.Add(m_env.apply(m_loc, fn, m_new_args));
                 } else {
-                    throw new Exception("cannot apply object <" + m_new_args[0].GetType().FullName + "> " + Literal.literal(m_new_args[0]));
+                    throw new Exception("cannot apply object <" + m_new_args[0].GetType().FullName + "> " + Literal.format(m_new_args[0]));
                 }
             } else {
                 m_args.Add(null);

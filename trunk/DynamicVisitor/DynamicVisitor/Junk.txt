@@ -1381,3 +1381,1290 @@ namespace CodeBuilder {
             return Car(atom);
         }
     }
+
+
+#if false
+    public class TopLevelWriter : VectorVisitor {
+        Writer m_writer;
+
+        public TopLevelWriter(Writer writer)
+        {
+            m_writer = writer;
+        }
+
+        public override AtomVisitor visitItem_Atom()
+        {
+            return new TopAtomWriter(m_writer);
+        }
+
+        public override ConsVisitor visitItem_Cons()
+        {
+            return new ConsCarWriter(m_writer, StringUtil.repeat(System.Environment.NewLine, 2));// TopConsWriter(m_writer);
+        }
+
+        public override VectorVisitor visitItem_Vector()
+        {
+            return new TopVectorWriter(m_writer);
+        }
+
+        public override void visitItem()
+        {
+            m_writer.Append("()").End().End();
+        }
+    }
+
+    public class TopAtomWriter : AtomVisitor {
+        Writer m_writer;
+
+        public TopAtomWriter(Writer writer)
+        {
+            m_writer = writer;
+        }
+
+        public override void visit(object o)
+        {
+            m_writer.Append(Literal.literal(o)).End().End();
+        }
+    }
+
+    public class TopVectorWriter : VectorVisitor {
+        Writer m_writer;
+        bool is_first = true;
+
+        public TopVectorWriter(Writer writer)
+        {
+            m_writer = writer;
+        }
+
+        public override void visit()
+        {
+            m_writer.Append("#(");
+        }
+
+        public override void visitEnd()
+        {
+            m_writer.Append(")").End().End();
+        }
+
+        public void space()
+        {
+            if (is_first) {
+                is_first = false;
+            } else {
+                m_writer.Append(' ');
+            }
+        }
+
+        public override AtomVisitor visitItem_Atom()
+        {
+            space();
+            return new OldAtomWriter(m_writer);
+        }
+
+        public override ConsVisitor visitItem_Cons()
+        {
+            space();
+            return new ConsCarWriter(m_writer, "");
+        }
+
+        public override VectorVisitor visitItem_Vector()
+        {
+            space();
+            return new OldVectorWriter(m_writer);
+        }
+
+        public override void visitItem()
+        {
+            space();
+            m_writer.Append("()");
+        }
+    }
+
+    //public class TopConsWriter : ConsVisitor {
+    //    Writer m_writer;
+
+    //    public TopConsWriter(Writer writer)
+    //    {
+    //        m_writer = writer;
+    //    }
+
+    //    public override void visit()
+    //    {
+    //        m_writer.Append("(");
+    //        m_writer.Indent();
+    //    }
+
+    //    public override void visitEnd()
+    //    {
+    //        m_writer.Append(")").End().End();
+    //        m_writer.Unindent();
+    //    }
+
+    //    public override AtomVisitor visit_Atom_car()
+    //    {
+    //        return new AtomWriter(m_writer);
+    //    }
+
+    //    public override ConsVisitor visit_Cons_car()
+    //    {
+    //        return new ConsCarWriter(m_writer, "");
+    //    }
+
+    //    public override VectorVisitor visit_Vector_car()
+    //    {
+    //        return new VectorWriter(m_writer);
+    //    }
+
+    //    public override AtomVisitor visit_Atom_cdr()
+    //    {
+    //        m_writer.Append(" . ");
+    //        return new AtomWriter(m_writer);
+    //    }
+
+    //    public override ConsVisitor visit_Cons_cdr()
+    //    {
+    //        return new ConsCdrWriter(m_writer);
+    //    }
+
+    //    public override VectorVisitor visit_Vector_cdr()
+    //    {
+    //        m_writer.Append(" . ");
+    //        return new VectorWriter(m_writer);
+    //    }
+
+    //    public override void visit_car()
+    //    {
+    //        m_writer.Append("()");
+    //    }
+    //}
+
+    public class OldVectorWriter : VectorVisitor {
+        Writer m_writer;
+        bool is_first = true;
+
+        public OldVectorWriter(Writer writer)
+        {
+            m_writer = writer;
+        }
+
+        public override void visit()
+        {
+            m_writer.Append("#(");
+        }
+
+        public override void visitEnd()
+        {
+            m_writer.Append(")");
+        }
+
+        public void space()
+        {
+            if (is_first) {
+                is_first = false;
+            } else {
+                m_writer.Append(' ');
+            }
+        }
+
+        public override AtomVisitor visitItem_Atom()
+        {
+            space();
+            return new OldAtomWriter(m_writer);
+        }
+
+        public override ConsVisitor visitItem_Cons()
+        {
+            space();
+            return new ConsCarWriter(m_writer, "");
+        }
+
+        public override VectorVisitor visitItem_Vector()
+        {
+            space();
+            return new OldVectorWriter(m_writer);
+        }
+
+        public override void visitItem()
+        {
+            space();
+            m_writer.Append("()");
+        }
+    }
+
+    //public class QuoteVectorWriter : VectorVisitor {
+    //    Writer m_writer;
+    //    bool is_first = true;
+
+    //    public QuoteVectorWriter(Writer writer)
+    //    {
+    //        m_writer = writer;
+    //    }
+
+    //    public override void visit()
+    //    {
+    //        m_writer.Append("#(");
+    //    }
+
+    //    public override void visitEnd()
+    //    {
+    //        m_writer.Append(")");
+    //    }
+
+    //    public void space()
+    //    {
+    //        if (is_first) {
+    //            is_first = false;
+    //        } else {
+    //            m_writer.Append(' ');
+    //        }
+    //    }
+
+    //    public override AtomVisitor visitItem_Atom()
+    //    {
+    //        space();
+    //        return new OldAtomWriter(m_writer);
+    //    }
+
+    //    public override ConsVisitor visitItem_Cons()
+    //    {
+    //        space();
+    //        return new QuoteCarWriter(m_writer);
+    //    }
+
+    //    public override VectorVisitor visitItem_Vector()
+    //    {
+    //        space();
+    //        return new QuoteVectorWriter(m_writer);
+    //    }
+
+    //    public override void visitItem()
+    //    {
+    //        space();
+    //        m_writer.Append("()");
+    //    }
+    //}
+
+    public class ConsCarWriter : ConsVisitor {
+        Writer m_writer;
+        AtomCtor m_args;
+        bool m_is_quote = false;
+        string m_eol;
+
+        public ConsCarWriter(Writer writer, string eol)
+        {
+            m_writer = writer;
+            m_eol = eol;
+        }
+
+        public override void visitEnd()
+        {
+            if (!m_is_quote) {
+                m_writer.Unindent();
+                m_writer.Append(")");
+            }
+
+            m_writer.Append(m_eol);
+        }
+
+        public override AtomVisitor visit_Atom_car()
+        {
+            m_args = new AtomCtor();
+            return new AtomBuilder(m_args);
+        }
+
+        public override ConsVisitor visit_Cons_car()
+        {
+            m_writer.Append("(");
+            m_writer.Indent();
+            return new ConsCarWriter(m_writer, "");
+        }
+
+        public override VectorVisitor visit_Vector_car()
+        {
+            m_writer.Append("(");
+            m_writer.Indent();
+            return new OldVectorWriter(m_writer);
+        }
+
+        void write_head()
+        {
+            if (m_args != null) {
+                m_writer.Append("(").Append(Literal.literal(m_args.value));
+                m_writer.Indent();
+            }
+        }
+
+        void write_abbrev()
+        {
+            if (m_args != null) {
+                if (m_args.value is Symbol) {
+                    if (((Symbol)m_args.value).name == "quote") {
+                        m_writer.Append("'");
+                        m_is_quote = true;
+                        return;
+                    } else if (((Symbol)m_args.value).name == "quasiquotation") {
+                        m_writer.Append("`");
+                        m_is_quote = true;
+                        return;
+                    } else if (((Symbol)m_args.value).name == "unquote") {
+                        m_writer.Append(",");
+                        m_is_quote = true;
+                        return;
+                    } else if (((Symbol)m_args.value).name == "unquote-splicing") {
+                        m_writer.Append(",@");
+                        m_is_quote = true;
+                        return;
+                    }
+                }
+
+                m_writer.Append("(").Append(Literal.literal(m_args.value));
+                m_writer.Indent();
+            }
+        }
+
+        public override AtomVisitor visit_Atom_cdr()
+        {
+            write_head();
+            m_writer.Append(" . ");
+            return new OldAtomWriter(m_writer);
+        }
+
+        public override ConsVisitor visit_Cons_cdr()
+        {
+            write_abbrev();
+
+            if (m_is_quote) {
+                return new FooCdrWriter(m_writer);
+            } else {
+                return new ConsCdrWriter(m_writer);
+            }
+        }
+
+        public override VectorVisitor visit_Vector_cdr()
+        {
+            write_head();
+            m_writer.Append(" . ");
+            return new OldVectorWriter(m_writer);
+        }
+
+        public override void visit_car()
+        {
+            m_writer.Append("()");
+        }
+
+        public override void visit_cdr()
+        {
+            write_head();
+        }
+    }
+
+    public class ConsCdrWriter : ConsVisitor {
+        Writer m_writer;
+
+        public ConsCdrWriter(Writer writer)
+        {
+            m_writer = writer;
+        }
+
+        public override AtomVisitor visit_Atom_car()
+        {
+            m_writer.End().Begin();// Append(' ');
+            return new OldAtomWriter(m_writer);
+        }
+
+        public override ConsVisitor visit_Cons_car()
+        {
+            m_writer.End().Begin();// Append(' ');
+            return new ConsCarWriter(m_writer, "");
+        }
+
+        public override VectorVisitor visit_Vector_car()
+        {
+            m_writer.End().Begin();// Append(' ');
+            return new OldVectorWriter(m_writer);
+        }
+
+        public override AtomVisitor visit_Atom_cdr()
+        {
+            m_writer.Append(" . ");
+            return new OldAtomWriter(m_writer);
+        }
+
+        public override ConsVisitor visit_Cons_cdr()
+        {
+            return new ConsCdrWriter(m_writer);
+        }
+
+        public override VectorVisitor visit_Vector_cdr()
+        {
+            m_writer.Append(" . ");
+            return new OldVectorWriter(m_writer);
+        }
+
+        public override void visit_car()
+        {
+            m_writer.Append(" ()");
+        }
+    }
+
+    public class OldAtomWriter : AtomVisitor {
+        Writer m_writer;
+
+        public OldAtomWriter(Writer writer)
+        {
+            m_writer = writer;
+        }
+
+        public override void visit(object o)
+        {
+            m_writer.Append(Literal.literal(o));
+        }
+    }
+
+    //public class QuoteCarWriter : ConsVisitor {
+    //    Writer m_writer;
+
+    //    public QuoteCarWriter(Writer writer)
+    //    {
+    //        m_writer = writer;
+    //    }
+
+    //    public override void visit()
+    //    {
+    //        m_writer.Append("(");
+    //    }
+
+    //    public override void visitEnd()
+    //    {
+    //        m_writer.Append(")");
+    //    }
+
+    //    public override AtomVisitor visit_Atom_car()
+    //    {
+    //        return new OldAtomWriter(m_writer);
+    //    }
+
+    //    public override ConsVisitor visit_Cons_car()
+    //    {
+    //        return new QuoteCarWriter(m_writer);
+    //    }
+
+    //    public override VectorVisitor visit_Vector_car()
+    //    {
+    //        return new QuoteVectorWriter(m_writer);
+    //    }
+
+    //    public override AtomVisitor visit_Atom_cdr()
+    //    {
+    //        m_writer.Append(" . ");
+    //        return new OldAtomWriter(m_writer);
+    //    }
+
+    //    public override ConsVisitor visit_Cons_cdr()
+    //    {
+    //        return new QuoteCdrWriter(m_writer);
+    //    }
+
+    //    public override VectorVisitor visit_Vector_cdr()
+    //    {
+    //        m_writer.Append(" . ");
+    //        return new QuoteVectorWriter(m_writer);
+    //    }
+
+    //    public override void visit_car()
+    //    {
+    //        m_writer.Append("()");
+    //    }
+    //}
+
+    //public class QuoteCdrWriter : ConsVisitor {
+    //    Writer m_writer;
+
+    //    public QuoteCdrWriter(Writer writer)
+    //    {
+    //        m_writer = writer;
+    //    }
+
+    //    public override void visit()
+    //    {
+    //    }
+
+    //    public override void visitEnd()
+    //    {
+    //    }
+
+    //    public override AtomVisitor visit_Atom_car()
+    //    {
+    //        m_writer.Append(' ');
+    //        return new OldAtomWriter(m_writer);
+    //    }
+
+    //    public override ConsVisitor visit_Cons_car()
+    //    {
+    //        m_writer.Append(' ');
+    //        return new QuoteCarWriter(m_writer);
+    //    }
+
+    //    public override VectorVisitor visit_Vector_car()
+    //    {
+    //        m_writer.Append(' ');
+    //        return new QuoteVectorWriter(m_writer);
+    //    }
+
+    //    public override AtomVisitor visit_Atom_cdr()
+    //    {
+    //        m_writer.Append(" . ");
+    //        return new OldAtomWriter(m_writer);
+    //    }
+
+    //    public override ConsVisitor visit_Cons_cdr()
+    //    {
+    //        return new QuoteCdrWriter(m_writer);
+    //    }
+
+    //    public override VectorVisitor visit_Vector_cdr()
+    //    {
+    //        m_writer.Append(" . ");
+    //        return new QuoteVectorWriter(m_writer);
+    //    }
+
+    //    public override void visit_car()
+    //    {
+    //        m_writer.Append(" ()");
+    //    }
+    //}
+
+    public class FooCdrWriter : ConsVisitor {
+        Writer m_writer;
+
+        public FooCdrWriter(Writer writer)
+        {
+            m_writer = writer;
+        }
+
+        public override AtomVisitor visit_Atom_car()
+        {
+            return new OldAtomWriter(m_writer);
+        }
+
+        public override ConsVisitor visit_Cons_car()
+        {
+            return new ConsCarWriter(m_writer, "");
+        }
+
+        public override VectorVisitor visit_Vector_car()
+        {
+            return new OldVectorWriter(m_writer);
+        }
+
+        public override AtomVisitor visit_Atom_cdr()
+        {
+            throw new Exception();
+        }
+
+        public override ConsVisitor visit_Cons_cdr()
+        {
+            throw new Exception();
+        }
+
+        public override VectorVisitor visit_Vector_cdr()
+        {
+            throw new Exception();
+        }
+
+        public override void visit_car()
+        {
+            m_writer.Append("()");
+        }
+    }
+
+#if false
+    public interface IWritable {
+        void write(Writer writer);
+    }
+
+    public class TopLevelWriter : VectorVisitor, IWritable {
+        Writer m_writer;
+        List<object> top = new List<object>();
+
+        public TopLevelWriter(Writer writer)
+        {
+            m_writer = writer;
+        }
+
+        public void write(Writer writer)
+        {
+            foreach (IWritable w in top) {
+                if (w != null) {
+                    w.write(writer);
+                } else {
+                    writer.Append("()");
+                }
+
+                writer.End();
+                writer.End();
+            }
+        }
+
+        public override void visitEnd()
+        {
+            write(m_writer);
+        }
+
+        public override AtomVisitor visitItem_Atom()
+        {
+            AtomWriter atom = new AtomWriter();
+            top.Add(atom);
+            return atom;
+        }
+
+        public override ConsVisitor visitItem_Cons()
+        {
+            ListWriter cons = new ListWriter();
+            top.Add(cons);
+            return cons;
+        }
+
+        public override VectorVisitor visitItem_Vector()
+        {
+            VectorWriter vect = new VectorWriter();
+            top.Add(vect);
+            return vect;
+        }
+
+        public override void visitItem()
+        {
+            top.Add(null);
+        }
+    }
+
+    public class VectorWriter : VectorVisitor, IWritable {
+        List<object> vect = new List<object>();
+
+        public void write(Writer writer)
+        {
+            bool is_first = true;
+
+            writer.Append("#(");
+
+            foreach (IWritable w in vect) {
+                if (is_first) {
+                    is_first = false;
+                } else {
+                    writer.Append(' ');
+                }
+
+                if (w != null) {
+                    w.write(writer);
+                } else {
+                    writer.Append("()");
+                }
+            }
+
+            writer.Append(")");
+        }
+
+        public override AtomVisitor visitItem_Atom()
+        {
+            AtomWriter atom = new AtomWriter();
+            vect.Add(atom);
+            return atom;
+        }
+
+        public override ConsVisitor visitItem_Cons()
+        {
+            ListWriter list = new ListWriter();
+            vect.Add(list);
+            return list;
+        }
+
+        public override VectorVisitor visitItem_Vector()
+        {
+            VectorWriter new_vect = new VectorWriter();
+            vect.Add(new_vect);
+            return new_vect;
+        }
+
+        public override void visitItem()
+        {
+            vect.Add(null);
+        }
+    }
+
+    public class AtomWriter : AtomVisitor, IWritable {
+        string m_literal;
+        public object value;
+
+        public void write(Writer writer)
+        {
+            writer.Append(m_literal);
+        }
+
+        public override void visit(object v)
+        {
+            m_literal = Literal.literal(v);
+            value = v;
+        }
+    }
+
+    public class ListWriter : ConsVisitor, IWritable {
+        IWritable car;
+        IWritable cdr;
+
+        public void write(Writer writer)
+        {
+            bool is_quote = false;
+            string quote_sym = "";
+            string quote_ch = "";
+
+            // TODO - clean up and generalize this 
+            if (car is AtomWriter) {
+                AtomWriter atom = (AtomWriter)car;
+                if (atom.value is Symbol) {
+                    Symbol sym = atom.value as Symbol;
+                    if (sym.name == "quote") {
+                        is_quote = true;
+                        quote_sym = "quote";
+                        quote_ch = "'";
+                    } else if (sym.name == "quasiquotation") {
+                        is_quote = true;
+                        quote_sym = "quasiquotation";
+                        quote_ch = "`";
+                    } else if (sym.name == "unquote") {
+                        is_quote = true;
+                        quote_sym = "unquote";
+                        quote_ch = ",";
+                    } else if (sym.name == "unquote-splicing") {
+                        is_quote = true;
+                        quote_sym = "unquote-splicing";
+                        quote_ch = ",@";
+                    }
+                }
+            }
+
+            if (is_quote) {
+                if (cdr == null) {
+                    writer.Append("("+quote_sym+")");
+                } else {
+                    writer.Append(quote_ch);
+                    cdr.write(writer);
+                }
+            } else {
+                writer.Indent();
+                writer.Append("(");
+
+                if (car != null) {
+                    car.write(writer);
+                } else {
+                    writer.Append("()");
+                }
+
+                if (cdr != null) {
+                    if (!(cdr is ConsWriter)) {
+                        writer.Append(" . ");
+                    } else {
+                        writer.End();
+                    }
+
+                    cdr.write(writer);
+                }
+
+                writer.Unindent();
+                writer.Append(")");
+            }
+        }
+
+        public override AtomVisitor visit_Atom_car()
+        {
+            AtomWriter atom = new AtomWriter();
+            car = atom;
+            return atom;
+        }
+
+        public override ConsVisitor visit_Cons_car()
+        {
+            ListWriter list = new ListWriter();
+            car = list;
+            return list;
+        }
+
+        public override VectorVisitor visit_Vector_car()
+        {
+            VectorWriter vect = new VectorWriter();
+            car = vect;
+            return vect;
+        }
+
+        public override AtomVisitor visit_Atom_cdr()
+        {
+            AtomWriter atom = new AtomWriter();
+            cdr = atom;
+            return atom;
+        }
+
+        public override ConsVisitor visit_Cons_cdr()
+        {
+            ConsWriter cons = new ConsWriter();
+            cdr = cons;
+            return cons;
+        }
+
+        public override VectorVisitor visit_Vector_cdr()
+        {
+            VectorWriter vect = new VectorWriter();
+            cdr = vect;
+            return vect;
+        }
+    }
+
+    public class ConsWriter : ConsVisitor, IWritable {
+        IWritable car;
+        IWritable cdr;
+
+        public void write(Writer writer)
+        {
+            if (car != null) {
+                car.write(writer);
+            } else {
+                writer.Append("()");
+            }
+
+            if (cdr != null) {
+                writer.End();
+                cdr.write(writer);
+            }
+        }
+
+        public override AtomVisitor visit_Atom_car()
+        {
+            AtomWriter atom = new AtomWriter();
+            car = atom;
+            return atom;
+        }
+
+        public override ConsVisitor visit_Cons_car()
+        {
+            ListWriter list = new ListWriter();
+            car = list;
+            return list;
+        }
+
+        public override VectorVisitor visit_Vector_car()
+        {
+            VectorWriter vect = new VectorWriter();
+            car = vect;
+            return vect;
+        }
+
+        public override AtomVisitor visit_Atom_cdr()
+        {
+            AtomWriter atom = new AtomWriter();
+            cdr = atom;
+            return atom;
+        }
+
+        public override ConsVisitor visit_Cons_cdr()
+        {
+            ConsWriter cons = new ConsWriter();
+            cdr = cons;
+            return cons;
+        }
+
+        public override VectorVisitor visit_Vector_cdr()
+        {
+            VectorWriter vect = new VectorWriter();
+            cdr = vect;
+            return vect;
+        }
+    }
+#endif
+#endif
+
+
+
+
+    public class Format {
+        internal int file_line_spacing;
+        internal string file_delimiter;
+
+        internal bool first_indent;
+        internal int first_line_spacing;
+        internal string first_delimiter;
+
+        internal int appl_line_spacing;
+        internal string appl_delimiter;
+
+        internal int data_line_spacing;
+        internal string data_delimiter;
+
+        internal bool vector_indent;
+        internal int vector_line_spacing;
+        internal string vector_delimiter;
+
+        public Format()
+            : this(2, false, true, false, false)
+        { }
+
+        public Format(int line_spacing, bool format_vector, bool format_appl, bool format_first, bool format_data)
+        {
+            file_line_spacing = line_spacing;
+            file_delimiter = line_spacing > 0 ? "" : " ";
+
+            if (format_first) {
+                first_indent = true;
+                first_line_spacing = 1;
+                first_delimiter = "";
+            } else {
+                first_indent = false;
+                first_line_spacing = 0;
+                first_delimiter = " ";
+            }
+
+            if (format_vector) {
+                vector_indent = true;
+                vector_line_spacing = 1;
+                vector_delimiter = "";
+            } else {
+                vector_indent = false;
+                vector_line_spacing = 0;
+                vector_delimiter = " ";
+            }
+
+            if (format_appl) {
+                appl_line_spacing = 1;
+                appl_delimiter = "";
+            } else {
+                appl_line_spacing = 0;
+                appl_delimiter = " ";
+            }
+
+            if (format_data) {
+                data_line_spacing = 1;
+                data_delimiter = "";
+            } else {
+                data_line_spacing = 0;
+                data_delimiter = " ";
+            }
+        }
+    }
+
+
+
+    class SexpWriterNode {
+        public SexpWriter writer;
+
+        SexpWriterStateMachine m_machine;
+        State m_state;
+
+        public SexpWriterNode(SexpWriterStateMachine machine, State state, SexpWriter writer)
+        {
+            m_machine = machine;
+            m_state = state;
+            this.writer = writer;
+        }
+
+        public VectorWriter nextItemVectorWriter()
+        {
+            if (State.FILE == m_state) {
+                return new VectorWriter(m_machine.top_vect);
+            } else if (State.TOP_VECT == m_state || State.VECT == m_state || State.VECT_CDR == m_state) {
+                return new VectorWriter(m_machine.vect);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public ConsWriter nextItemConsWriter()
+        {
+            if (State.FILE == m_state) {
+                return new ConsWriter(m_machine.top_cons);
+            } else if (State.TOP_VECT == m_state || State.VECT == m_state || State.VECT_CDR == m_state) {
+                return new ConsWriter(m_machine.vect_cons);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public AtomWriter nextItemAtomWriter()
+        {
+            if (State.FILE == m_state || State.TOP_VECT == m_state || State.VECT == m_state || State.VECT_CDR == m_state) {
+                return new AtomWriter(m_machine.atom);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public VectorWriter nextCarVectorWriter()
+        {
+            if (State.CONS == m_state ||
+                State.APPL_CONS_CDR == m_state ||
+                State.DATA_CONS_CDR == m_state ||
+                State.VECT_CONS == m_state ||
+                State.VECT_CONS_CDR == m_state||
+                State.FIRST_CONS == m_state ||
+                State.FIRST_CONS_CDR == m_state ||
+                State.TOP_CONS == m_state) {
+
+                return new VectorWriter(m_machine.vect);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public ConsWriter nextCarConsWriter()
+        {
+            if (State.CONS == m_state) {
+                return new ConsWriter(m_machine.first_cons);
+            } else if (State.APPL_CONS_CDR == m_state || State.DATA_CONS_CDR == m_state) {
+                return new ConsWriter(m_machine.cons);
+            } else if (State.VECT_CONS == m_state || State.VECT_CONS_CDR == m_state) {
+                return new ConsWriter(m_machine.vect_cons);
+            } else if (State.FIRST_CONS == m_state || State.FIRST_CONS_CDR == m_state || State.TOP_CONS == m_state) {
+                return new ConsWriter(m_machine.first_cons);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public AtomVisitor nextCarAtomWriter(out AtomCtor atom)
+        {
+            if (State.CONS == m_state ||
+                State.APPL_CONS_CDR == m_state ||
+                State.DATA_CONS_CDR == m_state ||
+                State.VECT_CONS == m_state ||
+                State.VECT_CONS_CDR == m_state||
+                State.FIRST_CONS == m_state ||
+                State.FIRST_CONS_CDR == m_state ||
+                State.TOP_CONS == m_state) {
+
+                atom = new AtomCtor();
+                return new AtomBuilder(atom);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public VectorWriter nextCdrVectorWriter()
+        {
+            if (State.CONS == m_state ||
+                State.APPL_CONS_CDR == m_state ||
+                State.DATA_CONS_CDR == m_state ||
+                State.VECT_CONS == m_state ||
+                State.VECT_CONS_CDR == m_state||
+                State.FIRST_CONS == m_state ||
+                State.FIRST_CONS_CDR == m_state ||
+                State.TOP_CONS == m_state) {
+
+                return new VectorWriter(m_machine.vect_cdr);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public ConsWriter nextCdrConsWriter(bool is_quote, AtomCtor atom)
+        {
+            if (State.CONS == m_state ||State.TOP_CONS == m_state) {
+                if (atom == null || atom.value is Symbol) {
+                    return new ConsWriter(m_machine.appl_cons_cdr, is_quote);
+                } else {
+                    return new ConsWriter(m_machine.data_cons_cdr, is_quote);
+                }
+            } else if (State.FIRST_CONS == m_state || State.FIRST_CONS_CDR == m_state) {
+                return new ConsWriter(m_machine.first_cons_cdr, is_quote);
+            } else if (State.APPL_CONS_CDR == m_state) {
+                return new ConsWriter(m_machine.appl_cons_cdr, is_quote);
+            } else if (State.DATA_CONS_CDR == m_state) {
+                return new ConsWriter(m_machine.data_cons_cdr, is_quote);
+            } else if (State.VECT_CONS == m_state || State.VECT_CONS_CDR == m_state) {
+                return new ConsWriter(m_machine.vect_cons_cdr, is_quote);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public AtomWriter nextCdrAtomWriter()
+        {
+            if (State.CONS == m_state ||
+                State.APPL_CONS_CDR == m_state ||
+                State.DATA_CONS_CDR == m_state ||
+                State.VECT_CONS == m_state ||
+                State.VECT_CONS_CDR == m_state||
+                State.FIRST_CONS == m_state ||
+                State.FIRST_CONS_CDR == m_state ||
+                State.TOP_CONS == m_state) {
+
+                return new AtomWriter(m_machine.atom_cdr);
+            } else {
+                throw new Exception();
+            }
+        }
+    }
+
+
+
+    class SexpWriterNode {
+        public SexpWriter writer;
+
+        SexpWriterStateMachine m_machine;
+        VectorState m_vect_state;
+        ConsState m_cons_state;
+        AtomState m_atom_state;
+
+        public SexpWriterNode(SexpWriterStateMachine machine, VectorState state, SexpWriter writer)
+        {
+            m_machine = machine;
+            m_vect_state = state;
+            this.writer = writer;
+        }
+
+        public SexpWriterNode(SexpWriterStateMachine machine, ConsState state, SexpWriter writer)
+        {
+            m_machine = machine;
+            m_cons_state = state;
+            this.writer = writer;
+        }
+
+        public SexpWriterNode(SexpWriterStateMachine machine, AtomState state, SexpWriter writer)
+        {
+            m_machine = machine;
+            m_atom_state = state;
+            this.writer = writer;
+        }
+
+        public VectorWriter nextItemVectorWriter()
+        {
+            if (VectorState.FILE == m_vect_state) {
+                return new VectorWriter(m_machine.top_vect);
+            } else if (VectorState.TOP_VECT == m_vect_state || VectorState.VECT == m_vect_state || VectorState.VECT_CDR == m_vect_state) {
+                return new VectorWriter(m_machine.vect);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public ConsWriter nextItemConsWriter()
+        {
+            if (VectorState.FILE == m_vect_state) {
+                return new ConsWriter(m_machine.top_cons);
+            } else if (VectorState.TOP_VECT == m_vect_state || VectorState.VECT == m_vect_state || VectorState.VECT_CDR == m_vect_state) {
+                return new ConsWriter(m_machine.vect_cons);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public AtomWriter nextItemAtomWriter()
+        {
+            if (VectorState.FILE == m_vect_state || VectorState.TOP_VECT == m_vect_state || VectorState.VECT == m_vect_state || VectorState.VECT_CDR == m_vect_state) {
+                return new AtomWriter(m_machine.atom);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public VectorWriter nextCarVectorWriter()
+        {
+            if (ConsState.CONS == m_cons_state ||
+                ConsState.APPL_CONS_CDR == m_cons_state ||
+                ConsState.DATA_CONS_CDR == m_cons_state ||
+                ConsState.VECT_CONS == m_cons_state ||
+                ConsState.VECT_CONS_CDR == m_cons_state||
+                ConsState.FIRST_CONS == m_cons_state ||
+                ConsState.FIRST_CONS_CDR == m_cons_state ||
+                ConsState.TOP_CONS == m_cons_state) {
+
+                return new VectorWriter(m_machine.vect);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public ConsWriter nextCarConsWriter()
+        {
+            if (ConsState.CONS == m_cons_state) {
+                return new ConsWriter(m_machine.first_cons);
+            } else if (ConsState.APPL_CONS_CDR == m_cons_state || ConsState.DATA_CONS_CDR == m_cons_state) {
+                return new ConsWriter(m_machine.cons);
+            } else if (ConsState.VECT_CONS == m_cons_state || ConsState.VECT_CONS_CDR == m_cons_state) {
+                return new ConsWriter(m_machine.vect_cons);
+            } else if (ConsState.FIRST_CONS == m_cons_state || ConsState.FIRST_CONS_CDR == m_cons_state || ConsState.TOP_CONS == m_cons_state) {
+                return new ConsWriter(m_machine.first_cons);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public AtomVisitor nextCarAtomWriter(out AtomCtor atom)
+        {
+            if (ConsState.CONS == m_cons_state ||
+                ConsState.APPL_CONS_CDR == m_cons_state ||
+                ConsState.DATA_CONS_CDR == m_cons_state ||
+                ConsState.VECT_CONS == m_cons_state ||
+                ConsState.VECT_CONS_CDR == m_cons_state||
+                ConsState.FIRST_CONS == m_cons_state ||
+                ConsState.FIRST_CONS_CDR == m_cons_state ||
+                ConsState.TOP_CONS == m_cons_state) {
+
+                atom = new AtomCtor();
+                return new AtomBuilder(atom);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public VectorWriter nextCdrVectorWriter()
+        {
+            if (ConsState.CONS == m_cons_state ||
+                ConsState.APPL_CONS_CDR == m_cons_state ||
+                ConsState.DATA_CONS_CDR == m_cons_state ||
+                ConsState.VECT_CONS == m_cons_state ||
+                ConsState.VECT_CONS_CDR == m_cons_state||
+                ConsState.FIRST_CONS == m_cons_state ||
+                ConsState.FIRST_CONS_CDR == m_cons_state ||
+                ConsState.TOP_CONS == m_cons_state) {
+
+                return new VectorWriter(m_machine.vect_cdr);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public ConsWriter nextCdrConsWriter(bool is_quote, AtomCtor atom)
+        {
+            if (ConsState.CONS == m_cons_state ||ConsState.TOP_CONS == m_cons_state) {
+                if (atom == null || atom.value is Symbol) {
+                    return new ConsWriter(m_machine.appl_cons_cdr, is_quote);
+                } else {
+                    return new ConsWriter(m_machine.data_cons_cdr, is_quote);
+                }
+            } else if (ConsState.FIRST_CONS == m_cons_state || ConsState.FIRST_CONS_CDR == m_cons_state) {
+                return new ConsWriter(m_machine.first_cons_cdr, is_quote);
+            } else if (ConsState.APPL_CONS_CDR == m_cons_state) {
+                return new ConsWriter(m_machine.appl_cons_cdr, is_quote);
+            } else if (ConsState.DATA_CONS_CDR == m_cons_state) {
+                return new ConsWriter(m_machine.data_cons_cdr, is_quote);
+            } else if (ConsState.VECT_CONS == m_cons_state || ConsState.VECT_CONS_CDR == m_cons_state) {
+                return new ConsWriter(m_machine.vect_cons_cdr, is_quote);
+            } else {
+                throw new Exception();
+            }
+        }
+
+        public AtomWriter nextCdrAtomWriter()
+        {
+            if (ConsState.CONS == m_cons_state ||
+                ConsState.APPL_CONS_CDR == m_cons_state ||
+                ConsState.DATA_CONS_CDR == m_cons_state ||
+                ConsState.VECT_CONS == m_cons_state ||
+                ConsState.VECT_CONS_CDR == m_cons_state||
+                ConsState.FIRST_CONS == m_cons_state ||
+                ConsState.FIRST_CONS_CDR == m_cons_state ||
+                ConsState.TOP_CONS == m_cons_state) {
+
+                return new AtomWriter(m_machine.atom_cdr);
+            } else {
+                throw new Exception();
+            }
+        }
+    }
+

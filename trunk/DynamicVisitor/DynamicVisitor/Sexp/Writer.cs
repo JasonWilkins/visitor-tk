@@ -8,231 +8,213 @@ namespace Sexp {
     public static class GetTopLevelWriter {
         public static VectorWriter create(Writer writer)
         {
-            return new VectorWriter(MakeConfig.make_basic_config(writer).top, State.TOP);
+            Config config = new Config(writer);
+            return new VectorWriter(config.file, config);
         }
     }
 
-    public class SexpWriterConfig {
-        public SexpWriter top;
-        public SexpWriter top_vect;
-        public SexpWriter top_cons;
-        public SexpWriter vect;
-        public SexpWriter vect_cdr;
-        public SexpWriter vect_cons;
-        public SexpWriter vect_cons_cdr;
-        public SexpWriter first_cons;
-        public SexpWriter first_cons_cdr;
-        public SexpWriter cons;
-        public SexpWriter appl_cons_cdr;
-        public SexpWriter data_cons_cdr;
-        public SexpWriter atom;
-        public SexpWriter atom_cdr;
+    public class Format {
+        public int line_spacing = 2;
+        public bool format_vector = false;
+        public bool format_appl = true;
+        public bool format_first = false;
+        public bool format_data = false;
+        public bool do_abbrev = true;
+        public bool dot_cdr = false;
+        public bool dot_nil = false;
     }
 
-    public static class MakeConfig {
-        public static SexpWriterConfig make_basic_config(Writer writer)
+    class Config {
+        public VectFormatter file;
+        public VectFormatter top_vect;
+        public ConsFormatter top_cons;
+        public VectFormatter vect;
+        public VectFormatter vect_cdr;
+        public ConsFormatter vect_cons;
+        public ConsFormatter vect_cons_cdr;
+        public ConsFormatter first_cons;
+        public ConsFormatter first_cons_cdr;
+        public ConsFormatter cons;
+        public ConsFormatter appl_cons_cdr;
+        public ConsFormatter data_cons_cdr;
+        public AtomFormatter atom;
+        public AtomFormatter atom_cdr;
+
+        public Config(Writer writer)
+            : this(writer, new Format())
+        { }
+
+        public Config(Writer writer, Format fmt)
         {
-            SexpWriterConfig rv = new SexpWriterConfig();
+            {
+                file = new VectFormatter(writer);
+                file.seperator      = fmt.line_spacing > 0 ? "" : " ";
+                file.seperator_spacing  = fmt.line_spacing;
+                file.footer_spacing = 1;
+            }
 
-            rv.top = new SexpWriter(writer, rv);
-            rv.top.sep = "";
-            rv.top.sepline = 2;
-            rv.top.footline = 1;
+            top_vect = new_vect(writer, fmt.format_vector, "#(");
+            vect     = new_vect(writer, fmt.format_vector, "#(");
+            vect_cdr = new_vect(writer, fmt.format_vector, fmt.format_vector ? ". #(" : " . #(");
 
-            rv.top_vect = new SexpWriter(writer, rv);
-            rv.top_vect.head = "#(";
-            rv.top_vect.foot = ")";
+            cons       = new_cons(writer, fmt.do_abbrev, true);
+            top_cons   = new_cons(writer, fmt.do_abbrev, true);
+            vect_cons  = new_cons(writer, fmt.do_abbrev, fmt.format_vector);
+            first_cons = new_cons(writer, fmt.do_abbrev, fmt.format_first);
 
-            rv.top_cons = new SexpWriter(writer, rv);
-            rv.top_cons.indent = true;
-            rv.top_cons.head = "(";
-            rv.top_cons.foot = ")";
+            vect_cons_cdr  = new_cons_cdr(writer, fmt.format_vector, fmt.dot_cdr, fmt.dot_nil);
+            first_cons_cdr = new_cons_cdr(writer, fmt.format_first, fmt.dot_cdr, fmt.dot_nil);
+            appl_cons_cdr  = new_cons_cdr(writer, fmt.format_appl, fmt.dot_cdr, fmt.dot_nil);
+            data_cons_cdr  = new_cons_cdr(writer, fmt.format_data, fmt.dot_cdr, fmt.dot_nil);
 
-            rv.vect = new SexpWriter(writer, rv);
-            rv.vect.head = "#(";
-            rv.vect.foot = ")";
+            atom = new AtomFormatter(writer);
 
-            rv.vect_cdr = new SexpWriter(writer, rv);
-            rv.vect_cdr.head = " . #(";
-            rv.vect_cdr.foot = ")";
+            {
+                atom_cdr = new AtomFormatter(writer);
+                atom_cdr.header = " . ";
+            }
+        }
 
-            rv.vect_cons = new SexpWriter(writer, rv);
-            rv.vect_cons.head = "(";
-            rv.vect_cons.foot = ")";
+        VectFormatter new_vect(Writer writer, bool format, string head)
+        {
+            VectFormatter f = new VectFormatter(writer);
 
-            rv.vect_cons_cdr = new SexpWriter(writer, rv);
-            rv.vect_cons_cdr.head = " ";
+            f.do_indent         = format;
+            f.seperator_spacing = format ? 1 : 0;
+            f.seperator         = format ? "" : " ";
+            f.header            = head;
+            f.footer            = ")";
 
-            rv.first_cons = new SexpWriter(writer, rv);
-            rv.first_cons.head = "(";
-            rv.first_cons.foot = ")";
+            return f;
+        }
 
-            rv.cons = new SexpWriter(writer, rv);
-            rv.cons.indent = true;
-            rv.cons.head = "(";
-            rv.cons.foot = ")";
+        ConsFormatter new_cons(Writer writer, bool abbreviate, bool indent)
+        {
+            ConsFormatter f = new ConsFormatter(writer);
 
-            rv.first_cons_cdr = new SexpWriter(writer, rv);
-            rv.first_cons_cdr.head = " ";
+            f.do_abbrev = abbreviate;
+            f.do_indent = indent;
+            f.header    = "(";
+            f.footer    = ")";
 
-            rv.appl_cons_cdr = new SexpWriter(writer, rv);
-            rv.appl_cons_cdr.head = "";
-            rv.appl_cons_cdr.headline = 1;
+            return f;
+        }
 
-            rv.data_cons_cdr = new SexpWriter(writer, rv);
-            rv.data_cons_cdr.head = " ";
+        ConsFormatter new_cons_cdr(Writer writer, bool format, bool dot_cdr, bool dot_nil)
+        {
+            ConsFormatter f = new ConsFormatter(writer);
 
-            rv.atom = new SexpWriter(writer, rv);
+            f.header_spacing = format ? 1 : 0;
 
-            rv.atom_cdr = new SexpWriter(writer, rv);
-            rv.atom_cdr.head = " . ";
+            string delimiter = format ? "" : " ";
 
-            return rv;
+            if (dot_cdr) {
+                f.header = delimiter + ". (";
+                f.footer = ")";
+            } else {
+                f.header = delimiter;
+            }
+
+            if (dot_nil) {
+                f.nil_cdr = " . ()";
+            }
+
+            return f;
         }
     }
 
-    public enum State {
-        TOP,
-        TOP_VECT,
-        TOP_CONS,
-        VECT,
-        VECT_CDR,
-        VECT_CONS,
-        VECT_CONS_CDR,
-        FIRST_CONS,
-        FIRST_CONS_CDR,
-        CONS,
-        APPL_CONS_CDR,
-        DATA_CONS_CDR,
-        ATOM,
-        ATOM_CDR,
-    }
-
-    public class SexpWriter {
-        public bool abbreviate = true;
-        public bool indent = false;
-        public string head = "";
-        public int headline = 0;
-        public string sep = " ";
-        public int sepline = 0;
-        public string foot = "";
-        public int footline = 0;
+    abstract class Formatter {
+        public bool do_abbrev = true;
+        public bool do_indent = false;
+        public string header = "";
+        public int header_spacing = 0;
+        public string seperator = " ";
+        public int seperator_spacing = 0;
+        public string footer = "";
+        public int footer_spacing = 0;
+        public string nil = "()";
+        public string nil_cdr = "";
 
         Writer m_writer;
 
-        SexpWriterConfig m_cfg;
-
-        public SexpWriter(Writer writer, SexpWriterConfig cfg)
+        public Formatter(Writer writer)
         {
             m_writer = writer;
-            m_cfg = cfg;
         }
 
-        public VectorWriter nextItemVectorWriter(State s)
+        public Formatter AppendNil()
         {
-            if (State.TOP == s) {
-                return new VectorWriter(m_cfg.top_vect, State.TOP_VECT);
-            } else {
-                return new VectorWriter(m_cfg.vect, State.VECT);
-            }
-        }
-
-        public ConsWriter nextItemConsWriter(State s)
-        {
-            if (State.TOP == s) {
-                return new ConsWriter(m_cfg.top_cons, State.TOP_CONS);
-            } else {
-                return new ConsWriter(m_cfg.vect_cons, State.VECT_CONS);
-            }
-        }
-
-        public AtomWriter nextItemAtomWriter(State s)
-        {
-            return new AtomWriter(m_cfg.atom);
-        }
-
-        public VectorWriter nextCarVectorWriter(State s)
-        {
-            return new VectorWriter(m_cfg.vect, State.VECT);
-        }
-
-        public ConsWriter nextCarConsWriter(State s)
-        {
-            if (State.CONS == s) {
-                return new ConsWriter(m_cfg.cons, State.CONS);
-            } else if (State.APPL_CONS_CDR == s) {
-                return new ConsWriter(m_cfg.cons, State.CONS);
-            } else if (State.DATA_CONS_CDR == s) {
-                return new ConsWriter(m_cfg.cons, State.CONS);
-            } else if (State.VECT_CONS == s) {
-                return new ConsWriter(m_cfg.vect_cons, State.VECT_CONS);
-            } else if (State.VECT_CONS_CDR == s) {
-                return new ConsWriter(m_cfg.vect_cons, State.VECT_CONS);
-            } else if (State.FIRST_CONS == s) {
-                return new ConsWriter(m_cfg.first_cons, State.FIRST_CONS);
-            } else if (State.FIRST_CONS_CDR == s) {
-                return new ConsWriter(m_cfg.first_cons, State.FIRST_CONS);
-            } else if (State.TOP_CONS == s) {
-                return new ConsWriter(m_cfg.first_cons, State.FIRST_CONS);
-            } else {
-                throw new Exception();
-            }
-        }
-
-        public AtomVisitor nextCarAtomWriter(State s, out AtomCtor atom)
-        {
-            atom = new AtomCtor();
-            return new AtomBuilder(atom);
-        }
-
-        public VectorWriter nextCdrVectorWriter(State s)
-        {
-            return new VectorWriter(m_cfg.vect_cdr, State.VECT_CDR);
-        }
-
-        public ConsWriter nextCdrConsWriter(bool is_quote, State s, AtomCtor atom)
-        {
-            if (State.CONS == s) {
-                if (atom != null && atom.value is Symbol) {
-                    return new ConsWriter(m_cfg.appl_cons_cdr, State.APPL_CONS_CDR, is_quote);
-                } else {
-                    return new ConsWriter(m_cfg.data_cons_cdr, State.DATA_CONS_CDR, is_quote);
-                }
-            } else if (State.FIRST_CONS_CDR == s) {
-                return new ConsWriter(m_cfg.first_cons_cdr, State.FIRST_CONS_CDR, is_quote);
-            } else if (State.APPL_CONS_CDR == s) {
-                return new ConsWriter(m_cfg.appl_cons_cdr, State.APPL_CONS_CDR, is_quote);
-            } else if (State.DATA_CONS_CDR == s) {
-                return new ConsWriter(m_cfg.data_cons_cdr, State.DATA_CONS_CDR, is_quote);
-            } else if (State.VECT_CONS == s) {
-                return new ConsWriter(m_cfg.vect_cons_cdr, State.VECT_CONS_CDR, is_quote);
-            } else if (State.VECT_CONS_CDR == s) {
-                return new ConsWriter(m_cfg.vect_cons_cdr, State.VECT_CONS_CDR, is_quote);
-            } else if (State.FIRST_CONS == s) {
-                return new ConsWriter(m_cfg.first_cons_cdr, State.FIRST_CONS_CDR, is_quote);
-            } else if (State.TOP_CONS == s) {
-                if (atom != null && atom.value is Symbol) {
-                    return new ConsWriter(m_cfg.appl_cons_cdr, State.APPL_CONS_CDR, is_quote);
-                } else {
-                    return new ConsWriter(m_cfg.data_cons_cdr, State.DATA_CONS_CDR, is_quote);
-                }
-            } else {
-                throw new Exception();
-            }
-        }
-
-        public AtomWriter nextCdrAtomWriter(State s)
-        {
-            return new AtomWriter(m_cfg.atom_cdr);
-        }
-
-        public SexpWriter Append(string s)
-        {
-            m_writer.Append(s);
+            m_writer.Append(nil);
             return this;
         }
 
-        void lines(int c)
+        public Formatter AppendNilCdr(bool is_abbrev_body)
+        {
+            if (!is_abbrev_body) m_writer.Append(nil_cdr);
+            return this;
+        }
+
+        public Formatter AppendHeader(bool is_abbrev_body)
+        {
+            if (!is_abbrev_body) {
+                append_newlines(header_spacing);
+                m_writer.Append(header);
+            }
+
+            if (do_indent) m_writer.Indent();
+
+            return this;
+        }
+
+        public Formatter AppendSeperator(ref bool is_first)
+        {
+            if (is_first) {
+                is_first = false;
+            } else {
+                m_writer.Append(seperator);
+                append_newlines(seperator_spacing);
+            }
+
+            return this;
+        }
+
+        public Formatter AppendFooter(bool is_abbrev_body)
+        {
+            if (do_indent) m_writer.Unindent();
+
+            if (!is_abbrev_body) {
+                m_writer.Append(footer);
+                append_newlines(footer_spacing);
+            }
+
+            return this;
+        }
+
+        public Formatter AppendAtom(object o, bool is_abbrev_body)
+        {
+            AppendHeader(is_abbrev_body);
+            m_writer.Append(Literal.format(o));
+            return this;
+        }
+
+        public Formatter AppendAbbrev(AtomCtor atom, bool is_abbrev_body, out bool is_abbrev)
+        {
+            if (do_abbrev) {
+                string abbrev = get_abbreviation(atom);
+
+                if (abbrev != null) {
+                    m_writer.Append(abbrev);
+                    is_abbrev = true;
+                    return this;
+                }
+            }
+
+            is_abbrev = false;
+
+            return AppendAtom(atom.value, is_abbrev_body);
+        }
+
+        void append_newlines(int c)
         {
             for (int i = 0; i < c; i++) {
                 m_writer.End();
@@ -241,1119 +223,220 @@ namespace Sexp {
             if (c > 0) m_writer.Begin();
         }
 
-        public SexpWriter Head(bool abbreviated)
+        string get_abbreviation(AtomCtor atom)
         {
-            m_writer.Append(abbreviated ? head.Trim() : head);
+            if (atom.value is Symbol) {
+                string name = ((Symbol)atom.value).name;
 
-            if (!abbreviated) lines(headline);
-
-            if (indent) m_writer.Indent();
-
-            return this;
-        }
-
-        public SexpWriter Delimiter(ref bool is_first)
-        {
-            if (is_first) {
-                is_first = false;
-            } else {
-                m_writer.Append(sep);
-                lines(sepline);
-            }
-
-            return this;
-        }
-
-        public SexpWriter Foot()
-        {
-            if (indent) m_writer.Unindent();
-
-            m_writer.Append(foot);
-            lines(footline);
-
-            return this;
-        }
-
-        //public SexpWriter Car(AtomCtor atom)
-        //{
-        //    return Car(atom, false);
-        //}
-
-        public SexpWriter Car(AtomCtor atom, bool abbreviated)
-        {
-            if (atom != null) {
-                return Head(abbreviated).Append(Literal.literal(atom.value));
-            }
-
-            return this;
-        }
-
-        public SexpWriter Abbrev(AtomCtor atom, bool abbreviated, out bool is_quote)
-        {
-            if (abbreviate) {
-                if (atom != null && atom.value is Symbol) {
-                    if (((Symbol)atom.value).name == "quote") {
-                        m_writer.Append("'");
-                        is_quote = true;
-                        return this;
-                    } else if (((Symbol)atom.value).name == "quasiquotation") {
-                        m_writer.Append("`");
-                        is_quote = true;
-                        return this;
-                    } else if (((Symbol)atom.value).name == "unquote") {
-                        m_writer.Append(",");
-                        is_quote = true;
-                        return this;
-                    } else if (((Symbol)atom.value).name == "unquote-splicing") {
-                        m_writer.Append(",@");
-                        is_quote = true;
-                        return this;
-                    }
+                if (name == "quote") {
+                    return "'";
+                } else if (name == "quasiquotation") {
+                    return "`";
+                } else if (name == "unquote") {
+                    return ",";
+                } else if (name == "unquote-splicing") {
+                    return ",@";
                 }
             }
 
-            is_quote = false;
-            return Car(atom, abbreviated);
+            return null;
         }
     }
 
+    class VectFormatter : Formatter {
+        public VectFormatter(Writer writer)
+            : base(writer)
+        { }
+    }
+
+    class ConsFormatter : Formatter {
+        public ConsFormatter(Writer writer)
+            : base(writer)
+        { }
+    }
+
+    class AtomFormatter : Formatter {
+        public AtomFormatter(Writer writer)
+            : base(writer)
+        { }
+    }
+
     public class VectorWriter : VectorVisitor {
-        SexpWriter m_writer;
-        State m_state;
+        Formatter m_formatter;
+        Config m_config;
 
         bool is_first = true;
-        bool m_abbreviated;
+        bool m_is_abbrev_body;
 
-        public VectorWriter(SexpWriter writer, State s)
-            : this(writer, s, false)
+        internal VectorWriter(Formatter formatter, Config config)
+            : this(formatter, config, false)
         { }
 
-        public VectorWriter(SexpWriter writer, State s, bool abbreviated)
+        internal VectorWriter(Formatter formatter, Config config, bool is_abbrev_body)
         {
-            m_state = s;
-            m_writer = writer;
-            m_abbreviated = abbreviated;
+            m_is_abbrev_body = is_abbrev_body;
+            m_formatter      = formatter;
+            m_config         = config;
         }
 
         public override void visit()
         {
-            m_writer.Head(m_abbreviated);
+            m_formatter.AppendHeader(m_is_abbrev_body);
         }
 
         public override void visitEnd()
         {
-            m_writer.Foot();
+            m_formatter.AppendFooter(m_is_abbrev_body);
         }
 
         public override AtomVisitor visitItem_Atom()
         {
-            m_writer.Delimiter(ref is_first);
-            return m_writer.nextItemAtomWriter(m_state);
+            m_formatter.AppendSeperator(ref is_first);
+            return new AtomWriter(m_config.atom);
         }
 
         public override ConsVisitor visitItem_Cons()
         {
-            m_writer.Delimiter(ref is_first);
-            return m_writer.nextItemConsWriter(m_state);
+            m_formatter.AppendSeperator(ref is_first);
+
+            if (m_config.file == m_formatter) {
+                return new ConsWriter(m_config.top_cons, m_config);
+            } else {
+                return new ConsWriter(m_config.vect_cons, m_config);
+            }
         }
 
         public override VectorVisitor visitItem_Vector()
         {
-            m_writer.Delimiter(ref is_first);
-            return m_writer.nextItemVectorWriter(m_state);
+            m_formatter.AppendSeperator(ref is_first);
+
+            if (m_config.file == m_formatter) {
+                return new VectorWriter(m_config.top_vect, m_config);
+            } else {
+                return new VectorWriter(m_config.vect, m_config);
+            }
         }
 
         public override void visitItem()
         {
-            m_writer.Delimiter(ref is_first).Append("()");
+            m_formatter.AppendSeperator(ref is_first).AppendNil();
         }
     }
 
     public class ConsWriter : ConsVisitor {
-        SexpWriter m_writer;
-        State m_state;
+        ConsFormatter m_formatter;
+        Config m_config;
 
-        bool m_is_quote = false;
-        AtomCtor m_atom = null;
-        bool m_abbreviated = false;
+        AtomCtor m_atom;
+        bool m_is_abbrev;
+        bool m_is_abbrev_body;
 
-        public ConsWriter(SexpWriter writer, State s)
-            : this(writer, s, false)
+        internal ConsWriter(ConsFormatter formatter, Config config)
+            : this(formatter, config, false)
         { }
 
-        public ConsWriter(SexpWriter writer, State s, bool abbreviated)
+        internal ConsWriter(ConsFormatter formatter, Config config, bool is_abbrev_body)
         {
-            m_state = s;
-            m_writer = writer;
-            m_abbreviated = abbreviated;
+            m_formatter = formatter;
+            m_config = config;
+            m_is_abbrev_body = is_abbrev_body;
         }
 
         public override void visitEnd()
         {
-            if (!m_is_quote) m_writer.Foot();
+            if (!m_is_abbrev) m_formatter.AppendFooter(m_is_abbrev_body);
         }
 
         public override AtomVisitor visit_Atom_car()
         {
-            return m_writer.nextCarAtomWriter(m_state, out m_atom);
+            m_atom = new AtomCtor();
+            return new AtomBuilder(m_atom);
         }
 
         public override ConsVisitor visit_Cons_car()
         {
-            m_writer.Head(m_abbreviated);
-            return m_writer.nextCarConsWriter(m_state);
+            m_formatter.AppendHeader(m_is_abbrev_body);
+
+            if (m_config.cons == m_formatter) {
+                return new ConsWriter(m_config.first_cons, m_config);
+            } else if (m_config.appl_cons_cdr == m_formatter || m_config.data_cons_cdr == m_formatter) {
+                return new ConsWriter(m_config.cons, m_config);
+            } else if (m_config.vect_cons == m_formatter || m_config.vect_cons_cdr == m_formatter) {
+                return new ConsWriter(m_config.vect_cons, m_config);
+            } else if (m_config.first_cons == m_formatter || m_config.first_cons_cdr == m_formatter || m_config.top_cons == m_formatter) {
+                return new ConsWriter(m_config.first_cons, m_config);
+            } else {
+                throw new Exception();
+            }
         }
 
         public override VectorVisitor visit_Vector_car()
         {
-            m_writer.Head(m_abbreviated);
-            return m_writer.nextCarVectorWriter(m_state);
+            m_formatter.AppendHeader(m_is_abbrev_body);
+            return new VectorWriter(m_config.vect, m_config);
         }
 
         public override void visit_car()
         {
-            m_writer.Head(m_abbreviated).Append("()");
+            m_formatter.AppendHeader(m_is_abbrev_body).AppendNil();
         }
 
         public override AtomVisitor visit_Atom_cdr()
         {
-            m_writer.Car(m_atom, m_abbreviated);
-            return m_writer.nextCdrAtomWriter(m_state);
+            if (m_atom != null) m_formatter.AppendAtom(m_atom.value, m_is_abbrev_body);
+
+            return new AtomWriter(m_config.atom_cdr);
         }
 
         public override ConsVisitor visit_Cons_cdr()
         {
-            m_writer.Abbrev(m_atom, m_abbreviated, out m_is_quote);
-            return m_writer.nextCdrConsWriter(m_is_quote, m_state, m_atom);
+            if (m_atom != null) m_formatter.AppendAbbrev(m_atom, m_is_abbrev_body, out m_is_abbrev);
+
+            if (m_config.cons == m_formatter || m_config.top_cons == m_formatter) {
+                if (m_atom == null || m_atom.value is Symbol) {
+                    return new ConsWriter(m_config.appl_cons_cdr, m_config, m_is_abbrev);
+                } else {
+                    return new ConsWriter(m_config.data_cons_cdr, m_config, m_is_abbrev);
+                }
+            } else if (m_config.appl_cons_cdr == m_formatter) {
+                return new ConsWriter(m_config.appl_cons_cdr, m_config, m_is_abbrev);
+            } else if (m_config.data_cons_cdr == m_formatter) {
+                return new ConsWriter(m_config.data_cons_cdr, m_config, m_is_abbrev);
+            } else if (m_config.first_cons == m_formatter || m_config.first_cons_cdr == m_formatter) {
+                return new ConsWriter(m_config.first_cons_cdr, m_config, m_is_abbrev);
+            } else if (m_config.vect_cons == m_formatter || m_config.vect_cons_cdr == m_formatter) {
+                return new ConsWriter(m_config.vect_cons_cdr, m_config, m_is_abbrev);
+            } else {
+                throw new Exception();
+            }
         }
 
         public override VectorVisitor visit_Vector_cdr()
         {
-            m_writer.Car(m_atom, m_abbreviated);
-            return m_writer.nextCdrVectorWriter(m_state);
+            if (m_atom != null) m_formatter.AppendAtom(m_atom.value, m_is_abbrev_body);
+
+            return new VectorWriter(m_config.vect_cdr, m_config);
         }
 
         public override void visit_cdr()
         {
-            m_writer.Car(m_atom, m_abbreviated);
+            if (m_atom != null) m_formatter.AppendAtom(m_atom.value, m_is_abbrev_body);
+
+            m_formatter.AppendNilCdr(m_is_abbrev_body);
         }
     }
 
     public class AtomWriter : AtomVisitor {
-        SexpWriter m_writer;
-        bool m_abbreviated;
+        Formatter m_formatter;
 
-        public AtomWriter(SexpWriter writer)
-            : this(writer, false)
-        {}
-
-        public AtomWriter(SexpWriter writer, bool abbreviated)
+        internal AtomWriter(Formatter formatter)
         {
-            m_writer = writer;
-            m_abbreviated = abbreviated;
+            m_formatter = formatter;
         }
 
         public override void visit(object o)
         {
-            m_writer.Head(m_abbreviated).Append(Literal.literal(o)).Foot();
+            m_formatter.AppendAtom(o, false).AppendFooter(false);
         }
     }
-
-#if false
-    public class TopLevelWriter : VectorVisitor {
-        Writer m_writer;
-
-        public TopLevelWriter(Writer writer)
-        {
-            m_writer = writer;
-        }
-
-        public override AtomVisitor visitItem_Atom()
-        {
-            return new TopAtomWriter(m_writer);
-        }
-
-        public override ConsVisitor visitItem_Cons()
-        {
-            return new ConsCarWriter(m_writer, StringUtil.repeat(System.Environment.NewLine, 2));// TopConsWriter(m_writer);
-        }
-
-        public override VectorVisitor visitItem_Vector()
-        {
-            return new TopVectorWriter(m_writer);
-        }
-
-        public override void visitItem()
-        {
-            m_writer.Append("()").End().End();
-        }
-    }
-
-    public class TopAtomWriter : AtomVisitor {
-        Writer m_writer;
-
-        public TopAtomWriter(Writer writer)
-        {
-            m_writer = writer;
-        }
-
-        public override void visit(object o)
-        {
-            m_writer.Append(Literal.literal(o)).End().End();
-        }
-    }
-
-    public class TopVectorWriter : VectorVisitor {
-        Writer m_writer;
-        bool is_first = true;
-
-        public TopVectorWriter(Writer writer)
-        {
-            m_writer = writer;
-        }
-
-        public override void visit()
-        {
-            m_writer.Append("#(");
-        }
-
-        public override void visitEnd()
-        {
-            m_writer.Append(")").End().End();
-        }
-
-        public void space()
-        {
-            if (is_first) {
-                is_first = false;
-            } else {
-                m_writer.Append(' ');
-            }
-        }
-
-        public override AtomVisitor visitItem_Atom()
-        {
-            space();
-            return new OldAtomWriter(m_writer);
-        }
-
-        public override ConsVisitor visitItem_Cons()
-        {
-            space();
-            return new ConsCarWriter(m_writer, "");
-        }
-
-        public override VectorVisitor visitItem_Vector()
-        {
-            space();
-            return new OldVectorWriter(m_writer);
-        }
-
-        public override void visitItem()
-        {
-            space();
-            m_writer.Append("()");
-        }
-    }
-
-    //public class TopConsWriter : ConsVisitor {
-    //    Writer m_writer;
-
-    //    public TopConsWriter(Writer writer)
-    //    {
-    //        m_writer = writer;
-    //    }
-
-    //    public override void visit()
-    //    {
-    //        m_writer.Append("(");
-    //        m_writer.Indent();
-    //    }
-
-    //    public override void visitEnd()
-    //    {
-    //        m_writer.Append(")").End().End();
-    //        m_writer.Unindent();
-    //    }
-
-    //    public override AtomVisitor visit_Atom_car()
-    //    {
-    //        return new AtomWriter(m_writer);
-    //    }
-
-    //    public override ConsVisitor visit_Cons_car()
-    //    {
-    //        return new ConsCarWriter(m_writer, "");
-    //    }
-
-    //    public override VectorVisitor visit_Vector_car()
-    //    {
-    //        return new VectorWriter(m_writer);
-    //    }
-
-    //    public override AtomVisitor visit_Atom_cdr()
-    //    {
-    //        m_writer.Append(" . ");
-    //        return new AtomWriter(m_writer);
-    //    }
-
-    //    public override ConsVisitor visit_Cons_cdr()
-    //    {
-    //        return new ConsCdrWriter(m_writer);
-    //    }
-
-    //    public override VectorVisitor visit_Vector_cdr()
-    //    {
-    //        m_writer.Append(" . ");
-    //        return new VectorWriter(m_writer);
-    //    }
-
-    //    public override void visit_car()
-    //    {
-    //        m_writer.Append("()");
-    //    }
-    //}
-
-    public class OldVectorWriter : VectorVisitor {
-        Writer m_writer;
-        bool is_first = true;
-
-        public OldVectorWriter(Writer writer)
-        {
-            m_writer = writer;
-        }
-
-        public override void visit()
-        {
-            m_writer.Append("#(");
-        }
-
-        public override void visitEnd()
-        {
-            m_writer.Append(")");
-        }
-
-        public void space()
-        {
-            if (is_first) {
-                is_first = false;
-            } else {
-                m_writer.Append(' ');
-            }
-        }
-
-        public override AtomVisitor visitItem_Atom()
-        {
-            space();
-            return new OldAtomWriter(m_writer);
-        }
-
-        public override ConsVisitor visitItem_Cons()
-        {
-            space();
-            return new ConsCarWriter(m_writer, "");
-        }
-
-        public override VectorVisitor visitItem_Vector()
-        {
-            space();
-            return new OldVectorWriter(m_writer);
-        }
-
-        public override void visitItem()
-        {
-            space();
-            m_writer.Append("()");
-        }
-    }
-
-    //public class QuoteVectorWriter : VectorVisitor {
-    //    Writer m_writer;
-    //    bool is_first = true;
-
-    //    public QuoteVectorWriter(Writer writer)
-    //    {
-    //        m_writer = writer;
-    //    }
-
-    //    public override void visit()
-    //    {
-    //        m_writer.Append("#(");
-    //    }
-
-    //    public override void visitEnd()
-    //    {
-    //        m_writer.Append(")");
-    //    }
-
-    //    public void space()
-    //    {
-    //        if (is_first) {
-    //            is_first = false;
-    //        } else {
-    //            m_writer.Append(' ');
-    //        }
-    //    }
-
-    //    public override AtomVisitor visitItem_Atom()
-    //    {
-    //        space();
-    //        return new OldAtomWriter(m_writer);
-    //    }
-
-    //    public override ConsVisitor visitItem_Cons()
-    //    {
-    //        space();
-    //        return new QuoteCarWriter(m_writer);
-    //    }
-
-    //    public override VectorVisitor visitItem_Vector()
-    //    {
-    //        space();
-    //        return new QuoteVectorWriter(m_writer);
-    //    }
-
-    //    public override void visitItem()
-    //    {
-    //        space();
-    //        m_writer.Append("()");
-    //    }
-    //}
-
-    public class ConsCarWriter : ConsVisitor {
-        Writer m_writer;
-        AtomCtor m_args;
-        bool m_is_quote = false;
-        string m_eol;
-
-        public ConsCarWriter(Writer writer, string eol)
-        {
-            m_writer = writer;
-            m_eol = eol;
-        }
-
-        public override void visitEnd()
-        {
-            if (!m_is_quote) {
-                m_writer.Unindent();
-                m_writer.Append(")");
-            }
-
-            m_writer.Append(m_eol);
-        }
-
-        public override AtomVisitor visit_Atom_car()
-        {
-            m_args = new AtomCtor();
-            return new AtomBuilder(m_args);
-        }
-
-        public override ConsVisitor visit_Cons_car()
-        {
-            m_writer.Append("(");
-            m_writer.Indent();
-            return new ConsCarWriter(m_writer, "");
-        }
-
-        public override VectorVisitor visit_Vector_car()
-        {
-            m_writer.Append("(");
-            m_writer.Indent();
-            return new OldVectorWriter(m_writer);
-        }
-
-        void write_head()
-        {
-            if (m_args != null) {
-                m_writer.Append("(").Append(Literal.literal(m_args.value));
-                m_writer.Indent();
-            }
-        }
-
-        void write_abbrev()
-        {
-            if (m_args != null) {
-                if (m_args.value is Symbol) {
-                    if (((Symbol)m_args.value).name == "quote") {
-                        m_writer.Append("'");
-                        m_is_quote = true;
-                        return;
-                    } else if (((Symbol)m_args.value).name == "quasiquotation") {
-                        m_writer.Append("`");
-                        m_is_quote = true;
-                        return;
-                    } else if (((Symbol)m_args.value).name == "unquote") {
-                        m_writer.Append(",");
-                        m_is_quote = true;
-                        return;
-                    } else if (((Symbol)m_args.value).name == "unquote-splicing") {
-                        m_writer.Append(",@");
-                        m_is_quote = true;
-                        return;
-                    }
-                }
-
-                m_writer.Append("(").Append(Literal.literal(m_args.value));
-                m_writer.Indent();
-            }
-        }
-
-        public override AtomVisitor visit_Atom_cdr()
-        {
-            write_head();
-            m_writer.Append(" . ");
-            return new OldAtomWriter(m_writer);
-        }
-
-        public override ConsVisitor visit_Cons_cdr()
-        {
-            write_abbrev();
-
-            if (m_is_quote) {
-                return new FooCdrWriter(m_writer);
-            } else {
-                return new ConsCdrWriter(m_writer);
-            }
-        }
-
-        public override VectorVisitor visit_Vector_cdr()
-        {
-            write_head();
-            m_writer.Append(" . ");
-            return new OldVectorWriter(m_writer);
-        }
-
-        public override void visit_car()
-        {
-            m_writer.Append("()");
-        }
-
-        public override void visit_cdr()
-        {
-            write_head();
-        }
-    }
-
-    public class ConsCdrWriter : ConsVisitor {
-        Writer m_writer;
-
-        public ConsCdrWriter(Writer writer)
-        {
-            m_writer = writer;
-        }
-
-        public override AtomVisitor visit_Atom_car()
-        {
-            m_writer.End().Begin();// Append(' ');
-            return new OldAtomWriter(m_writer);
-        }
-
-        public override ConsVisitor visit_Cons_car()
-        {
-            m_writer.End().Begin();// Append(' ');
-            return new ConsCarWriter(m_writer, "");
-        }
-
-        public override VectorVisitor visit_Vector_car()
-        {
-            m_writer.End().Begin();// Append(' ');
-            return new OldVectorWriter(m_writer);
-        }
-
-        public override AtomVisitor visit_Atom_cdr()
-        {
-            m_writer.Append(" . ");
-            return new OldAtomWriter(m_writer);
-        }
-
-        public override ConsVisitor visit_Cons_cdr()
-        {
-            return new ConsCdrWriter(m_writer);
-        }
-
-        public override VectorVisitor visit_Vector_cdr()
-        {
-            m_writer.Append(" . ");
-            return new OldVectorWriter(m_writer);
-        }
-
-        public override void visit_car()
-        {
-            m_writer.Append(" ()");
-        }
-    }
-
-    public class OldAtomWriter : AtomVisitor {
-        Writer m_writer;
-
-        public OldAtomWriter(Writer writer)
-        {
-            m_writer = writer;
-        }
-
-        public override void visit(object o)
-        {
-            m_writer.Append(Literal.literal(o));
-        }
-    }
-
-    //public class QuoteCarWriter : ConsVisitor {
-    //    Writer m_writer;
-
-    //    public QuoteCarWriter(Writer writer)
-    //    {
-    //        m_writer = writer;
-    //    }
-
-    //    public override void visit()
-    //    {
-    //        m_writer.Append("(");
-    //    }
-
-    //    public override void visitEnd()
-    //    {
-    //        m_writer.Append(")");
-    //    }
-
-    //    public override AtomVisitor visit_Atom_car()
-    //    {
-    //        return new OldAtomWriter(m_writer);
-    //    }
-
-    //    public override ConsVisitor visit_Cons_car()
-    //    {
-    //        return new QuoteCarWriter(m_writer);
-    //    }
-
-    //    public override VectorVisitor visit_Vector_car()
-    //    {
-    //        return new QuoteVectorWriter(m_writer);
-    //    }
-
-    //    public override AtomVisitor visit_Atom_cdr()
-    //    {
-    //        m_writer.Append(" . ");
-    //        return new OldAtomWriter(m_writer);
-    //    }
-
-    //    public override ConsVisitor visit_Cons_cdr()
-    //    {
-    //        return new QuoteCdrWriter(m_writer);
-    //    }
-
-    //    public override VectorVisitor visit_Vector_cdr()
-    //    {
-    //        m_writer.Append(" . ");
-    //        return new QuoteVectorWriter(m_writer);
-    //    }
-
-    //    public override void visit_car()
-    //    {
-    //        m_writer.Append("()");
-    //    }
-    //}
-
-    //public class QuoteCdrWriter : ConsVisitor {
-    //    Writer m_writer;
-
-    //    public QuoteCdrWriter(Writer writer)
-    //    {
-    //        m_writer = writer;
-    //    }
-
-    //    public override void visit()
-    //    {
-    //    }
-
-    //    public override void visitEnd()
-    //    {
-    //    }
-
-    //    public override AtomVisitor visit_Atom_car()
-    //    {
-    //        m_writer.Append(' ');
-    //        return new OldAtomWriter(m_writer);
-    //    }
-
-    //    public override ConsVisitor visit_Cons_car()
-    //    {
-    //        m_writer.Append(' ');
-    //        return new QuoteCarWriter(m_writer);
-    //    }
-
-    //    public override VectorVisitor visit_Vector_car()
-    //    {
-    //        m_writer.Append(' ');
-    //        return new QuoteVectorWriter(m_writer);
-    //    }
-
-    //    public override AtomVisitor visit_Atom_cdr()
-    //    {
-    //        m_writer.Append(" . ");
-    //        return new OldAtomWriter(m_writer);
-    //    }
-
-    //    public override ConsVisitor visit_Cons_cdr()
-    //    {
-    //        return new QuoteCdrWriter(m_writer);
-    //    }
-
-    //    public override VectorVisitor visit_Vector_cdr()
-    //    {
-    //        m_writer.Append(" . ");
-    //        return new QuoteVectorWriter(m_writer);
-    //    }
-
-    //    public override void visit_car()
-    //    {
-    //        m_writer.Append(" ()");
-    //    }
-    //}
-
-    public class FooCdrWriter : ConsVisitor {
-        Writer m_writer;
-
-        public FooCdrWriter(Writer writer)
-        {
-            m_writer = writer;
-        }
-
-        public override AtomVisitor visit_Atom_car()
-        {
-            return new OldAtomWriter(m_writer);
-        }
-
-        public override ConsVisitor visit_Cons_car()
-        {
-            return new ConsCarWriter(m_writer, "");
-        }
-
-        public override VectorVisitor visit_Vector_car()
-        {
-            return new OldVectorWriter(m_writer);
-        }
-
-        public override AtomVisitor visit_Atom_cdr()
-        {
-            throw new Exception();
-        }
-
-        public override ConsVisitor visit_Cons_cdr()
-        {
-            throw new Exception();
-        }
-
-        public override VectorVisitor visit_Vector_cdr()
-        {
-            throw new Exception();
-        }
-
-        public override void visit_car()
-        {
-            m_writer.Append("()");
-        }
-    }
-
-#if false
-    public interface IWritable {
-        void write(Writer writer);
-    }
-
-    public class TopLevelWriter : VectorVisitor, IWritable {
-        Writer m_writer;
-        List<object> top = new List<object>();
-
-        public TopLevelWriter(Writer writer)
-        {
-            m_writer = writer;
-        }
-
-        public void write(Writer writer)
-        {
-            foreach (IWritable w in top) {
-                if (w != null) {
-                    w.write(writer);
-                } else {
-                    writer.Append("()");
-                }
-
-                writer.End();
-                writer.End();
-            }
-        }
-
-        public override void visitEnd()
-        {
-            write(m_writer);
-        }
-
-        public override AtomVisitor visitItem_Atom()
-        {
-            AtomWriter atom = new AtomWriter();
-            top.Add(atom);
-            return atom;
-        }
-
-        public override ConsVisitor visitItem_Cons()
-        {
-            ListWriter cons = new ListWriter();
-            top.Add(cons);
-            return cons;
-        }
-
-        public override VectorVisitor visitItem_Vector()
-        {
-            VectorWriter vect = new VectorWriter();
-            top.Add(vect);
-            return vect;
-        }
-
-        public override void visitItem()
-        {
-            top.Add(null);
-        }
-    }
-
-    public class VectorWriter : VectorVisitor, IWritable {
-        List<object> vect = new List<object>();
-
-        public void write(Writer writer)
-        {
-            bool is_first = true;
-
-            writer.Append("#(");
-
-            foreach (IWritable w in vect) {
-                if (is_first) {
-                    is_first = false;
-                } else {
-                    writer.Append(' ');
-                }
-
-                if (w != null) {
-                    w.write(writer);
-                } else {
-                    writer.Append("()");
-                }
-            }
-
-            writer.Append(")");
-        }
-
-        public override AtomVisitor visitItem_Atom()
-        {
-            AtomWriter atom = new AtomWriter();
-            vect.Add(atom);
-            return atom;
-        }
-
-        public override ConsVisitor visitItem_Cons()
-        {
-            ListWriter list = new ListWriter();
-            vect.Add(list);
-            return list;
-        }
-
-        public override VectorVisitor visitItem_Vector()
-        {
-            VectorWriter new_vect = new VectorWriter();
-            vect.Add(new_vect);
-            return new_vect;
-        }
-
-        public override void visitItem()
-        {
-            vect.Add(null);
-        }
-    }
-
-    public class AtomWriter : AtomVisitor, IWritable {
-        string m_literal;
-        public object value;
-
-        public void write(Writer writer)
-        {
-            writer.Append(m_literal);
-        }
-
-        public override void visit(object v)
-        {
-            m_literal = Literal.literal(v);
-            value = v;
-        }
-    }
-
-    public class ListWriter : ConsVisitor, IWritable {
-        IWritable car;
-        IWritable cdr;
-
-        public void write(Writer writer)
-        {
-            bool is_quote = false;
-            string quote_sym = "";
-            string quote_ch = "";
-
-            // TODO - clean up and generalize this 
-            if (car is AtomWriter) {
-                AtomWriter atom = (AtomWriter)car;
-                if (atom.value is Symbol) {
-                    Symbol sym = atom.value as Symbol;
-                    if (sym.name == "quote") {
-                        is_quote = true;
-                        quote_sym = "quote";
-                        quote_ch = "'";
-                    } else if (sym.name == "quasiquotation") {
-                        is_quote = true;
-                        quote_sym = "quasiquotation";
-                        quote_ch = "`";
-                    } else if (sym.name == "unquote") {
-                        is_quote = true;
-                        quote_sym = "unquote";
-                        quote_ch = ",";
-                    } else if (sym.name == "unquote-splicing") {
-                        is_quote = true;
-                        quote_sym = "unquote-splicing";
-                        quote_ch = ",@";
-                    }
-                }
-            }
-
-            if (is_quote) {
-                if (cdr == null) {
-                    writer.Append("("+quote_sym+")");
-                } else {
-                    writer.Append(quote_ch);
-                    cdr.write(writer);
-                }
-            } else {
-                writer.Indent();
-                writer.Append("(");
-
-                if (car != null) {
-                    car.write(writer);
-                } else {
-                    writer.Append("()");
-                }
-
-                if (cdr != null) {
-                    if (!(cdr is ConsWriter)) {
-                        writer.Append(" . ");
-                    } else {
-                        writer.End();
-                    }
-
-                    cdr.write(writer);
-                }
-
-                writer.Unindent();
-                writer.Append(")");
-            }
-        }
-
-        public override AtomVisitor visit_Atom_car()
-        {
-            AtomWriter atom = new AtomWriter();
-            car = atom;
-            return atom;
-        }
-
-        public override ConsVisitor visit_Cons_car()
-        {
-            ListWriter list = new ListWriter();
-            car = list;
-            return list;
-        }
-
-        public override VectorVisitor visit_Vector_car()
-        {
-            VectorWriter vect = new VectorWriter();
-            car = vect;
-            return vect;
-        }
-
-        public override AtomVisitor visit_Atom_cdr()
-        {
-            AtomWriter atom = new AtomWriter();
-            cdr = atom;
-            return atom;
-        }
-
-        public override ConsVisitor visit_Cons_cdr()
-        {
-            ConsWriter cons = new ConsWriter();
-            cdr = cons;
-            return cons;
-        }
-
-        public override VectorVisitor visit_Vector_cdr()
-        {
-            VectorWriter vect = new VectorWriter();
-            cdr = vect;
-            return vect;
-        }
-    }
-
-    public class ConsWriter : ConsVisitor, IWritable {
-        IWritable car;
-        IWritable cdr;
-
-        public void write(Writer writer)
-        {
-            if (car != null) {
-                car.write(writer);
-            } else {
-                writer.Append("()");
-            }
-
-            if (cdr != null) {
-                writer.End();
-                cdr.write(writer);
-            }
-        }
-
-        public override AtomVisitor visit_Atom_car()
-        {
-            AtomWriter atom = new AtomWriter();
-            car = atom;
-            return atom;
-        }
-
-        public override ConsVisitor visit_Cons_car()
-        {
-            ListWriter list = new ListWriter();
-            car = list;
-            return list;
-        }
-
-        public override VectorVisitor visit_Vector_car()
-        {
-            VectorWriter vect = new VectorWriter();
-            car = vect;
-            return vect;
-        }
-
-        public override AtomVisitor visit_Atom_cdr()
-        {
-            AtomWriter atom = new AtomWriter();
-            cdr = atom;
-            return atom;
-        }
-
-        public override ConsVisitor visit_Cons_cdr()
-        {
-            ConsWriter cons = new ConsWriter();
-            cdr = cons;
-            return cons;
-        }
-
-        public override VectorVisitor visit_Vector_cdr()
-        {
-            VectorWriter vect = new VectorWriter();
-            cdr = vect;
-            return vect;
-        }
-    }
-#endif
-#endif
-
 }

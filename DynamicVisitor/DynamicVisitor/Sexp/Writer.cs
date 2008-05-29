@@ -129,7 +129,7 @@ namespace Sexp {
 
         public override ConsVisitor visit_Cons_cdr()
         {
-            if (m_atom != null) m_formatter.AppendAbbrev(m_atom, m_is_abbrev_body, out m_is_abbrev);
+            if (m_atom != null) m_formatter.AppendAbbrev(m_atom.value, m_is_abbrev_body, out m_is_abbrev);
 
             if (m_config.cons == m_formatter || m_config.top_cons == m_formatter) {
                 if (m_atom != null) {

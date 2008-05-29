@@ -1,19 +1,20 @@
 using System;
 using System.IO;
+
 using Util;
 
 namespace Sexp {
     public class Reader : IDisposable {
-        TextReader m_reader;
+        readonly TextReader m_reader;
 
         string m_line;
         int m_index;
         int m_peek;
 
-        TxtLocation m_loc;
+        readonly TxtLocation m_loc;
         public TxtLocation loc { get { return m_loc; } }
 
-        int m_tabsize = 4;
+        int m_tabsize;
         string m_tab;
 
         public int tabsize
@@ -29,14 +30,15 @@ namespace Sexp {
 
         public Reader(string path)
         {
-            m_reader = new StreamReader(path);
-            m_loc = new TxtLocation();
-            m_loc.path = path;
+            tabsize = 4;
 
-            init_read();
+            m_reader = new StreamReader(path);
+            m_loc = new TxtLocation(path);
+
+            init();
         }
 
-        void init_read()
+        void init()
         {
             next();
             m_peek = read();
@@ -47,13 +49,17 @@ namespace Sexp {
             string raw = m_reader.ReadLine();
 
             if (null == raw) {
-                m_loc.context = null;
                 m_line = null;
                 return false;
             } else {
+                m_line = raw;
+
                 m_loc.context = raw.Replace("\t", m_tab);
-                m_line = raw + System.Environment.NewLine;
+
+                if (m_reader.Peek() != -1) m_line += System.Environment.NewLine;
+
                 m_index = 0;
+
                 return true;
             }
         }
@@ -67,15 +73,15 @@ namespace Sexp {
             return m_line[m_index++];
         }
 
-        public int getc()
+        public int GetChar()
         {
             int cin = m_peek;
 
             m_peek = read();
 
-            if (cin != -1) {
-                m_loc.column++;
+            m_loc.column++;
 
+            if (cin != -1) {
                 if ('\n' == cin) {
                     m_loc.line++;
                     m_loc.column = 0;
@@ -87,7 +93,7 @@ namespace Sexp {
             return cin;
         }
 
-        public int peek()
+        public int Peek()
         {
             return m_peek;
         }

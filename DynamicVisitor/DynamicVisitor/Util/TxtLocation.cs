@@ -1,34 +1,40 @@
-using System.Text;
+using System;
 
 namespace Util {
+
+    [Serializable]
     public class TxtLocation {
-        public string path;
+        string m_path;
+        public string path { get { return m_path; } set { m_path = value ?? ""; } }
+
         public int column;
         public int line;
-        public string context;
 
-        public TxtLocation()
+        string m_context;
+        public string context { get { return m_context; } set { m_context = value ?? ""; } }
+
+        public TxtLocation(string path)
         {
-            this.path = "";
-            this.column = 0;
-            this.line = 1;
-            this.context = "";
+            m_path    = path;
+            column    = 0;
+            line      = 1;
+            m_context = "";
         }
 
         public TxtLocation(string path, int column, int line, string context)
         {
-            this.path = path;
-            this.column = column;
-            this.line = line;
+            this.path    = path;
+            this.column  = column;
+            this.line    = line;
             this.context = context;
         }
 
         public void copy(TxtLocation loc)
         {
-            path = loc.path;
-            column = loc.column;
-            line = loc.line;
-            context = loc.context;
+            m_path    = loc.m_path;
+            column    = loc.column;
+            line      = loc.line;
+            m_context = loc.m_context;
         }
 
         public TxtLocation clone()
@@ -38,14 +44,27 @@ namespace Util {
 
         public string PathPoint()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(path).Append("(").Append(line).Append(",").Append(column).Append(")");
-            return sb.ToString();
+            return String.Format("{0}({1},{2})", path, line, column);
         }
 
-        public override string ToString()
+        public string FancyContext(int width)
         {
-            return PathPoint();
+            int half = width/2;
+
+            int start = half < column ? column-half : 0;
+            int arrow = start > 0 ? column-start : column;
+
+            if (start+width > context.Length) {
+                width = context.Length-start;
+            }
+
+            string snippet = context.Substring(start, width);
+
+            return String.Format("{0}\n{1}\n", snippet, "^".PadLeft(arrow, '_'));
         }
+
+        public string FancyContext() { return FancyContext(78); }
+
+        public override string ToString() { return PathPoint(); }
     }
 }

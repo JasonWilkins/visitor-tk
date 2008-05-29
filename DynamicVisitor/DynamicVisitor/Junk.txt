@@ -2924,3 +2924,28 @@ namespace CodeBuilder {
 
             #endregion
         }*/
+
+
+
+
+        //void throw new SyntaxError(string context, Token[] tokens)
+        //{
+        //    if (0 == m_errors || m_error_loc.line != m_attrib.loc.line || m_error_loc.column != m_attrib.loc.column) {
+        //        m_error_loc.copy(m_attrib.loc);
+
+        //        Console.WriteLine(
+        //            "{0}: {1}: expected {2} got {3}",
+        //            m_attrib.loc.ToString(),
+        //            context,
+        //            token_string(tokens),
+        //            fancy_token(lookahead));
+
+        //        Console.WriteLine();
+        //        Console.WriteLine(m_attrib.loc.context);
+        //        Console.WriteLine("^".PadLeft(m_attrib.loc.column, '_'));
+        //        Console.WriteLine();
+
+        //        m_errors++;
+        //    }
+        //}
+

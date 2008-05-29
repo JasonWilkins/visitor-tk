@@ -1,11 +1,11 @@
 using System;
 
 namespace Sexp {
-    public class VectorMultiVisitor : VectorVisitor {
-        VectorVisitor car;
-        VectorVisitor cdr;
+    public class VectorMultiVisitor : VectVisitor {
+        VectVisitor car;
+        VectVisitor cdr;
 
-        public VectorMultiVisitor(VectorVisitor car, VectorVisitor cdr)
+        public VectorMultiVisitor(VectVisitor car, VectVisitor cdr)
         {
             this.car = car;
             this.cdr = cdr;
@@ -15,7 +15,7 @@ namespace Sexp {
         public override void visitEnd() { car.visitEnd(); cdr.visitEnd(); }
         public override AtomVisitor visitItem_Atom() { return new AtomMultiVisitor(car.visitItem_Atom(), cdr.visitItem_Atom()); }
         public override ConsVisitor visitItem_Cons() { return new ConsMultiVisitor(car.visitItem_Cons(), cdr.visitItem_Cons()); }
-        public override VectorVisitor visitItem_Vector() { return new VectorMultiVisitor(car.visitItem_Vector(), cdr.visitItem_Vector()); }
+        public override VectVisitor visitItem_Vect() { return new VectorMultiVisitor(car.visitItem_Vect(), cdr.visitItem_Vect()); }
         public override void visitItem() { car.visitItem(); cdr.visitItem(); }
     }
 
@@ -54,10 +54,10 @@ namespace Sexp {
         public override void visitEnd() { car.visitEnd(); cdr.visitEnd(); }
         public override AtomVisitor visit_Atom_car() { return new AtomMultiVisitor(car.visit_Atom_car(), cdr.visit_Atom_car()); }
         public override ConsVisitor visit_Cons_car() { return new ConsMultiVisitor(car.visit_Cons_car(), cdr.visit_Cons_car()); }
-        public override VectorVisitor visit_Vector_car() { return new VectorMultiVisitor(car.visit_Vector_car(), cdr.visit_Vector_car()); }
+        public override VectVisitor visit_Vect_car() { return new VectorMultiVisitor(car.visit_Vect_car(), cdr.visit_Vect_car()); }
         public override AtomVisitor visit_Atom_cdr() { return new AtomMultiVisitor(car.visit_Atom_cdr(), cdr.visit_Atom_cdr()); }
         public override ConsVisitor visit_Cons_cdr() { return new ConsMultiVisitor(car.visit_Cons_cdr(), cdr.visit_Cons_cdr()); }
-        public override VectorVisitor visit_Vector_cdr() { return new VectorMultiVisitor(car.visit_Vector_cdr(), cdr.visit_Vector_cdr()); }
+        public override VectVisitor visit_Vect_cdr() { return new VectorMultiVisitor(car.visit_Vect_cdr(), cdr.visit_Vect_cdr()); }
         public override void visit_car() { car.visit_car(); cdr.visit_car(); }
         public override void visit_cdr() { car.visit_cdr(); cdr.visit_cdr(); }
     }

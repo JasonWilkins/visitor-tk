@@ -18,6 +18,18 @@ namespace Util {
 
         public abstract Writer Begin();
         public abstract Writer End();
+
+        public Writer BeginLine(int lines)
+        {
+            for (int i = 0; i < lines; i++) {
+                End();
+            }
+
+            if (lines > 0) Begin();
+
+            return this;
+        }
+
         public abstract Writer Append(string s);
         public abstract Writer Append(char c);
 

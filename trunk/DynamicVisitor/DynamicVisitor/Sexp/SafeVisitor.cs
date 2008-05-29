@@ -1,10 +1,10 @@
 using System;
 
 namespace Sexp {
-    public class SafeVectorVisitor : VectorVisitor {
-        VectorVisitor m_vect;
+    public class SafeVectorVisitor : VectVisitor {
+        VectVisitor m_vect;
 
-        public SafeVectorVisitor(VectorVisitor vect)
+        public SafeVectorVisitor(VectVisitor vect)
         {
             m_vect = vect;
         }
@@ -13,7 +13,7 @@ namespace Sexp {
         public override void visitEnd() { if (m_vect != null) m_vect.visitEnd(); }
         public override AtomVisitor visitItem_Atom() { return new SafeAtomVisitor(m_vect != null ? m_vect.visitItem_Atom() : null); }
         public override ConsVisitor visitItem_Cons() { return new SafeConsVisitor(m_vect != null ? m_vect.visitItem_Cons() : null); }
-        public override VectorVisitor visitItem_Vector() { return new SafeVectorVisitor(m_vect != null ? m_vect.visitItem_Vector() : null); }
+        public override VectVisitor visitItem_Vect() { return new SafeVectorVisitor(m_vect != null ? m_vect.visitItem_Vect() : null); }
         public override void visitItem() { if (m_vect != null) m_vect.visitItem(); }
     }
 
@@ -48,10 +48,10 @@ namespace Sexp {
         public override void visitEnd() { if (m_cons != null) m_cons.visitEnd(); }
         public override AtomVisitor visit_Atom_car() { return new SafeAtomVisitor(m_cons != null ? m_cons.visit_Atom_car() : null); }
         public override ConsVisitor visit_Cons_car() { return new SafeConsVisitor(m_cons != null ? m_cons.visit_Cons_car() : null); }
-        public override VectorVisitor visit_Vector_car() { return new SafeVectorVisitor(m_cons != null ? m_cons.visit_Vector_car() : null); }
+        public override VectVisitor visit_Vect_car() { return new SafeVectorVisitor(m_cons != null ? m_cons.visit_Vect_car() : null); }
         public override AtomVisitor visit_Atom_cdr() { return new SafeAtomVisitor(m_cons != null ? m_cons.visit_Atom_cdr() : null); }
         public override ConsVisitor visit_Cons_cdr() { return new SafeConsVisitor(m_cons != null ? m_cons.visit_Cons_cdr() : null); }
-        public override VectorVisitor visit_Vector_cdr() { return new SafeVectorVisitor(m_cons != null ? m_cons.visit_Vector_cdr() : null); }
+        public override VectVisitor visit_Vect_cdr() { return new SafeVectorVisitor(m_cons != null ? m_cons.visit_Vect_cdr() : null); }
         public override void visit_car() { if (m_cons != null) m_cons.visit_car(); }
         public override void visit_cdr() { if (m_cons != null) m_cons.visit_cdr(); }
     }

@@ -522,9 +522,9 @@ namespace Main {
                 Parser parser = new Parser(file, visitor);
 
                 Console.WriteLine("parsing: {0}", path);
-                parser.read();
+                parser.SafeRead();
                 Console.WriteLine(writer.ToString());
-                Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
+                //Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
             }
         }
 
@@ -537,9 +537,9 @@ namespace Main {
                 Parser parser = new Parser(file, visitor);
 
                 Console.WriteLine("parsing: {0}", path);
-                parser.read();
+                parser.SafeRead();
                 //Console.WriteLine(writer.ToString());
-                Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
+                //Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
             }
         }
 
@@ -550,13 +550,13 @@ namespace Main {
                 VectVisitor visitor = GetTopLevelWriter.create(writer);
                 Parser parser = new Parser(file, visitor);
 
-                parser.read();
-                Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
+                parser.SafeRead();
+                //Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
 
-                if (parser.errors == 0) {
+                //if (parser.errors == 0) {
                     using (System.IO.StreamWriter output1 = new System.IO.StreamWriter(path + ".parsed.txt", false)) {
                         output1.Write(writer.ToString());
-                    }
+                //    }
                 }
             }
         }
@@ -568,9 +568,9 @@ namespace Main {
                 using (FileWriter writer = new FileWriter(out_path)) {
                     VectVisitor visitor = GetTopLevelWriter.create(writer);
                     Parser parser = new Parser(file, visitor);
-                    parser.read();
-                    Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
-                    Console.WriteLine(parser.errors == 0 ? "OK" : "FAILED!");
+                    Console.WriteLine(parser.SafeRead() ? "OK" : "FAILED");
+                    //Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
+                    //Console.WriteLine(parser.errors == 0 ? "OK" : "FAILED!");
                 }
             }
             Console.WriteLine();
@@ -598,9 +598,9 @@ namespace Main {
                 Parser parser = new Parser(file, visitor);
 
                 Console.WriteLine("parsing: {0}", path);
-                parser.read();
-                Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
-                Console.WriteLine(parser.errors == 0 ? "OK" : "FAILED!");
+                Console.WriteLine(parser.SafeRead() ? "OK" : "FAILED");
+                //Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
+                //Console.WriteLine(parser.errors == 0 ? "OK" : "FAILED!");
                 return top.value;
             }
         }
@@ -610,7 +610,7 @@ namespace Main {
             Console.WriteLine("parsing {0} into memory then writing it out to {1}", in_path, out_path);
             using (FileWriter writer = new FileWriter(out_path)) {
                 object[] top = build(in_path);
-                DynamicVisitor.accept(top, GetTopLevelWriter.create(writer));
+                if (top != null) DynamicVisitor.accept(top, GetTopLevelWriter.create(writer));
             }
             Console.WriteLine();
         }
@@ -622,13 +622,14 @@ namespace Main {
                 using (Reader file2 = new Reader(path2)) {
                     Log log1 = new Log();
                     Log log2 = new Log();
-                    Util.TxtLocation loc = new Util.TxtLocation();
-                    VectorLogger logger1 = new VectorLogger(log1, loc, new SafeVectorVisitor(null));
-                    VectorLogger logger2 = new VectorLogger(log2, loc, new SafeVectorVisitor(null));
-                    Parser p1 = new Parser(file1, logger1, loc);
-                    Parser p2 = new Parser(file2, logger2, loc);
-                    p1.read();
-                    p2.read();
+                    Util.TxtLocation loc1 = new Util.TxtLocation(path1);
+                    Util.TxtLocation loc2 = new Util.TxtLocation(path2);
+                    VectorLogger logger1 = new VectorLogger(log1, loc1, new SafeVectorVisitor(null));
+                    VectorLogger logger2 = new VectorLogger(log2, loc2, new SafeVectorVisitor(null));
+                    Parser p1 = new Parser(file1, logger1, loc1);
+                    Parser p2 = new Parser(file2, logger2, loc2);
+                    p1.SafeRead();
+                    p2.SafeRead();
                     LogComparer.compare_logs(log1, log2);
                 }
             }
@@ -642,12 +643,13 @@ namespace Main {
                 using (Reader file2 = new Reader(path2)) {
                     Log log1 = new Log();
                     Log log2 = new Log();
-                    Util.TxtLocation loc = new Util.TxtLocation();
-                    VectorLogger logger1 = new VectorLogger(log1, loc, new SafeVectorVisitor(null));
-                    VectorLogger logger2 = new VectorLogger(log2, loc, new SafeVectorVisitor(null));
+                    Util.TxtLocation loc1 = new Util.TxtLocation(path1);
+                    Util.TxtLocation loc2 = new Util.TxtLocation(path2);
+                    VectorLogger logger1 = new VectorLogger(log1, loc1, new SafeVectorVisitor(null));
+                    VectorLogger logger2 = new VectorLogger(log2, loc2, new SafeVectorVisitor(null));
                     VectorMultiVisitor mv = new VectorMultiVisitor(logger1, logger2);
-                    Parser p1 = new Parser(file1, mv, loc);
-                    p1.read();
+                    Parser p1 = new Parser(file1, mv, loc1);
+                    p1.SafeRead();
                     LogComparer.compare_logs(log1, log2);
                 }
             }
@@ -661,10 +663,10 @@ namespace Main {
             Log log1 = new Log();
 
             using (Reader file = new Reader(path)) {
-                Util.TxtLocation loc = new Util.TxtLocation();
+                Util.TxtLocation loc = new Util.TxtLocation(path);
                 VectorLogger logger = new VectorLogger(log1, loc, new SafeVectorVisitor(null));
                 Parser p = new Parser(file, logger, loc);
-                p.read();
+                p.SafeRead();
             }
 
             Log log2 = new Log();
@@ -673,11 +675,11 @@ namespace Main {
                 VectBox top = new VectBox();
                 VectBuilder builder = new VectBuilder(top);
                 Parser p = new Parser(file, builder);
-                Util.TxtLocation loc = new Util.TxtLocation();
-                p.read();
+                Util.TxtLocation loc = new Util.TxtLocation(path);
+                p.SafeRead();
 
                 VectorLogger logger = new VectorLogger(log2, loc, new SafeVectorVisitor(null));
-                DynamicVisitor.accept(top.value, logger);
+                if (top.value != null) DynamicVisitor.accept(top.value, logger);
             }
 
             LogComparer.compare_logs(log1, log2);
@@ -879,9 +881,9 @@ namespace Main {
             //System.IO.TextWriter my_out = new System.IO.StreamWriter("output.txt");
             //Console.SetOut(my_out);
             Reader f = new Reader("test3.txt");
-            Util.TxtLocation loc = new Util.TxtLocation();
+            Util.TxtLocation loc = new Util.TxtLocation("test3.txt");
             Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new StandardEnvironment(), loc)), loc);
-            p.read();
+            p.SafeRead();
             //Vector v = build("test.txt");
             //DynamicVisitor.accept(v, new IntVisitor());
             //DynamicVisitor.accept(v, new Interpreter(new TestEnvironment(), null));

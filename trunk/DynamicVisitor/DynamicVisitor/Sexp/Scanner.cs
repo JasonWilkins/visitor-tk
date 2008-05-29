@@ -20,8 +20,8 @@ namespace Sexp {
 
         char getc()
         {
-            int new_cin = m_reader.getc();
-            int new_peek = m_reader.peek();
+            int new_cin = m_reader.GetChar();
+            int new_peek = m_reader.Peek();
 
             if (new_peek != -1) {
                 peek = (char)new_peek;

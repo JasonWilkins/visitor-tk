@@ -116,14 +116,14 @@ namespace Sexp {
         }
     }
 
-    public class VectorLogger : VectorVisitor {
-        VectorVisitor m_next;
+    public class VectorLogger : VectVisitor {
+        VectVisitor m_next;
         int m_sequence = 0;
         string m_class_name = "VectorLogger";
         Log m_log = new Log();
         TxtLocation m_loc;
 
-        public VectorLogger(Log log, TxtLocation loc, VectorVisitor next)
+        public VectorLogger(Log log, TxtLocation loc, VectVisitor next)
         {
             m_log = log;
             m_next = next;
@@ -154,10 +154,10 @@ namespace Sexp {
             return new ConsLogger(m_log, m_loc, m_next.visitItem_Cons());
         }
 
-        public override VectorVisitor visitItem_Vector()
+        public override VectVisitor visitItem_Vect()
         {
             m_log.Add(m_sequence++, m_loc,  m_class_name, "visitItem_Vector");
-            return new VectorLogger(m_log, m_loc, m_next.visitItem_Vector());
+            return new VectorLogger(m_log, m_loc, m_next.visitItem_Vect());
         }
 
         public override void visitItem()
@@ -271,10 +271,10 @@ namespace Sexp {
             m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_Cons_car()");
             return new ConsLogger(m_log, m_loc, m_next.visit_Cons_car());
         }
-        public override VectorVisitor visit_Vector_car()
+        public override VectVisitor visit_Vect_car()
         {
             m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_Vector_car()");
-            return new VectorLogger(m_log, m_loc, m_next.visit_Vector_car());
+            return new VectorLogger(m_log, m_loc, m_next.visit_Vect_car());
         }
         public override AtomVisitor visit_Atom_cdr()
         {
@@ -288,10 +288,10 @@ namespace Sexp {
             return new ConsLogger(m_log, m_loc, m_next.visit_Cons_cdr());
         }
 
-        public override VectorVisitor visit_Vector_cdr()
+        public override VectVisitor visit_Vect_cdr()
         {
             m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_Vector_cdr()");
-            return new VectorLogger(m_log, m_loc, m_next.visit_Vector_cdr());
+            return new VectorLogger(m_log, m_loc, m_next.visit_Vect_cdr());
         }
 
         public override void visit_car()

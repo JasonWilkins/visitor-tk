@@ -47,7 +47,7 @@ namespace Sexp {
         }
     }
 
-    public class Interpreter : VectorVisitor {
+    public class Interpreter : VectVisitor {
         Environment m_env;
         TxtLocation m_loc;
         Print m_print = new Print();
@@ -68,7 +68,7 @@ namespace Sexp {
             return new TopLevelConsInterpreter(m_env, m_loc, m_print, new List<object>());
         }
 
-        public override VectorVisitor visitItem_Vector()
+        public override VectVisitor visitItem_Vect()
         {
             return new TopLevelVectInterpreter(m_env, m_loc, m_print, new List<object>());
         }
@@ -232,7 +232,7 @@ namespace Sexp {
             return new CombinationInterpreter(m_env, m_new_loc, m_new_args);
         }
 
-        public override VectorVisitor visit_Vector_car()
+        public override VectVisitor visit_Vect_car()
         {
             return new VectInterpreter(m_env, m_new_loc, m_new_args);
         }
@@ -247,7 +247,7 @@ namespace Sexp {
             return new ConsInterpreter(m_env, m_new_loc, m_new_args);
         }
 
-        public override VectorVisitor visit_Vector_cdr()
+        public override VectVisitor visit_Vect_cdr()
         {
             throw new Exception("combination must be a proper list");
         }
@@ -284,7 +284,7 @@ namespace Sexp {
             return new CombinationInterpreter(m_env, m_loc, m_args);
         }
 
-        public override VectorVisitor visit_Vector_car()
+        public override VectVisitor visit_Vect_car()
         {
             return new VectInterpreter(m_env, m_loc, m_args);
         }
@@ -299,7 +299,7 @@ namespace Sexp {
             return new ConsInterpreter(m_env, m_loc, m_args);
         }
 
-        public override VectorVisitor visit_Vector_cdr()
+        public override VectVisitor visit_Vect_cdr()
         {
             throw new Exception("combination must be a proper list");
         }
@@ -313,7 +313,7 @@ namespace Sexp {
         { }
     }
 
-    class VectInterpreter : VectorVisitor {
+    class VectInterpreter : VectVisitor {
         Environment m_env;
         TxtLocation m_loc;
 
@@ -343,7 +343,7 @@ namespace Sexp {
             return new CombinationInterpreter(m_env, m_loc, m_vect);
         }
 
-        public override VectorVisitor visitItem_Vector()
+        public override VectVisitor visitItem_Vect()
         {
             return new VectInterpreter(m_env, m_loc, m_vect);
         }

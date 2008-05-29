@@ -7,21 +7,19 @@ namespace Sexp {
     public class Parser {
         Scanner m_scanner;
         Attributes m_attrib;
-        VectorVisitor m_visitor;
-        int m_errors = 0;
+        VectVisitor m_visitor;
         TxtLocation m_loc;
+
         TxtLocation m_error_loc = new TxtLocation();
 
-        public int errors
-        {
-            get { return m_errors; }
-        }
+        int m_errors = 0;
+        public int errors { get { return m_errors; } }
 
-        public Parser(Reader reader, VectorVisitor visitor)
+        public Parser(Reader reader, VectVisitor visitor)
             : this(reader, visitor, null)
         { }
 
-        public Parser(Reader reader, VectorVisitor visitor, TxtLocation loc)
+        public Parser(Reader reader, VectVisitor visitor, TxtLocation loc)
         {
             m_scanner = new Scanner(reader);
             m_visitor = visitor;
@@ -80,7 +78,7 @@ namespace Sexp {
 
                 Console.WriteLine();
                 Console.WriteLine(m_attrib.loc.context);
-                Console.WriteLine(StringUtil.repeat('_', m_attrib.loc.column-1) + '^');
+                Console.WriteLine("^".PadLeft(m_attrib.loc.column, '_'));
                 Console.WriteLine();
 
                 m_errors++;
@@ -112,7 +110,7 @@ namespace Sexp {
             match(Token.EOF);
         }
 
-        void top_level(VectorVisitor vec)
+        void top_level(VectVisitor vec)
         {
             datum_list(vec);
 
@@ -122,7 +120,7 @@ namespace Sexp {
             }
         }
 
-        void datum_list(VectorVisitor vec)
+        void datum_list(VectVisitor vec)
         {
             while (
                 Token.BOOL == lookahead ||
@@ -141,7 +139,7 @@ namespace Sexp {
             }
         }
 
-        void top_datum(VectorVisitor top)
+        void top_datum(VectVisitor top)
         {
             if (Token.BOOL == lookahead ||
                 Token.NUM == lookahead ||
@@ -165,7 +163,7 @@ namespace Sexp {
                 abbreviation(cons);
                 cons.visitEnd();
             } else if (Token.VECTOR == lookahead) {
-                VectorVisitor vec = top.visitItem_Vector();
+                VectVisitor vec = top.visitItem_Vect();
                 vec.visit();
                 vector(vec);
                 vec.visitEnd();
@@ -175,7 +173,7 @@ namespace Sexp {
             }
         }
 
-        void top_list(VectorVisitor top)
+        void top_list(VectVisitor top)
         {
             if (Token.CLOSE_PAREN == lookahead) {
                 match(Token.CLOSE_PAREN);
@@ -230,7 +228,7 @@ namespace Sexp {
                 abbreviation(new_cons);
                 new_cons.visitEnd();
             } else if (Token.VECTOR == lookahead) {
-                VectorVisitor vec = set_car ? cons.visit_Vector_car() : cons.visit_Vector_cdr();
+                VectVisitor vec = set_car ? cons.visit_Vect_car() : cons.visit_Vect_cdr();
                 vec.visit();
                 vector(vec);
                 vec.visitEnd();
@@ -419,7 +417,7 @@ namespace Sexp {
             //atom.visitEnd();
         }
 
-        void vector(VectorVisitor vec)
+        void vector(VectVisitor vec)
         {
             if (Token.VECTOR == lookahead) {
                 match(Token.VECTOR);
@@ -431,7 +429,7 @@ namespace Sexp {
             }
         }
 
-        void vector_contents(VectorVisitor vec)
+        void vector_contents(VectVisitor vec)
         {
             if (Token.CLOSE_PAREN == lookahead) {
                 // EPSILON

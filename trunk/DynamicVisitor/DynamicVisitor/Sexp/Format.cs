@@ -207,28 +207,13 @@ namespace Sexp {
 
         bool write_abbrev(Symbol sym)
         {
-            string abbrev = get_abbreviation(sym.name);
+            string abbrev = Abbrev.get_abbrev(sym);
 
             if (abbrev != null) {
                 m_writer.Append(abbrev);
                 return true;
             } else {
                 return false;
-            }
-        }
-
-        string get_abbreviation(string name)
-        {
-            if (name == "quote") {
-                return "'";
-            } else if (name == "quasiquotation") {
-                return "`";
-            } else if (name == "unquote") {
-                return ",";
-            } else if (name == "unquote-splicing") {
-                return ",@";
-            } else {
-                return null;
             }
         }
     }

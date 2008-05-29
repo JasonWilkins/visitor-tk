@@ -177,7 +177,7 @@ namespace Sexp {
                 attrib.token = Token.CLOSE_PAREN;
             } else if ('\'' == cin) {
                 attrib.literal = "'";
-                attrib.token = Token.SINGLE_QUOTE;
+                attrib.token = Token.QUOTE;
             } else if ('`' == cin) {
                 attrib.literal = "`";
                 attrib.token = Token.BACKQUOTE;

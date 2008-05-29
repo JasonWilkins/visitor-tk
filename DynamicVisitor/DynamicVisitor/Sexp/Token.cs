@@ -19,7 +19,7 @@ namespace Sexp {
         EOF,
         OPEN_PAREN,
         CLOSE_PAREN,
-        SINGLE_QUOTE,
+        QUOTE,
         BACKQUOTE,
         ID,
         STRING,

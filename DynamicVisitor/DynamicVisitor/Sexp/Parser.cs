@@ -53,7 +53,7 @@ namespace Sexp {
         TxtLocation m_loc;
 
         public Parser(Reader reader, VectVisitor visitor)
-            : this(reader, visitor , null)
+            : this(reader, visitor, null)
         { }
 
         public Parser(Reader reader, VectVisitor visitor, TxtLocation loc)
@@ -73,8 +73,7 @@ namespace Sexp {
             try {
                 start();
                 return true;
-            }
-            catch (SyntaxError e) {
+            } catch (SyntaxError e) {
                 Console.Error.WriteLine(e.Message);
                 return false;
             }
@@ -129,7 +128,7 @@ namespace Sexp {
                 Token.STRING == lookahead ||
                 Token.ID == lookahead ||
                 Token.OPEN_PAREN == lookahead ||
-                Token.SINGLE_QUOTE == lookahead ||
+                Token.QUOTE == lookahead ||
                 Token.BACKQUOTE == lookahead ||
                 Token.COMMA == lookahead ||
                 Token.SPLICE == lookahead ||
@@ -153,7 +152,7 @@ namespace Sexp {
                 match(Token.OPEN_PAREN);
                 top_list(top);
             } else if (
-                Token.SINGLE_QUOTE == lookahead ||
+                Token.QUOTE == lookahead ||
                 Token.BACKQUOTE == lookahead ||
                 Token.COMMA == lookahead ||
                 Token.SPLICE == lookahead) {
@@ -169,7 +168,7 @@ namespace Sexp {
                 vec.visitEnd();
             } else {
                 // ERROR
-                throw new SyntaxError(m_attrib.loc, lookahead, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE);
+                throw new SyntaxError(m_attrib.loc, lookahead, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE);
             }
         }
 
@@ -185,7 +184,7 @@ namespace Sexp {
                 Token.STRING == lookahead ||
                 Token.ID == lookahead ||
                 Token.OPEN_PAREN == lookahead ||
-                Token.SINGLE_QUOTE == lookahead ||
+                Token.QUOTE == lookahead ||
                 Token.BACKQUOTE == lookahead ||
                 Token.COMMA == lookahead ||
                 Token.SPLICE == lookahead ||
@@ -198,7 +197,7 @@ namespace Sexp {
                 match(Token.CLOSE_PAREN);
             } else {
                 // ERROR
-                throw new SyntaxError(m_attrib.loc, lookahead, Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE, Token.VECTOR);
+                throw new SyntaxError(m_attrib.loc, lookahead, Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE, Token.VECTOR);
             }
         }
 
@@ -218,7 +217,7 @@ namespace Sexp {
                 match(Token.OPEN_PAREN);
                 list(cons, set_car);
             } else if (
-                Token.SINGLE_QUOTE == lookahead ||
+                Token.QUOTE == lookahead ||
                 Token.BACKQUOTE == lookahead ||
                 Token.COMMA == lookahead ||
                 Token.SPLICE == lookahead) {
@@ -234,36 +233,55 @@ namespace Sexp {
                 vec.visitEnd();
             } else {
                 // ERROR
-                throw new SyntaxError(m_attrib.loc, lookahead, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE);
+                throw new SyntaxError(m_attrib.loc, lookahead, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE);
             }
         }
 
         void simple_datum(AtomVisitor atom)
         {
             if (Token.BOOL == lookahead) {
-                atom.visit((Boolean)m_attrib.value);
+                if (m_attrib.value is bool) {
+                    atom.visit((Boolean)m_attrib.value);
+                } else {
+                    throw new Exception();
+                }
+
                 match(Token.BOOL);
             } else if (Token.NUM == lookahead) {
-                if (m_attrib.value is Int64) {
-                    atom.visit((Int64)m_attrib.value);
-                } else if (m_attrib.value is Double) {
-                    atom.visit((Double)m_attrib.value);
+                if (m_attrib.value is long) {
+                    atom.visit((long)m_attrib.value);
+                } else if (m_attrib.value is double) {
+                    atom.visit((double)m_attrib.value);
                 } else {
-                    throw new InvalidOperationException();
+                    throw new Exception();
                 }
 
                 match(Token.NUM);
             } else if (Token.CHAR == lookahead) {
-                atom.visit((Char)m_attrib.value);
+                if (m_attrib.value is char) {
+                    atom.visit((char)m_attrib.value);
+                } else {
+                    throw new Exception();
+                }
+
                 match(Token.CHAR);
             } else if (Token.STRING == lookahead) {
-                atom.visit((String)m_attrib.value);
+                if (m_attrib.value is string) {
+                    atom.visit((string)m_attrib.value);
+                } else {
+                    throw new Exception();
+                }
+
                 match(Token.STRING);
             } else if (Token.ID == lookahead) {
-                atom.visit((Symbol)m_attrib.value);
+                if (m_attrib.value is Symbol) {
+                    atom.visit((Symbol)m_attrib.value);
+                } else {
+                    throw new Exception();
+                }
+
                 match(Token.ID);
             } else {
-                // ERROR
                 throw new SyntaxError(m_attrib.loc, lookahead, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID);
             }
         }
@@ -278,6 +296,7 @@ namespace Sexp {
                 } else {
                     cons.visit_cdr();
                 }
+
             } else if (
                 Token.BOOL == lookahead ||
                 Token.NUM == lookahead ||
@@ -285,7 +304,7 @@ namespace Sexp {
                 Token.STRING == lookahead ||
                 Token.ID == lookahead ||
                 Token.OPEN_PAREN == lookahead ||
-                Token.SINGLE_QUOTE == lookahead ||
+                Token.QUOTE == lookahead ||
                 Token.BACKQUOTE == lookahead ||
                 Token.COMMA == lookahead ||
                 Token.SPLICE == lookahead ||
@@ -297,8 +316,7 @@ namespace Sexp {
                 new_cons.visitEnd();
                 match(Token.CLOSE_PAREN);
             } else {
-                // ERROR
-                throw new SyntaxError(m_attrib.loc, lookahead, Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE, Token.VECTOR);
+                throw new SyntaxError(m_attrib.loc, lookahead, Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE, Token.VECTOR);
             }
         }
 
@@ -310,7 +328,7 @@ namespace Sexp {
                 Token.STRING == lookahead ||
                 Token.ID == lookahead ||
                 Token.OPEN_PAREN == lookahead ||
-                Token.SINGLE_QUOTE == lookahead ||
+                Token.QUOTE == lookahead ||
                 Token.BACKQUOTE == lookahead ||
                 Token.COMMA == lookahead ||
                 Token.SPLICE == lookahead ||
@@ -319,15 +337,13 @@ namespace Sexp {
                 datum(cons, true);
                 list_contents_tail(cons);
             } else {
-                // ERROR
-                throw new SyntaxError(m_attrib.loc, lookahead, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE);
+                throw new SyntaxError(m_attrib.loc, lookahead, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE);
             }
         }
 
         void list_contents_tail(ConsVisitor cons)
         {
             if (Token.CLOSE_PAREN == lookahead) {
-                // EPSILON
                 cons.visit_cdr();
             } else if (
                 Token.BOOL == lookahead ||
@@ -336,7 +352,7 @@ namespace Sexp {
                 Token.STRING == lookahead ||
                 Token.ID == lookahead ||
                 Token.OPEN_PAREN == lookahead ||
-                Token.SINGLE_QUOTE == lookahead ||
+                Token.QUOTE == lookahead ||
                 Token.BACKQUOTE == lookahead ||
                 Token.COMMA == lookahead ||
                 Token.SPLICE == lookahead ||
@@ -350,8 +366,7 @@ namespace Sexp {
             } else if (Token.DOT == lookahead) {
                 dot_tail(cons);
             } else {
-                // ERROR
-                throw new SyntaxError(m_attrib.loc, lookahead, Token.DOT, Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE);
+                throw new SyntaxError(m_attrib.loc, lookahead, Token.DOT, Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE);
             }
         }
 
@@ -361,14 +376,13 @@ namespace Sexp {
                 match(Token.DOT);
                 datum(cons, false);
             } else {
-                // ERROR
                 throw new SyntaxError(m_attrib.loc, lookahead, Token.DOT);
             }
         }
 
         void abbreviation(ConsVisitor cons)
         {
-            if (Token.SINGLE_QUOTE == lookahead ||                
+            if (Token.QUOTE == lookahead ||                
                 Token.BACKQUOTE == lookahead ||
                 Token.COMMA == lookahead ||
                 Token.SPLICE == lookahead) {
@@ -381,40 +395,25 @@ namespace Sexp {
                 cdr.visit_cdr();
                 cdr.visitEnd();
             } else {
-                // ERROR
-                throw new SyntaxError(m_attrib.loc, lookahead, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE);
+                throw new SyntaxError(m_attrib.loc, lookahead, Token.QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE);
             }
         }
 
         void abbrev_prefix(ConsVisitor abbrev)
         {
-            if (Token.SINGLE_QUOTE == lookahead) {
-                expand_abbrev(abbrev, "quote");
-                match(Token.SINGLE_QUOTE);
+            abbrev.visit_Atom_car().visit(Abbrev.get_symbol(lookahead));
+
+            if (Token.QUOTE == lookahead) {
+                match(Token.QUOTE);
             } else if (Token.BACKQUOTE == lookahead) {
-                expand_abbrev(abbrev, "quasiquotation");
                 match(Token.BACKQUOTE);
             } else if (Token.COMMA == lookahead) {
-                expand_abbrev(abbrev, "unquote");
                 match(Token.COMMA);
             } else if (Token.SPLICE == lookahead) {
-                expand_abbrev(abbrev, "unquote-splicing");
                 match(Token.SPLICE);
             } else {
-                // ERROR
-                throw new SyntaxError(m_attrib.loc, lookahead, Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE);
+                throw new SyntaxError(m_attrib.loc, lookahead, Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE);
             }
-        }
-
-        void expand_abbrev(ConsVisitor abbrev, string name)
-        {
-            AtomVisitor atom = abbrev.visit_Atom_car();
-            //atom.visit();
-
-            Symbol sym = Symbol.get_symbol(name);
-            atom.visit(sym);
-
-            //atom.visitEnd();
         }
 
         void vector(VectVisitor vec)
@@ -424,7 +423,6 @@ namespace Sexp {
                 vector_contents(vec);
                 match(Token.CLOSE_PAREN);
             } else {
-                // ERROR;
                 throw new SyntaxError(m_attrib.loc, lookahead, Token.VECTOR);
             }
         }
@@ -440,7 +438,7 @@ namespace Sexp {
                 Token.STRING == lookahead ||
                 Token.ID == lookahead ||
                 Token.OPEN_PAREN == lookahead ||
-                Token.SINGLE_QUOTE == lookahead ||
+                Token.QUOTE == lookahead ||
                 Token.BACKQUOTE == lookahead ||
                 Token.COMMA == lookahead ||
                 Token.SPLICE == lookahead ||
@@ -449,13 +447,11 @@ namespace Sexp {
                 datum_list(vec);
 
                 if (Token.CLOSE_PAREN != lookahead) {
-                    // ERROR
                     throw new SyntaxError(m_attrib.loc, lookahead, Token.CLOSE_PAREN);
                 }
 
             } else {
-                // ERROR
-                throw new SyntaxError(m_attrib.loc, lookahead, Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.SINGLE_QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE, Token.VECTOR);
+                throw new SyntaxError(m_attrib.loc, lookahead, Token.CLOSE_PAREN, Token.BOOL, Token.NUM, Token.CHAR, Token.STRING, Token.ID, Token.OPEN_PAREN, Token.QUOTE, Token.BACKQUOTE, Token.COMMA, Token.SPLICE, Token.VECTOR);
             }
         }
     }

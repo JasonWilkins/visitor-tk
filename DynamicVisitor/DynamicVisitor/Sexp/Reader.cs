@@ -42,7 +42,7 @@ namespace Sexp {
                 m_loc.line++;
                 m_loc.context = m_line.Replace("\t", m_tab);
 
-                if (m_reader.Peek() != -1) m_line += '\n';
+                if (m_reader.Peek() != -1) m_line += System.Environment.NewLine;
 
                 m_index = 0;
 
@@ -69,7 +69,7 @@ namespace Sexp {
             m_peek = read();
 
             if (c != -1) {
-                if (c != '\n') {
+                if (c != '\n' && c != '\r') {
                     m_loc.column++;
                 } else if ('\t' == c) {
                     m_loc.column += m_tabsize;

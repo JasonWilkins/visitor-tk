@@ -17,7 +17,7 @@ namespace Util {
         {
             m_path    = path;
             column    = 0;
-            line      = 1;
+            line      = 0;
             m_context = "";
         }
 

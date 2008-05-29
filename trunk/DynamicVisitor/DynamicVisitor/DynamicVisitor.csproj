@@ -40,7 +40,7 @@
     <Compile Include="Sexp\Closure.cs" />
     <Compile Include="Sexp\Environment.cs" />
     <Compile Include="Sexp\Format.cs" />
-    <Compile Include="Sexp\GetC.cs" />
+    <Compile Include="Sexp\Reader.cs" />
     <Compile Include="Sexp\Literals.cs" />
     <Compile Include="Flat\Flat.cs" />
     <Compile Include="Sexp\MultiVisitor.cs" />

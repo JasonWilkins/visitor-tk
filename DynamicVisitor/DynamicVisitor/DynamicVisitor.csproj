@@ -33,6 +33,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Construction\ConstructSiteSeer.cs" />
     <Compile Include="GuidedTour\Guide.cs" />
     <Compile Include="GuidedTour\ISiteseer.cs" />
     <Compile Include="GuidedTour\Site.cs" />
@@ -79,9 +80,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Junk.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Construction\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

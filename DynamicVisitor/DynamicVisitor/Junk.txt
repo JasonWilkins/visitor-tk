@@ -2949,3 +2949,10 @@ namespace CodeBuilder {
         //    }
         //}
 
+                //Type face = type.GetInterface("IEnumerable`1");
+
+                //if (null == face) {
+                //    face = type.GetInterface("IEnumerable");
+                //}
+
+                //if (face != null) {

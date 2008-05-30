@@ -5,12 +5,14 @@ using System.Text;
 namespace Sexp {
     public interface IBox {
         void put(object o);
+        object get();
     }
 
     public class Box<T> : IBox where T :class {
         T m_object;
         public T value { get { return m_object; } }
         void IBox.put(object o) { m_object = (T)o; }
+        object IBox.get() { return m_object; }
     }
 
     public class ListBox : IBox {
@@ -18,6 +20,27 @@ namespace Sexp {
         public List<object> list { get { return m_list; } }
         public object[] array { get { return m_list.ToArray(); } }
         void IBox.put(object o) { m_list.Add(o); }
+        object IBox.get() { return m_list.ToArray(); }
+    }
+
+    public class ProperListBox : IBox {
+        Cons m_top;
+        Cons m_end;
+        
+        public Cons cons { get { return m_top; } }
+
+        void IBox.put(object o)
+        {
+            if (m_end !=  null) {
+                m_end.cdr = new Cons(o);
+                m_end = (Cons)m_end.cdr;
+            } else {
+                m_top = new Cons(o);
+                m_end = m_top;
+            }
+        }
+
+        object IBox.get() { return m_top; }
     }
 
     public class AtomBox : Box<object> { }

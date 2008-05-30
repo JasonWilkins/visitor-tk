@@ -3,6 +3,18 @@ using System.Text;
 
 namespace Sexp {
     public static class Literal {
+        public static bool is_atom_type(object o)
+        {
+            return
+                o is bool     ||
+                o is char     ||
+                o is long     ||
+                o is double   ||
+                o is string   ||
+                o is Symbol   ||
+                o == null;
+        }
+
         public static string escape(string input)
         {
             StringBuilder sb = new StringBuilder();
@@ -15,6 +27,18 @@ namespace Sexp {
 
                     case '\\':
                         sb.Append("\\\\");
+                        break;
+
+                    case '\n':
+                        sb.Append("\\n");
+                        break;
+
+                    case '\t':
+                        sb.Append("\\t");
+                        break;
+
+                    case '\f':
+                        sb.Append("\\f");
                         break;
 
                     default:
@@ -35,12 +59,12 @@ namespace Sexp {
         {
             return v.ToString();
         }
-        
+
         public static string format(Double v)
         {
             return v.ToString();
         }
-        
+
         public static string format(Char v)
         {
             if ('\n' == v) {
@@ -51,12 +75,12 @@ namespace Sexp {
                 return "#\\"+v;
             }
         }
-        
+
         public static string format(String v)
         {
             return '"'+escape(v)+'"';
         }
-        
+
         public static string format(Symbol v)
         {
             return v.name;
@@ -99,12 +123,19 @@ namespace Sexp {
                 return format((Symbol)o);
             } else if (o is Object[]) {
                 return format((Object[])o);
+            } else if (o == null) {
+                return "()";
             } else {
-                if (o != null) {
-                    return o.ToString();
-                } else {
-                    return "()";
-                }
+                return "@";// throw new Exception();
+            }
+        }
+
+        public static string try_format(object o)
+        {
+            try {
+                return format(o);
+            } catch {
+                return null;
             }
         }
     }

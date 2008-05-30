@@ -13,7 +13,7 @@ namespace Main {
     using Flat2Pirate;
     using FlatType=Flat.Type;
     using DynamicVisitor;
-
+    using ConstructLang;
     class Program {
 #if false
         static string Example1()
@@ -687,7 +687,16 @@ namespace Main {
             Console.WriteLine();
         }
 #endif
-        static void code_builder_test1()
+        static void code_builder_test(Code code)
+        {
+            PirateCodeBuilder pir = new PirateCodeBuilder();
+            DynamicVisitor.accept(code, pir);
+            StringWriter sw = new StringWriter();
+            DynamicVisitor.accept(pir.getPirate(), new PirateWriter(sw));
+            Console.Write(sw.ToString());
+        }
+
+        static Code code_builder_test1()
         {
 #if false
             ; hello world
@@ -708,14 +717,10 @@ namespace Main {
             LambdaBuilder lb = cb.getLambdaBuilder("main", null);
             lb.addCall(null, print_prototype, print_global, null, new OperandList(hello_world));
             cb.defineLambda(lb.getLambda(null));
-            PirateCodeBuilder pir = new PirateCodeBuilder();
-            DynamicVisitor.accept(cb.getCode(), pir);
-            StringWriter sw = new StringWriter();
-            DynamicVisitor.accept(pir.getPirate(), new PirateWriter(sw));
-            Console.Write(sw.ToString());
+            return cb.getCode();
         }
 
-        static void code_builder_test2()
+        static Code code_builder_test2()
         {
             CodeBuilder cb = new CodeBuilder();
 
@@ -790,12 +795,7 @@ namespace Main {
 
             cb.defineLambda(lb.getLambda(null));
 
-            PirateCodeBuilder pir = new PirateCodeBuilder();
-            DynamicVisitor.accept(cb.getCode(), pir);
-
-            StringWriter sw = new StringWriter();
-            DynamicVisitor.accept(pir.getPirate(), new PirateWriter(sw));
-            Console.Write(sw.ToString());
+            return cb.getCode();
         }
 
         class IntVisitor {
@@ -825,10 +825,15 @@ namespace Main {
         }
 
         public static class GetTopLevelWriter {
+            public static VectorWriter create(Writer writer, Format fmt)
+            {
+                Config config = new Config(writer, fmt);
+                return new VectorWriter(config.file, config);
+            }
+
             public static VectorWriter create(Writer writer)
             {
-                Config config = new Config(writer);
-                return new VectorWriter(config.file, config);
+                return create(writer, new Format());
             }
         }
 
@@ -858,7 +863,7 @@ namespace Main {
             //test_safe_parse("test2.txt");
 #endif
 
-#if true
+#if false
             parse_and_write("test.txt", "test-output1.txt");
             parse_and_write("test-output1.txt", "test-output2.txt");
             compare_files("test.txt", "test-output1.txt");
@@ -873,17 +878,34 @@ namespace Main {
             compare_logs("test-output1.txt");
             compare_logs("test-output2.txt");
             compare_logs("test-output3.txt");
-            //compare_logs("test.txt", "test2.txt");
-            code_builder_test1();
-            code_builder_test2();
+            compare_logs("test.txt", "test2.txt");
+            code_builder_test(code_builder_test1());
+            code_builder_test(code_builder_test2());
+#endif
+#if true
+            using (FileWriter writer = new FileWriter("construct1.txt")) {
+                Code c = code_builder_test2();
+                object[] test1 = ConstructLang.tour(c);
+                //VectorLogger logger = new VectorLogger(new Log(), new TxtLocation(""), GetTopLevelWriter.create(writer));
+                Format fmt = new Format();
+                fmt.format_vect = true;
+                fmt.format_data = false;
+                fmt.format_head = false;
+                fmt.format_appl = true;
+                fmt.do_abbrev = true;
+                DynamicVisitor.accept(test1, GetTopLevelWriter.create(writer, fmt));
+            }
+            int foo = 2+2;
 #endif
 #if true
             //System.IO.TextWriter my_out = new System.IO.StreamWriter("output.txt");
             //Console.SetOut(my_out);
-            Reader f = new Reader("test3.txt");
-            Util.TxtLocation loc = new Util.TxtLocation("test3.txt");
-            Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new StandardEnvironment(), loc)), loc);
-            p.SafeRead();
+            
+            //Reader f = new Reader("test3.txt");
+            //Util.TxtLocation loc = new Util.TxtLocation("test3.txt");
+            //Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new StandardEnvironment(), loc)), loc);
+            //p.SafeRead();
+
             //Vector v = build("test.txt");
             //DynamicVisitor.accept(v, new IntVisitor());
             //DynamicVisitor.accept(v, new Interpreter(new TestEnvironment(), null));

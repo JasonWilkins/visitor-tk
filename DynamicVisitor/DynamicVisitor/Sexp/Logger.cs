@@ -163,6 +163,7 @@ namespace Sexp {
         public override void visitItem()
         {
             m_log.Add(m_sequence++, m_loc, m_class_name, "visitItem");
+            m_next.visitItem();
         }
     }
 
@@ -297,11 +298,13 @@ namespace Sexp {
         public override void visit_car()
         {
             m_log.Add(m_sequence++, m_loc, m_class_name, "visit_car()");
+            m_next.visit_car();
         }
 
         public override void visit_cdr()
         {
             m_log.Add(m_sequence++, m_loc, m_class_name, "visit_cdr()");
+            m_next.visit_cdr();
         }
     }
 }

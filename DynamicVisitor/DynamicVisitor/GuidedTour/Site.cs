@@ -37,13 +37,7 @@ namespace GuidedTour {
             if (value != null) {
                 Type type = value.GetType();
 
-                Type face = type.GetInterface("IEnumerable`1");
-
-                if (null == face) {
-                    face = type.GetInterface("IEnumerable");
-                }
-
-                if (face != null) {
+                if (value is IEnumerable) {
                     foreach (object part in value as IEnumerable) {
                         m_list.Add(new Site(null, part != null ? part.GetType() : null, part));
                     }

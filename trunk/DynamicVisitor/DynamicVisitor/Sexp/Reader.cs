@@ -35,22 +35,25 @@ namespace Sexp {
 
         bool next()
         {
-            m_line = m_reader.ReadLine();
+            do {
+                m_line = m_reader.ReadLine();
 
-            if (m_line != null) {
-                m_loc.column = 0;
-                m_loc.line++;
-                m_loc.context = m_line.Replace("\t", m_tab);
+                if (m_line == null) {
+                    m_loc.column++;
+                    return false;
+                } else {
+                    m_loc.line++;
+                }
+            } while (m_line.Length == 0);
 
-                if (m_reader.Peek() != -1) m_line += System.Environment.NewLine;
+            m_loc.column = 0;
+            m_loc.context = m_line.Replace("\t", m_tab);
 
-                m_index = 0;
+            if (m_reader.Peek() != -1) m_line += System.Environment.NewLine;
 
-                return true;
-            } else {
-                m_loc.column++;
-                return false;
-            }
+            m_index = 0;
+
+            return true;
         }
 
         int read()

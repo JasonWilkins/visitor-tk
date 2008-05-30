@@ -1,3 +1,6 @@
+//#define WARNING
+//#define VERBOSE
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -221,16 +224,14 @@ namespace DynamicVisitor {
 
                 if (null == new_visitor) {
                     new_method = null;
-                    Trace.Verbose("debug: {0} did not return a new visitor", method_name);
+                    if (!is_last) Trace.Verbose("debug: {0} did not return a new visitor", method_name);
                 } else {
                     new_method = new VisitSiteseer(new_visitor, m_aliases);
                 }
 
                 return true;
             } else {
-                if (is_last) {
-                    Trace.Warning("debug: could not find method {0}.{1}(), skipping", m_visitor_type.FullName, method_name);
-                }
+                if (is_last) Trace.Warning("debug: could not find method {0}.{1}(), skipping", m_visitor_type.FullName, method_name);
                 new_method = null;
                 return false;
             }

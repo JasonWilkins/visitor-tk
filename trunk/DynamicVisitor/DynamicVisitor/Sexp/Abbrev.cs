@@ -2,10 +2,10 @@ using System;
 
 namespace Sexp {
     static class Abbrev {
-        static readonly Symbol quote = Symbol.get_symbol("quote");
-        static readonly Symbol quasiquotation = Symbol.get_symbol("quasiquotation");
-        static readonly Symbol unquote = Symbol.get_symbol("unquote");
-        static readonly Symbol unquote_splicing = Symbol.get_symbol("unquote-splicing");
+        public static readonly Symbol quote = Symbol.get_symbol("quote");
+        public static readonly Symbol quasiquotation = Symbol.get_symbol("quasiquotation");
+        public static readonly Symbol unquote = Symbol.get_symbol("unquote");
+        public static readonly Symbol unquote_splicing = Symbol.get_symbol("unquote-splicing");
 
         public static string get_abbrev(Symbol sym)
         {

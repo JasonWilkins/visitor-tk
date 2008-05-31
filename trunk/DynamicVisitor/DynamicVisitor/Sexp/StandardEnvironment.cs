@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 
+using Symbols;
+
 namespace Sexp {
     public class StandardEnvironment : Environment {
         static object fn_eq(List<object> args)

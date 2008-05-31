@@ -1,4 +1,5 @@
 using Util;
+using Symbols;
 
 namespace Sexp {
     public class Format {
@@ -10,6 +11,7 @@ namespace Sexp {
         public bool do_abbrev = true;
         public bool dot_cdr = false;
         public bool dot_nil = false;
+        public bool do_debug = false;
     }
 
     public delegate bool GetConfig(object atom, out Config config, out ConsFormatter formatter);
@@ -32,6 +34,8 @@ namespace Sexp {
 
         readonly GetConfig m_get_new_config;
 
+        readonly Format m_fmt;
+
         public Config(Writer writer)
             : this(writer, new Format())
         { }
@@ -42,6 +46,8 @@ namespace Sexp {
 
         public Config(Writer writer, Format fmt, GetConfig get_new_config)
         {
+            m_fmt = fmt;
+
             m_get_new_config = get_new_config ?? no_new_config;
 
             file = new VectFormatter(writer);
@@ -49,19 +55,19 @@ namespace Sexp {
             file.seperator_spacing  = fmt.line_spacing;
             file.footer_spacing     = 1;
 
-            top_vect = new_vect(writer, fmt.format_vect, "#(");
-            vect     = new_vect(writer, fmt.format_vect, "#(");
-            vect_cdr = new_vect(writer, fmt.format_vect, " . #(");
+            top_vect = new_vect(writer, fmt.format_vect, "#(", "TV");
+            vect     = new_vect(writer, fmt.format_vect, "#(", "V");
+            vect_cdr = new_vect(writer, fmt.format_vect, " . #(", "-V");
 
-            cons      = new_cons(writer, fmt.do_abbrev, true);
-            top_cons  = new_cons(writer, fmt.do_abbrev, true);
-            vect_cons = new_cons(writer, fmt.do_abbrev, fmt.format_vect);
-            head_cons = new_cons(writer, fmt.do_abbrev, fmt.format_head);
+            cons      = new_cons(writer, fmt.do_abbrev, true, "C");
+            top_cons  = new_cons(writer, fmt.do_abbrev, true, "TC");
+            vect_cons = new_cons(writer, fmt.do_abbrev, fmt.format_vect, "VC");
+            head_cons = new_cons(writer, fmt.do_abbrev, fmt.format_head, "HC");
 
-            vect_cons_cdr = new_cons_cdr(writer, fmt.format_vect, fmt.dot_cdr, fmt.dot_nil);
-            head_cons_cdr = new_cons_cdr(writer, fmt.format_head, fmt.dot_cdr, fmt.dot_nil);
-            appl_cons_cdr = new_cons_cdr(writer, fmt.format_appl, fmt.dot_cdr, fmt.dot_nil);
-            data_cons_cdr = new_cons_cdr(writer, fmt.format_data, fmt.dot_cdr, fmt.dot_nil);
+            vect_cons_cdr = new_cons_cdr(writer, fmt.format_vect, fmt.dot_cdr, fmt.dot_nil, "-VC");
+            head_cons_cdr = new_cons_cdr(writer, fmt.format_head, fmt.dot_cdr, fmt.dot_nil, "-HC");
+            appl_cons_cdr = new_cons_cdr(writer, fmt.format_appl, fmt.dot_cdr, fmt.dot_nil, "-AC");
+            data_cons_cdr = new_cons_cdr(writer, fmt.format_data, fmt.dot_cdr, fmt.dot_nil, "-DC");
 
             atom = new AtomFormatter(writer);
 
@@ -69,32 +75,37 @@ namespace Sexp {
             atom_cdr.header = " . ";
         }
 
-        VectFormatter new_vect(Writer writer, bool format, string head)
+        string debug_str(string db)
+        {
+            return m_fmt.do_debug ? "#|" + db + "|#" : "";
+        }
+
+        VectFormatter new_vect(Writer writer, bool format, string head, string db)
         {
             VectFormatter f = new VectFormatter(writer);
 
             f.do_indent         = format;
             f.seperator_spacing = format ? 1 : 0;
             f.seperator         = format ? "" : " ";
-            f.header            = head;
+            f.header            = debug_str(db) + head;
             f.footer            = ")";
 
             return f;
         }
 
-        ConsFormatter new_cons(Writer writer, bool do_abbrev, bool do_indent)
+        ConsFormatter new_cons(Writer writer, bool do_abbrev, bool do_indent, string db)
         {
             ConsFormatter f = new ConsFormatter(writer);
 
             f.do_abbrev = do_abbrev;
             f.do_indent = do_indent;
-            f.header    = "(";
+            f.header    = debug_str(db) + "(";
             f.footer    = ")";
 
             return f;
         }
 
-        ConsFormatter new_cons_cdr(Writer writer, bool format, bool dot_cdr, bool dot_nil)
+        ConsFormatter new_cons_cdr(Writer writer, bool format, bool dot_cdr, bool dot_nil, string db)
         {
             ConsFormatter f = new ConsFormatter(writer);
 
@@ -103,14 +114,14 @@ namespace Sexp {
             string delimiter = format ? "" : " ";
 
             if (dot_cdr) {
-                f.header = delimiter + ". (";
+                f.header = debug_str(db) + delimiter + ". (";
                 f.footer = ")";
             } else {
-                f.header = delimiter;
+                f.header = debug_str(db) + delimiter;
             }
 
             if (dot_nil) {
-                f.nil_cdr = " . ()";
+                f.nil_cdr = debug_str(db) + " . ()";
             }
 
             return f;
@@ -130,7 +141,7 @@ namespace Sexp {
     }
 
     public abstract class Formatter {
-        internal bool do_abbrev = true;
+        internal bool do_abbrev = false;
         internal bool do_indent = false;
         internal string header = "";
         internal int header_spacing = 0;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using Util;
+using Symbols;
 
 namespace Sexp {
     public class InterpreterException : Exception {

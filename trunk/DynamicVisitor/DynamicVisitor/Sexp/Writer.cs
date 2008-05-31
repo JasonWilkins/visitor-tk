@@ -1,5 +1,7 @@
 using System;
 
+using Symbols;
+
 namespace Sexp {
     public class VectorWriter : VectVisitor {
         readonly Formatter m_formatter;

@@ -1,6 +1,8 @@
 using System;
 using System.Text;
 
+using Symbols;
+
 namespace Sexp {
     public static class Literal {
         public static bool is_atom_type(object o)
@@ -27,18 +29,6 @@ namespace Sexp {
 
                     case '\\':
                         sb.Append("\\\\");
-                        break;
-
-                    case '\n':
-                        sb.Append("\\n");
-                        break;
-
-                    case '\t':
-                        sb.Append("\\t");
-                        break;
-
-                    case '\f':
-                        sb.Append("\\f");
                         break;
 
                     default:

@@ -1,5 +1,7 @@
 using System;
 
+using Symbols;
+
 namespace Sexp {
     static class Abbrev {
         public static readonly Symbol quote = Symbol.get_symbol("quote");

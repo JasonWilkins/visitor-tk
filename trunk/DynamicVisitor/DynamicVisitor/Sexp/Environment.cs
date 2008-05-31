@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using Util;
+using Symbols;
 
 namespace Sexp {
     public class Environment {

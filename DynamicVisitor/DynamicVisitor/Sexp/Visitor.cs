@@ -1,3 +1,5 @@
+using Symbols;
+
 namespace Sexp {
     public abstract class AtomVisitor {
         public abstract void visit(object o);

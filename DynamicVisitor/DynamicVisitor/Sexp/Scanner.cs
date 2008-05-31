@@ -4,6 +4,7 @@ using System.Text;
 using System.Globalization;
 
 using Util;
+using Symbols;
 
 namespace Sexp {
     public class Scanner {

@@ -2,16 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+using Symbols;
+
 namespace Main {
     //using Test;
     using GuidedTour;
     using Pirate;
     using PirateType=Pirate.Type;
+    using PirateLiteral=Pirate.Literal;
     using Util;
     using Sexp;
     using Flat;
     using Flat2Pirate;
     using FlatType=Flat.Type;
+    using FlatLiteral=Flat.Literal;
     using DynamicVisitor;
     using ConstructLang;
     class Program {
@@ -711,11 +715,11 @@ namespace Main {
 #endif
             CodeBuilder cb = new CodeBuilder();
             FlatType string_type = cb.defineType("string");
-            Prototype print_prototype = cb.definePrototype(null, new TypeList(string_type), null);
+            Prototype print_prototype = cb.definePrototype(null, new Types(string_type), null);
             Global print_global = cb.defineGlobal("print", print_prototype);
-            Constant hello_world = cb.defineConstant(null, string_type, "Hello World!\n");
+            FlatLiteral hello_world = cb.defineLiteral(string_type, "Hello World!"+System.Environment.NewLine);
             LambdaBuilder lb = cb.getLambdaBuilder("main", null);
-            lb.addCall(null, print_prototype, print_global, null, new OperandList(hello_world));
+            lb.addCall(print_prototype, print_global, null, new Operands(hello_world));
             cb.defineLambda(lb.getLambda(null));
             return cb.getCode();
         }
@@ -727,20 +731,20 @@ namespace Main {
             FlatType string_type = cb.defineType("string");
             FlatType single_type = cb.defineType("single");
 
-            Prototype print_prototype1 = cb.definePrototype(null, new TypeList(string_type), null);
-            Prototype print_prototype2 = cb.definePrototype(null, new TypeList(single_type), null);
-            Prototype sqrt_prototype = cb.definePrototype(null, new TypeList(single_type), new TypeList(single_type));
+            Prototype print_prototype1 = cb.definePrototype(null, new Types(string_type), null);
+            Prototype print_prototype2 = cb.definePrototype(null, new Types(single_type), null);
+            Prototype sqrt_prototype = cb.definePrototype(null, new Types(single_type), new Types(single_type));
 
-            Global print_global1 = cb.defineGlobal("print", print_prototype1);
-            Global print_global2 = cb.defineGlobal("print", print_prototype2);
+            Global print_global1 = cb.defineGlobal("print1", print_prototype1);
+            Global print_global2 = cb.defineGlobal("print2", print_prototype2);
             Global sqrt_global = cb.defineGlobal("sqrt", sqrt_prototype);
 
-            Operator neg = cb.defineOperator("neg", new TypeList(single_type), new TypeList(single_type));
-            Operator add = cb.defineOperator("+", new TypeList(single_type), new TypeList(single_type, single_type));
-            Operator sub = cb.defineOperator("-", new TypeList(single_type), new TypeList(single_type, single_type));
-            Operator mul = cb.defineOperator("*", new TypeList(single_type), new TypeList(single_type, single_type));
-            Operator div = cb.defineOperator("/", new TypeList(single_type), new TypeList(single_type, single_type));
-            Operator div_assign = cb.defineOperator("/=", new TypeList(single_type), new TypeList(single_type));
+            Operator neg = cb.defineOperator("neg", new Types(single_type), new Types(single_type));
+            Operator add = cb.defineOperator("+", new Types(single_type), new Types(single_type, single_type));
+            Operator sub = cb.defineOperator("-", new Types(single_type), new Types(single_type, single_type));
+            Operator mul = cb.defineOperator("*", new Types(single_type), new Types(single_type, single_type));
+            Operator div = cb.defineOperator("/", new Types(single_type), new Types(single_type, single_type));
+            Operator div_assign = cb.defineOperator("/=", new Types(single_type), new Types(single_type));
 
             LambdaBuilder lb = cb.getLambdaBuilder("foo", null);
             Local a = lb.defineLocal("a", single_type);
@@ -753,45 +757,45 @@ namespace Main {
             Local n3 = lb.defineLocal("n3", single_type);
             Local n4 = lb.defineLocal("n4", single_type);
 
-            Constant _2 = cb.defineConstant(null, single_type, 2);
-            lb.addMove(null, new LvalueList(a), new OperandList(_2));
+            FlatLiteral _2 = cb.defineLiteral(single_type, 2L);
+            lb.addMove(new Lvalues(a), new Operands(_2));
 
-            Constant _n3 = cb.defineConstant(null, single_type, -3);
-            lb.addMove(null, new LvalueList(b), new OperandList(_n3));
+            Constant _n3 = cb.defineConstant("neg-3", single_type, -3L);
+            lb.addMove(new Lvalues(b), new Operands(_n3));
 
-            Constant _n2 = cb.defineConstant(null, single_type, -2);
-            lb.addMove(null, new LvalueList(c), new OperandList(_n2));
+            FlatLiteral _n2 = cb.defineLiteral(single_type, -2L);
+            lb.addMove(new Lvalues(c), new Operands(_n2));
 
-            lb.addOperator(null, neg, new LvalueList(n0), new OperandList(b));
-            lb.addOperator(null, mul, new LvalueList(n1), new OperandList(b, b));
+            lb.addOperator(neg, new Lvalues(n0), new Operands(b));
+            lb.addOperator(mul, new Lvalues(n1), new Operands(b, b));
 
-            Constant _4 = cb.defineConstant(null, single_type, 4);
-            lb.addOperator(null, mul, new LvalueList(n2), new OperandList(_4, a));
+            FlatLiteral _4 = cb.defineLiteral(single_type, 4L);
+            lb.addOperator(mul, new Lvalues(n2), new Operands(_4, a));
 
-            lb.addOperator(null, mul, new LvalueList(n2), new OperandList(n2, c));
-            lb.addOperator(null, sub, new LvalueList(det), new OperandList(n1, n2));
+            lb.addOperator(mul, new Lvalues(n2), new Operands(n2, c));
+            lb.addOperator(sub, new Lvalues(det), new Operands(n1, n2));
 
-            lb.addCall(null, sqrt_prototype, sqrt_global, new LvalueList(n4), new OperandList(det));
+            lb.addCall(sqrt_prototype, sqrt_global, new Lvalues(n4), new Operands(det));
 
             Local x1 = lb.defineLocal("x1", single_type);
             Local x2 = lb.defineLocal("x2", single_type);
 
-            lb.addOperator(null, add, new LvalueList(x1), new OperandList(n0, n4));
-            lb.addOperator(null, div, new LvalueList(x1), new OperandList(x1, n3));
-            lb.addOperator(null, sub, new LvalueList(x2), new OperandList(n0, n4));
-            lb.addOperator(null, div_assign, new LvalueList(x2), new OperandList(n3));
+            lb.addOperator(add, new Lvalues(x1), new Operands(n0, n4));
+            lb.addOperator(div, new Lvalues(x1), new Operands(x1, n3));
+            lb.addOperator(sub, new Lvalues(x2), new Operands(n0, n4));
+            lb.addOperator(div_assign, new Lvalues(x2), new Operands(n3));
 
-            Constant answer1 = cb.defineConstant(null, string_type, "Answers to ABC formular are:\n");
-            Constant answer2 = cb.defineConstant(null, string_type, "x1 = ");
-            Constant answer3 = cb.defineConstant(null, string_type, "\nx2 = ");
-            Constant answer4 = cb.defineConstant(null, string_type, "\n");
+            FlatLiteral answer1 = cb.defineLiteral(string_type, "Answers to ABC formula are:"/*+System.Environment.NewLine*/);
+            FlatLiteral answer2 = cb.defineLiteral(string_type, "x1 = ");
+            FlatLiteral answer3 = cb.defineLiteral(string_type, /*System.Environment.NewLine+*/"x2 = ");
+            FlatLiteral answer4 = cb.defineLiteral(string_type, ""/*System.Environment.NewLine*/);
 
-            lb.addCall(null, print_prototype1, print_global1, null, new OperandList(answer1));
-            lb.addCall(null, print_prototype1, print_global1, null, new OperandList(answer2));
-            lb.addCall(null, print_prototype2, print_global2, null, new OperandList(x1));
-            lb.addCall(null, print_prototype1, print_global1, null, new OperandList(answer3));
-            lb.addCall(null, print_prototype2, print_global2, null, new OperandList(x2));
-            lb.addCall(null, print_prototype1, print_global1, null, new OperandList(answer4));
+            lb.addCall(print_prototype1, print_global1, null, new Operands(answer1));
+            lb.addCall(print_prototype1, print_global1, null, new Operands(answer2));
+            lb.addCall(print_prototype2, print_global2, null, new Operands(x1));
+            lb.addCall(print_prototype1, print_global1, null, new Operands(answer3));
+            lb.addCall(print_prototype2, print_global2, null, new Operands(x2));
+            lb.addCall(print_prototype1, print_global1, null, new Operands(answer4));
 
             cb.defineLambda(lb.getLambda(null));
 
@@ -885,17 +889,27 @@ namespace Main {
 #if true
             using (FileWriter writer = new FileWriter("construct1.txt")) {
                 Code c = code_builder_test2();
-                object[] test1 = ConstructLang.tour(c);
+                Dictionary<string, string> aliases = new Dictionary<string, string>();
+                aliases.Add("Sexp.Cons", "cons");
+                aliases.Add("System.Object[]", "vector");
+                List<string> ns = new List<string>();
+                ns.Add("Sexp");
+//                object[] test1 = build("test.txt");
+                object[] test1 = ConstructLang.tour(build("test.txt"), ns, aliases);
+                //ns.Add("Flat");
+                //object[] test1 = ConstructLang.tour(c));
                 //VectorLogger logger = new VectorLogger(new Log(), new TxtLocation(""), GetTopLevelWriter.create(writer));
                 Format fmt = new Format();
-                fmt.format_vect = true;
-                fmt.format_data = false;
-                fmt.format_head = false;
-                fmt.format_appl = true;
-                fmt.do_abbrev = true;
+                //fmt.format_vect = true;
+                //fmt.format_data = false;
+                //fmt.format_head = false;
+                //fmt.format_appl = true;
+                //fmt.do_abbrev = true;
+                //fmt.do_abbrev = false;
+                //fmt.do_debug = true;
                 DynamicVisitor.accept(test1, GetTopLevelWriter.create(writer, fmt));
             }
-            int foo = 2+2;
+//            int foo = 2+2;
 #endif
 #if true
             //System.IO.TextWriter my_out = new System.IO.StreamWriter("output.txt");

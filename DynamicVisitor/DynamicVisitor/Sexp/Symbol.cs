@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Sexp {
+namespace Symbols {
     public class Symbol {
         public string name;
 
@@ -8,12 +8,20 @@ namespace Sexp {
 
         public static Symbol get_symbol(string name)
         {
+            bool ignore;
+            return get_symbol(name, out ignore);
+        }
+
+        public static Symbol get_symbol(string name, out bool was_defined)
+        {
             Symbol sym;
 
-            if (!symbol_world.TryGetValue(name, out sym)) {
+            was_defined = symbol_world.TryGetValue(name, out sym);
+
+            if (!was_defined) {
                 sym = new Symbol(name);
                 symbol_world.Add(name, sym);
-            }
+            } 
 
             return sym;
         }

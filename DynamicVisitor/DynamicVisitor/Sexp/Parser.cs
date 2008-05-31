@@ -2,6 +2,7 @@ using System;
 using System.Text;
 
 using Util;
+using Symbols;
 
 namespace Sexp {
     public class SyntaxError : Exception {

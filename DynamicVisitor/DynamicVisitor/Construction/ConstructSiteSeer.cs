@@ -138,10 +138,20 @@ namespace ConstructLang {
                         }
                     }
 
-                    ProperListBox list = new ProperListBox();
-                    ((IBox)list).put(Symbol.get_symbol(resolve(site.type.FullName, site.type.Name)));
-                    new_siteseer = new ConstructSiteseer(m_collection, list, m_ns, m_symtab, m_aliases);
-                    return true;
+                    if (site.value is object[]) {
+                        ListBox list = new ListBox();
+                        new_siteseer = new ConstructSiteseer(m_collection, list, m_ns, m_symtab, m_aliases);
+                        return true;
+                    } else if (site.value is Cons) {
+                        m_collection.put(site.value);
+                        new_siteseer = null;
+                        return true;
+                    } else {
+                        ProperListBox list = new ProperListBox();
+                        ((IBox)list).put(Symbol.get_symbol(resolve(site.type.Namespace, site.type.FullName, site.type.Name)));
+                        new_siteseer = new ConstructSiteseer(m_collection, list, m_ns, m_symtab, m_aliases);
+                        return true;
+                    }
                 } else {
                     new_siteseer = null;
                     return true;
@@ -155,26 +165,25 @@ namespace ConstructLang {
             return false;
         }
 
-        public string resolve(string fullname, string basename)
+        string resolve(string ns, string fullname, string basename)
         {
-            //return fullname;
             string alias;
 
             if (m_aliases.TryGetValue(fullname, out alias)) {
                 return alias;
             } else {
-                return use_fullname(fullname) ? fullname : basename;
+                return use_fullname(ns) ? fullname : basename;
             }
         }
 
-        public bool use_fullname(string name)
+        bool use_fullname(string ns)
         {
             if (null == m_ns) return true;
 
             int count = 0;
 
             foreach (string s in m_ns) {
-                if (name == s) count++;
+                if (ns == s) count++;
             }
 
             return count != 1;

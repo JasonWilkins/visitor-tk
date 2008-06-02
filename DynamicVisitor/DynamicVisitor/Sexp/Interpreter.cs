@@ -40,7 +40,7 @@ namespace Sexp {
                 if (o != null) {
                     Console.WriteLine(" => <{0}> {1}", o.GetType().FullName, Literal.format(o));
                 } else {
-                    Console.WriteLine(" => nil");
+                    Console.WriteLine(" => ()");
                 }
             } else {
                 throw new Exception();

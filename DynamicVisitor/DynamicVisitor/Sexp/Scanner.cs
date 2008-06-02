@@ -7,8 +7,22 @@ using Util;
 using Symbols;
 
 namespace Sexp {
+    public class LexicalError : TxtException {
+        public char cin { get { return (char)Data["cin"]; } }
+        public char peek { get { return (char)Data["peek"]; } }
+        public bool is_eof { get { return (bool)Data["is_eof"]; } }
+
+        public LexicalError(TxtLocation loc, char cin, char peek, bool is_eof, string message)
+            : base(loc, message)
+        {
+            Data.Add("cin", cin);
+            Data.Add("peek", peek);
+            Data.Add("is_eof", is_eof);
+        }
+    }
+
     public class Scanner {
-        Reader m_reader;
+        readonly Reader m_reader;
 
         char cin;
         char peek;
@@ -38,6 +52,11 @@ namespace Sexp {
             }
 
             return cin;
+        }
+
+        LexicalError lexical_error(string message)
+        {
+            return new LexicalError(m_reader.loc, cin, peek, is_eof, message);
         }
 
         bool is_whitespace(char cin)
@@ -157,8 +176,7 @@ namespace Sexp {
                 line_comment();
 
                 if (!nested_comment()) {
-                    attrib.error = "EOF in comment";
-                    attrib.token = Token.ERROR;
+                    throw lexical_error("<eof> in comment");
                 }
 
                 if (is_whitespace(cin)) {
@@ -187,18 +205,11 @@ namespace Sexp {
                 sb.Append(cin);
 
                 while (peek != '"') {
-                    if (is_eof) {
-                        attrib.error = "EOF in string literal";
-                        attrib.token = Token.ERROR;
-                    }
+                    if (is_eof) throw lexical_error("<eof> in string literal");
 
                     if ('\\' == peek) {
                         getc();
                         sb.Append(cin);
-
-                        if (peek != '\\' && peek != '"') {
-                            attrib.error = "invalid escape sequence in string literal";
-                        }
                     }
 
                     getc();
@@ -266,8 +277,7 @@ namespace Sexp {
                     sb.Append(cin);
                     attrib.token = Token.CIRCULAR_OUTPUT;
                 } else {
-                    attrib.error = "invalid # sequence";
-                    attrib.token = Token.ERROR;
+                    throw lexical_error("invalid # sequence");
                 }
 
                 attrib.literal = sb.ToString();
@@ -290,8 +300,7 @@ namespace Sexp {
                 '}' == cin) {
 
                 attrib.literal = char.ToString(cin);
-                attrib.error = "reserved token";
-                attrib.token = Token.ERROR;
+                throw lexical_error("reserved token");
             } else {
                 StringBuilder sb = new StringBuilder();
                 sb.Append(cin);
@@ -338,8 +347,7 @@ namespace Sexp {
                     } else if (value.Equals("newline", StringComparison.OrdinalIgnoreCase)) {
                         attrib.value = '\n';
                     } else {
-                        attrib.error = "invalid named character";
-                        attrib.token = Token.ERROR;
+                        throw lexical_error("invalid named character");
                     }
                 }
             } else if (Token.NUM == attrib.token) {
@@ -347,13 +355,11 @@ namespace Sexp {
                 char type = attrib.literal[1];
 
                 if (!('x' == type || 'X' == type)) {
-                    attrib.error = "unimplemented number literal";
-                    attrib.token = Token.ERROR;
+                    throw lexical_error("unimplemented number literal");
                 } else if (parse_number(attrib.literal, out value)) {
                     attrib.value = value;
                 } else {
-                    attrib.error = "invalid number literal";
-                    attrib.token = Token.ERROR;
+                    throw lexical_error("invalid number literal");
                 }
             } else if (Token.NAMED_CONSTANT == attrib.token) {
                 if ("#!optional" == attrib.literal) {
@@ -361,15 +367,12 @@ namespace Sexp {
                 } else if ("#!rest" == attrib.literal) {
                     attrib.value = "rest";
                 } else {
-                    attrib.error = "invalid named constant";
-                    attrib.token = Token.ERROR;
+                    throw lexical_error("invalid named constant");
                 }
             } else if (Token.BIT_STRING == attrib.token) {
-                attrib.error = "bit strings not implemented";
-                attrib.token = Token.ERROR;
+                throw lexical_error("bit strings not implemented");
             } else if (Token.HASH_NUMBER == attrib.token) {
-                attrib.error = "hash numbers not implemented";
-                attrib.token = Token.ERROR;
+                throw lexical_error("hash numbers not implemented");
             } else if (Token.ID == attrib.token) {
                 object value;
                 if (attrib.literal == ".") {
@@ -381,8 +384,6 @@ namespace Sexp {
                 } else {
                     attrib.value = Symbol.get_symbol(attrib.literal);
                 }
-            } else if (Token.ERROR == attrib.token) {
-                // leave it alone
             } else {
                 attrib.value = attrib.literal;
             }

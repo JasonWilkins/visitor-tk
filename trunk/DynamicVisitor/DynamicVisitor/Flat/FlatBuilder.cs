@@ -57,7 +57,7 @@ namespace Flat {
 
         public Constant defineConstant(string name, Type type, object value)
         {
-            if (null == name) name = ".C"+m_code.literals.Count;
+            if (null == name) name = ".C"+m_code.constants.Count;
             Constant c = new Constant(name, type, value);
             m_code.constants.Add(c);
             return c;
@@ -114,21 +114,21 @@ namespace Flat {
             return p;
         }
 
-        public void addOperator(Operator op, Lvalues lvalues, Operands arguments)
+        public void addDo(Operator op, Lvalues lvalues, Operands arguments)
         {
-            OperatorStamp op_stamp = new OperatorStamp(lvalues, op, arguments);
+            Do op_stamp = new Do(lvalues, op, arguments);
             m_lambda.statements.Add(op_stamp);
         }
 
         public void addLambda(Lambda lambda, Lvalues lvalues, Operands arguments)
         {
-            LambdaStamp lambda_stamp = new LambdaStamp(lvalues, lambda, arguments);
+            DoLambda lambda_stamp = new DoLambda(lvalues, lambda, arguments);
             m_lambda.statements.Add(lambda_stamp);
         }
 
-        public void addCall(Prototype prototype, Operand lambda_reference, Lvalues lvalues, Operands arguments)
+        public void addCall(Operand lambda_reference, Lvalues lvalues, Operands arguments)
         {
-            Call call = new Call(lvalues, prototype, lambda_reference, arguments);
+            Call call = new Call(lvalues, lambda_reference, arguments);
             m_lambda.statements.Add(call);
         }
 

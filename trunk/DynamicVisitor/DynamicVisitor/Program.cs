@@ -506,13 +506,13 @@ namespace Main {
                 do {
                     attrib = scanner.scan();
 
-                    if (attrib.token != Token.ERROR) {
-                        if (Token.NUM == attrib.token) {
-                            Console.WriteLine("{0} {1} {3} {4}", attrib.loc.PathPoint(), Enum.GetName(attrib.token.GetType(), attrib.token), (attrib.literal==null)?(""):("= "+attrib.literal), (attrib.error == null)?(""):("warning: "+attrib.error));
-                        }
-                    } else {
+                    //if (attrib.token != Token.ERROR) {
+                    //    if (Token.NUM == attrib.token) {
+                    //        Console.WriteLine("{0} {1} {3} {4}", attrib.loc.PathPoint(), Enum.GetName(attrib.token.GetType(), attrib.token), (attrib.literal==null)?(""):("= "+attrib.literal), (attrib.error == null)?(""):("warning: "+attrib.error));
+                    //    }
+                    //} else {
                         Console.WriteLine("{0} error: {1} = {2}", attrib.loc.PathPoint(), attrib.error, attrib.literal);
-                    }
+                    //}
 
                 } while (attrib.token != Token.EOF);
             }
@@ -558,9 +558,9 @@ namespace Main {
                 //Console.WriteLine("{0} error{1}", parser.errors, parser.errors!=1?"s":"");
 
                 //if (parser.errors == 0) {
-                    using (System.IO.StreamWriter output1 = new System.IO.StreamWriter(path + ".parsed.txt", false)) {
-                        output1.Write(writer.ToString());
-                //    }
+                using (System.IO.StreamWriter output1 = new System.IO.StreamWriter(path + ".parsed.txt", false)) {
+                    output1.Write(writer.ToString());
+                    //    }
                 }
             }
         }
@@ -719,7 +719,7 @@ namespace Main {
             Global print_global = cb.defineGlobal("print", print_prototype);
             FlatLiteral hello_world = cb.defineLiteral(string_type, "Hello World!"+System.Environment.NewLine);
             LambdaBuilder lb = cb.getLambdaBuilder("main", null);
-            lb.addCall(print_prototype, print_global, null, new Operands(hello_world));
+            lb.addCall(print_global, null, new Operands(hello_world));
             cb.defineLambda(lb.getLambda(null));
             return cb.getCode();
         }
@@ -760,42 +760,42 @@ namespace Main {
             FlatLiteral _2 = cb.defineLiteral(single_type, 2L);
             lb.addMove(new Lvalues(a), new Operands(_2));
 
-            Constant _n3 = cb.defineConstant("neg-3", single_type, -3L);
+            FlatLiteral _n3 = cb.defineLiteral(single_type, -3L);
             lb.addMove(new Lvalues(b), new Operands(_n3));
 
             FlatLiteral _n2 = cb.defineLiteral(single_type, -2L);
             lb.addMove(new Lvalues(c), new Operands(_n2));
 
-            lb.addOperator(neg, new Lvalues(n0), new Operands(b));
-            lb.addOperator(mul, new Lvalues(n1), new Operands(b, b));
+            lb.addDo(neg, new Lvalues(n0), new Operands(b));
+            lb.addDo(mul, new Lvalues(n1), new Operands(b, b));
 
             FlatLiteral _4 = cb.defineLiteral(single_type, 4L);
-            lb.addOperator(mul, new Lvalues(n2), new Operands(_4, a));
+            lb.addDo(mul, new Lvalues(n2), new Operands(_4, a));
 
-            lb.addOperator(mul, new Lvalues(n2), new Operands(n2, c));
-            lb.addOperator(sub, new Lvalues(det), new Operands(n1, n2));
+            lb.addDo(mul, new Lvalues(n2), new Operands(n2, c));
+            lb.addDo(sub, new Lvalues(det), new Operands(n1, n2));
 
-            lb.addCall(sqrt_prototype, sqrt_global, new Lvalues(n4), new Operands(det));
+            lb.addCall(sqrt_global, new Lvalues(n4), new Operands(det));
 
             Local x1 = lb.defineLocal("x1", single_type);
             Local x2 = lb.defineLocal("x2", single_type);
 
-            lb.addOperator(add, new Lvalues(x1), new Operands(n0, n4));
-            lb.addOperator(div, new Lvalues(x1), new Operands(x1, n3));
-            lb.addOperator(sub, new Lvalues(x2), new Operands(n0, n4));
-            lb.addOperator(div_assign, new Lvalues(x2), new Operands(n3));
+            lb.addDo(add, new Lvalues(x1), new Operands(n0, n4));
+            lb.addDo(div, new Lvalues(x1), new Operands(x1, n3));
+            lb.addDo(sub, new Lvalues(x2), new Operands(n0, n4));
+            lb.addDo(div_assign, new Lvalues(x2), new Operands(n3));
 
-            FlatLiteral answer1 = cb.defineLiteral(string_type, "Answers to ABC formula are:"/*+System.Environment.NewLine*/);
-            FlatLiteral answer2 = cb.defineLiteral(string_type, "x1 = ");
-            FlatLiteral answer3 = cb.defineLiteral(string_type, /*System.Environment.NewLine+*/"x2 = ");
-            FlatLiteral answer4 = cb.defineLiteral(string_type, ""/*System.Environment.NewLine*/);
+            Constant answer1 = cb.defineConstant(null, string_type, "Answers to ABC formula are:"/*+System.Environment.NewLine*/);
+            Constant answer2 = cb.defineConstant(null, string_type, "x1 = ");
+            Constant answer3 = cb.defineConstant(null, string_type, /*System.Environment.NewLine+*/"x2 = ");
+            Constant answer4 = cb.defineConstant(null, string_type, ""/*System.Environment.NewLine*/);
 
-            lb.addCall(print_prototype1, print_global1, null, new Operands(answer1));
-            lb.addCall(print_prototype1, print_global1, null, new Operands(answer2));
-            lb.addCall(print_prototype2, print_global2, null, new Operands(x1));
-            lb.addCall(print_prototype1, print_global1, null, new Operands(answer3));
-            lb.addCall(print_prototype2, print_global2, null, new Operands(x2));
-            lb.addCall(print_prototype1, print_global1, null, new Operands(answer4));
+            lb.addCall(print_global1, null, new Operands(answer1));
+            lb.addCall(print_global1, null, new Operands(answer2));
+            lb.addCall(print_global2, null, new Operands(x1));
+            lb.addCall(print_global1, null, new Operands(answer3));
+            lb.addCall(print_global2, null, new Operands(x2));
+            lb.addCall(print_global1, null, new Operands(answer4));
 
             cb.defineLambda(lb.getLambda(null));
 
@@ -831,13 +831,65 @@ namespace Main {
         public static class GetTopLevelWriter {
             public static VectorWriter create(Writer writer, Format fmt)
             {
-                Config config = new Config(writer, fmt);
+                return create(writer, fmt, null);
+            }
+
+            public static VectorWriter create(Writer writer, Format fmt, GetConfig get_new_config)
+            {
+                Config config = new Config(writer, fmt, get_new_config);
                 return new VectorWriter(config.file, config);
             }
 
             public static VectorWriter create(Writer writer)
             {
                 return create(writer, new Format());
+            }
+        }
+
+        public static class ConstructFormat {
+            static Config m_cfg;
+            static Format m_fmt;
+
+            static readonly Symbol op = Symbol.get_symbol(".op");
+            static readonly Symbol call = Symbol.get_symbol(".call");
+            static readonly Symbol move = Symbol.get_symbol(".move");
+            static readonly Symbol local = Symbol.get_symbol(".local");
+            static readonly Symbol type = Symbol.get_symbol(".type");
+            static readonly Symbol prototype = Symbol.get_symbol(".prototype");
+
+            static public void init(Writer writer)
+            {
+                m_fmt = new Format();
+                m_fmt.format_appl = false;
+                m_fmt.format_data = false;
+                m_fmt.format_head = false;
+                m_fmt.format_vect = false;
+
+                m_cfg = new Config(writer, m_fmt);
+            }
+
+            static public bool get_construct_lang_config(object atom, out Config config, out bool is_appl)
+            {
+                if (atom is Symbol) {
+                    Symbol sym = (Symbol)atom;
+
+                    if (op == sym ||
+                        call == sym ||
+                        move == sym ||
+                        type == sym ||
+                        prototype == sym ||
+                        local == sym) {
+
+                        config = m_cfg;
+                        is_appl = true;
+                        return true;
+                    }
+                }
+
+                config = null;
+                is_appl = true;
+
+                return false;
             }
         }
 
@@ -867,7 +919,7 @@ namespace Main {
             //test_safe_parse("test2.txt");
 #endif
 
-#if false
+#if true
             parse_and_write("test.txt", "test-output1.txt");
             parse_and_write("test-output1.txt", "test-output2.txt");
             compare_files("test.txt", "test-output1.txt");
@@ -886,18 +938,32 @@ namespace Main {
             code_builder_test(code_builder_test1());
             code_builder_test(code_builder_test2());
 #endif
-#if true
+#if false
             using (FileWriter writer = new FileWriter("construct1.txt")) {
                 Code c = code_builder_test2();
                 Dictionary<string, string> aliases = new Dictionary<string, string>();
-                aliases.Add("Sexp.Cons", "cons");
-                aliases.Add("System.Object[]", "vector");
+                //aliases.Add("Sexp.Cons", "cons");
+                //aliases.Add("System.Object[]", "vector");
                 List<string> ns = new List<string>();
-                ns.Add("Sexp");
-//                object[] test1 = build("test.txt");
-                object[] test1 = ConstructLang.tour(build("test.txt"), ns, aliases);
-                //ns.Add("Flat");
-                //object[] test1 = ConstructLang.tour(c));
+                //                ns.Add("Sexp");
+                //                object[] test1 = build("test.txt");
+                //                object[] test1 = ConstructLang.tour(build("test.txt"), ns, aliases);
+                ns.Add("Flat");
+                aliases.Add("Flat.Do", ".do");
+                aliases.Add("Flat.Move", ".move");
+                aliases.Add("Flat.Call", ".call");
+                aliases.Add("Flat.DoLambda", ".sub");
+                aliases.Add("Flat.If", ".if");
+
+                aliases.Add("Flat.Type", "type");
+                aliases.Add("Flat.Local", ".local");
+                aliases.Add("Flat.Constant", ".constant");
+                aliases.Add("Flat.Global", ".global");
+                aliases.Add("Flat.Prototype", ".prototype");
+                aliases.Add("Flat.Operands", "->");
+                aliases.Add("Flat.Lvalues", "<-");
+
+                object[] test1 = ConstructLang.tour(c, ns, aliases);
                 //VectorLogger logger = new VectorLogger(new Log(), new TxtLocation(""), GetTopLevelWriter.create(writer));
                 Format fmt = new Format();
                 //fmt.format_vect = true;
@@ -907,14 +973,15 @@ namespace Main {
                 //fmt.do_abbrev = true;
                 //fmt.do_abbrev = false;
                 //fmt.do_debug = true;
-                DynamicVisitor.accept(test1, GetTopLevelWriter.create(writer, fmt));
+                ConstructFormat.init(writer);
+                DynamicVisitor.accept(test1, GetTopLevelWriter.create(writer, fmt, ConstructFormat.get_construct_lang_config));
             }
-//            int foo = 2+2;
+            //            int foo = 2+2;
 #endif
 #if true
             //System.IO.TextWriter my_out = new System.IO.StreamWriter("output.txt");
             //Console.SetOut(my_out);
-            
+
             //Reader f = new Reader("test3.txt");
             //Util.TxtLocation loc = new Util.TxtLocation("test3.txt");
             //Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new StandardEnvironment(), loc)), loc);

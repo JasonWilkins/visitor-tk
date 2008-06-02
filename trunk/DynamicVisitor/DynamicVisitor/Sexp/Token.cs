@@ -15,7 +15,6 @@ namespace Sexp {
     }
 
     public enum Token {
-        ERROR,
         EOF,
         OPEN_PAREN,
         CLOSE_PAREN,

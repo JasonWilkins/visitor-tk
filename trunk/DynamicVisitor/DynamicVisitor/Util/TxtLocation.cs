@@ -1,6 +1,15 @@
 using System;
 
 namespace Util {
+    public class TxtException : Exception {
+        public TxtLocation loc { get { return (TxtLocation)Data["loc"]; } }
+
+        public TxtException(TxtLocation loc, string message)
+            : base(message)
+        {
+            Data.Add("loc", loc);
+        }
+    }
 
     [Serializable]
     public class TxtLocation {

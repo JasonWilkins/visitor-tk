@@ -5,7 +5,10 @@ using Util;
 using Symbols;
 
 namespace Sexp {
-    public class SyntaxError : Exception {
+    public class SyntaxError : TxtException {
+        public Token lookahead { get { return (Token)Data["lookahead"]; } }
+        public Token[] expected { get { return (Token[])Data["expected"]; } }
+
         static string fancy_token(Token t)
         {
             return '<' + Enum.GetName(t.GetType(), t).ToLower().Replace('_', '-') + '>';
@@ -38,12 +41,11 @@ namespace Sexp {
                 fancy_token(lookahead), loc.FancyContext());
         }
 
-        public SyntaxError(TxtLocation loc, Token lookahead, params Token[] tokens)
-            : base(make_message(loc, lookahead, tokens))
+        public SyntaxError(TxtLocation loc, Token lookahead, params Token[] expected)
+            : base(loc, make_message(loc, lookahead, expected))
         {
-            Data.Add("location", loc);
-            Data.Add("tokens", tokens);
             Data.Add("lookahead", lookahead);
+            Data.Add("expected", expected);
         }
     }
 

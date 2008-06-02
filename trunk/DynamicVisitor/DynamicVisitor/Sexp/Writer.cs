@@ -136,10 +136,10 @@ namespace Sexp {
             if (m_config.cons == m_formatter || m_config.top_cons == m_formatter) {
                 if (m_atom != null) {
                     Config config;
-                    ConsFormatter formatter;
+                    bool is_appl;
 
-                    if (m_config.GetNewConfig(m_atom.value, out config, out formatter)) {
-                        return new ConsWriter(formatter, config, m_is_abbrev);
+                    if (m_config.GetNewConfig(m_atom.value, out config, out is_appl)) {
+                        return new ConsWriter(is_appl ? config.appl_cons_cdr : config.data_cons_cdr, config, m_is_abbrev);
                     }
                 }
 

@@ -14,7 +14,7 @@ namespace Sexp {
         public bool do_debug = false;
     }
 
-    public delegate bool GetConfig(object atom, out Config config, out ConsFormatter formatter);
+    public delegate bool GetConfig(object atom, out Config config, out bool is_appl);
 
     public class Config {
         internal readonly VectFormatter file;
@@ -127,16 +127,16 @@ namespace Sexp {
             return f;
         }
 
-        static bool no_new_config(object atom, out Config config, out ConsFormatter formatter)
+        static bool no_new_config(object atom, out Config config, out bool is_appl)
         {
             config = null;
-            formatter = null;
+            is_appl = true;
             return false;
         }
 
-        public bool GetNewConfig(object atom, out Config config, out ConsFormatter formatter)
+        public bool GetNewConfig(object atom, out Config config, out bool is_appl)
         {
-            return m_get_new_config(atom, out config, out formatter);
+            return m_get_new_config(atom, out config, out is_appl);
         }
     }
 

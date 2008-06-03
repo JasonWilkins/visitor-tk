@@ -97,51 +97,51 @@ namespace Flat {
 
         public void defineLambda(Lambda lambda)
         {
-            m_lambda.lambdas.Add(lambda);
+            m_lambda.addLambda(lambda);
         }
 
         public Local defineLocal(string name, Type type)
         {
             Local l = new Local(name, type);
-            m_lambda.locals.Add(l);
+            m_lambda.addLocal(l);
             return l;
         }
 
         public Parameter defineParameter(string name, Type type)
         {
             Parameter p = new Parameter(name, type);
-            m_lambda.parameters.Add(p);
+            m_lambda.addParameter(p);
             return p;
         }
 
         public void addDo(Operator op, Lvalues lvalues, Operands arguments)
         {
             Do op_stamp = new Do(lvalues, op, arguments);
-            m_lambda.statements.Add(op_stamp);
+            m_lambda.addStatement(op_stamp);
         }
 
         public void addLambda(Lambda lambda, Lvalues lvalues, Operands arguments)
         {
             DoLambda lambda_stamp = new DoLambda(lvalues, lambda, arguments);
-            m_lambda.statements.Add(lambda_stamp);
+            m_lambda.addStatement(lambda_stamp);
         }
 
         public void addCall(Operand lambda_reference, Lvalues lvalues, Operands arguments)
         {
             Call call = new Call(lvalues, lambda_reference, arguments);
-            m_lambda.statements.Add(call);
+            m_lambda.addStatement(call);
         }
 
         public void addIf(Lvalues lvalues, Relation conditional, Lambda consequent, Lambda alternate)
         {
             If _if = new If(lvalues, conditional, consequent, alternate);
-            m_lambda.statements.Add(_if);
+            m_lambda.addStatement(_if);
         }
 
         public void addMove(Lvalues lvalues, Operands rvalues)
         {
             Move m = new Move(lvalues, rvalues);
-            m_lambda.statements.Add(m);
+            m_lambda.addStatement(m);
         }
     }
 }

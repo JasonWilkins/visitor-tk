@@ -12,8 +12,8 @@ using GuidedTour;
 
 namespace DynamicVisitor {
     public class VisitSiteseer : ISiteseer {
-        static Type[] no_params = { };
-        static object[] no_args   = { };
+        static readonly Type[] no_params = { };
+        static readonly object[] no_args = { };
 
         Object m_visitor;
         Type m_visitor_type;

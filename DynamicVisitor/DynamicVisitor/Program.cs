@@ -511,7 +511,7 @@ namespace Main {
                     //        Console.WriteLine("{0} {1} {3} {4}", attrib.loc.PathPoint(), Enum.GetName(attrib.token.GetType(), attrib.token), (attrib.literal==null)?(""):("= "+attrib.literal), (attrib.error == null)?(""):("warning: "+attrib.error));
                     //    }
                     //} else {
-                        Console.WriteLine("{0} error: {1} = {2}", attrib.loc.PathPoint(), attrib.error, attrib.literal);
+                    Console.WriteLine("{0} error: {1} = {2}", attrib.loc.PathPoint(), attrib.error, attrib.literal);
                     //}
 
                 } while (attrib.token != Token.EOF);
@@ -824,7 +824,7 @@ namespace Main {
             public void visitEnd()
             {
                 Console.WriteLine("total is {0}", i);
-                Console.WriteLine("symbol count = {0}", scount);
+                Console.WriteLine("symbol m_count = {0}", scount);
             }
         }
 
@@ -850,12 +850,23 @@ namespace Main {
             static Config m_cfg;
             static Format m_fmt;
 
-            static readonly Symbol op = Symbol.get_symbol(".op");
-            static readonly Symbol call = Symbol.get_symbol(".call");
-            static readonly Symbol move = Symbol.get_symbol(".move");
-            static readonly Symbol local = Symbol.get_symbol(".local");
-            static readonly Symbol type = Symbol.get_symbol(".type");
-            static readonly Symbol prototype = Symbol.get_symbol(".prototype");
+            static readonly Symbol[] print_one_line = {
+                Symbol.get_symbol(".alias"),
+                Symbol.get_symbol(".namespace"),
+                Symbol.get_symbol(".type"),
+                Symbol.get_symbol(".prototype"),
+                Symbol.get_symbol(".operator"),
+                Symbol.get_symbol(".relation"),
+                Symbol.get_symbol(".constant"),
+                Symbol.get_symbol(".global"),
+                Symbol.get_symbol(".param"),
+                Symbol.get_symbol(".local"),
+                Symbol.get_symbol(".do"),
+                Symbol.get_symbol(".move"),
+                Symbol.get_symbol(".call"),
+                Symbol.get_symbol(".gosub"),
+                Symbol.get_symbol(".if"),
+            };
 
             static public void init(Writer writer)
             {
@@ -873,16 +884,12 @@ namespace Main {
                 if (atom is Symbol) {
                     Symbol sym = (Symbol)atom;
 
-                    if (op == sym ||
-                        call == sym ||
-                        move == sym ||
-                        type == sym ||
-                        prototype == sym ||
-                        local == sym) {
-
-                        config = m_cfg;
-                        is_appl = true;
-                        return true;
+                    foreach (Symbol s in print_one_line) {
+                        if (s == sym) {
+                            config = m_cfg;
+                            is_appl = true;
+                            return true;
+                        }
                     }
                 }
 
@@ -919,7 +926,7 @@ namespace Main {
             //test_safe_parse("test2.txt");
 #endif
 
-#if true
+#if false
             parse_and_write("test.txt", "test-output1.txt");
             parse_and_write("test-output1.txt", "test-output2.txt");
             compare_files("test.txt", "test-output1.txt");
@@ -938,7 +945,7 @@ namespace Main {
             code_builder_test(code_builder_test1());
             code_builder_test(code_builder_test2());
 #endif
-#if false
+#if true
             using (FileWriter writer = new FileWriter("construct1.txt")) {
                 Code c = code_builder_test2();
                 Dictionary<string, string> aliases = new Dictionary<string, string>();
@@ -949,19 +956,34 @@ namespace Main {
                 //                object[] test1 = build("test.txt");
                 //                object[] test1 = ConstructLang.tour(build("test.txt"), ns, aliases);
                 ns.Add("Flat");
+
+                aliases.Add("Flat.Type", ".type");
+                aliases.Add("Flat.Prototype", ".prototype");
+                aliases.Add("Flat.Operator", ".operator");
+                aliases.Add("Flat.Relation", ".relation");
+                aliases.Add("Flat.Constant", ".constant");
+                aliases.Add("Flat.Global", ".global");
+
+                aliases.Add("Flat.Local", ".local");
+                aliases.Add("Flat.Parameter", ".param");
+
                 aliases.Add("Flat.Do", ".do");
                 aliases.Add("Flat.Move", ".move");
                 aliases.Add("Flat.Call", ".call");
-                aliases.Add("Flat.DoLambda", ".sub");
+                aliases.Add("Flat.DoLambda", ".gosub");
                 aliases.Add("Flat.If", ".if");
 
-                aliases.Add("Flat.Type", "type");
-                aliases.Add("Flat.Local", ".local");
-                aliases.Add("Flat.Constant", ".constant");
-                aliases.Add("Flat.Global", ".global");
-                aliases.Add("Flat.Prototype", ".prototype");
+                aliases.Add("Flat.Lambda", ".lambda");
                 aliases.Add("Flat.Operands", "->");
                 aliases.Add("Flat.Lvalues", "<-");
+
+                aliases.Add("Flat.Types", "types:");
+                aliases.Add("Flat.Prototypes", "prototypes:");
+                aliases.Add("Flat.Constants", "constants:");
+                aliases.Add("Flat.Globals", "globals:");
+                aliases.Add("Flat.Operators", "operators:");
+                aliases.Add("Flat.Relations", "relations:");
+                aliases.Add("Flat.Lambdas", "lambdas:");
 
                 object[] test1 = ConstructLang.tour(c, ns, aliases);
                 //VectorLogger logger = new VectorLogger(new Log(), new TxtLocation(""), GetTopLevelWriter.create(writer));

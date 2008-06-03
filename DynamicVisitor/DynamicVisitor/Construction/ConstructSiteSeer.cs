@@ -24,13 +24,13 @@ namespace ConstructLang {
         static void add_namespace_directives(List<string> ns, Dictionary<string, string> aliases, ListBox collection)
         {
             foreach (string n in ns) {
-                ((IBox)collection).put(new Cons(Symbol.get_symbol("namespace"), new Cons(n)));
+                ((IBox)collection).put(new Cons(Symbol.get_symbol(".namespace"), new Cons(n)));
             }
 
             foreach (KeyValuePair<string, string> a in aliases) {
                 ((IBox)collection).put(
                     new Cons(
-                        Symbol.get_symbol("alias"),
+                        Symbol.get_symbol(".alias"),
                         new Cons(
                             a.Key,
                             new Cons(
@@ -63,6 +63,8 @@ namespace ConstructLang {
         Dictionary<object, object> m_symtab;
         Dictionary<string, string> m_aliases;
 
+        int m_count = 0;
+
         public ConstructSiteseer(IBox outbox, IBox collection, List<string> ns, Dictionary<object, object> symtab, Dictionary<string, string> aliases)
         {
             m_collection = collection;
@@ -77,11 +79,13 @@ namespace ConstructLang {
 
         public void end()
         {
-            m_outbox.put(m_collection.get());
+            if (m_count > 0) m_outbox.put(m_collection.get());
         }
 
         public bool view_part(Site site, out ISiteseer new_siteseer)
         {
+            m_count++;
+
             if (site.type != null) {
                 object[] attrib = site.type.GetCustomAttributes(typeof(LiteralFieldAttribute), true);
 
@@ -102,7 +106,7 @@ namespace ConstructLang {
 
                 if (site.value is Symbol) {
                     m_collection.put(new Cons(Abbrev.quote, new Cons(site.value)));
-                } else if (site.value != null) {
+                } else /*if (site.value != null)*/ {
                     m_collection.put(site.value);
                 }
 
@@ -148,7 +152,7 @@ namespace ConstructLang {
                         return true;
                     } else {
                         ProperListBox list = new ProperListBox();
-                        ((IBox)list).put(Symbol.get_symbol(resolve(site.type.Namespace, site.type.FullName, site.type.Name)));
+                        ((IBox)list).put(Symbol.get_symbol(resolve(site.type.Namespace, site.type.FullName, site.type.Name)+(site.name==null?"":site.name)));
                         new_siteseer = new ConstructSiteseer(m_collection, list, m_ns, m_symtab, m_aliases);
                         return true;
                     }

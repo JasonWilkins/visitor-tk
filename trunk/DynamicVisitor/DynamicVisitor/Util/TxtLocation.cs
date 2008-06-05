@@ -4,6 +4,10 @@ namespace Util {
     public class TxtException : Exception {
         public TxtLocation loc { get { return (TxtLocation)Data["loc"]; } }
 
+        public TxtException(TxtLocation loc, string message, Exception innerException)
+            : base(message, innerException)
+        { }
+
         public TxtException(TxtLocation loc, string message)
             : base(message)
         {

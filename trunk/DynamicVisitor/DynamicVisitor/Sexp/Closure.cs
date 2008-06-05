@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Sexp {
     public class Closure {
-        public delegate object Fn(List<object> args);
+        public delegate object Fn(object[] args);
 
         public Fn fn;
 

@@ -27,8 +27,10 @@ namespace ConstructLang {
                 ((IBox)collection).put(new Cons(Symbol.get_symbol(".namespace"), new Cons(n)));
             }
 
+            ProperListBox alias_list = new ProperListBox();
+            
             foreach (KeyValuePair<string, string> a in aliases) {
-                ((IBox)collection).put(
+                ((IBox)alias_list).put(
                     new Cons(
                         Symbol.get_symbol(".alias"),
                         new Cons(
@@ -38,6 +40,8 @@ namespace ConstructLang {
                                     Abbrev.quote,
                                     new Cons(Symbol.get_symbol(a.Value)))))));
             }
+
+            ((IBox)collection).put(new Cons(Symbol.get_symbol("aliases:"), alias_list.cons));
         }
 
         public static object[] tour(object graph, List<string> ns, Dictionary<string, string> aliases)
@@ -57,7 +61,7 @@ namespace ConstructLang {
         readonly IBox m_collection;
         readonly IBox m_outbox;
 
-        string m_name = null;
+        Type m_parent_type = null;
 
         List<string> m_ns;
         Dictionary<object, object> m_symtab;
@@ -107,7 +111,9 @@ namespace ConstructLang {
                 if (site.value is Symbol) {
                     m_collection.put(new Cons(Abbrev.quote, new Cons(site.value)));
                 } else /*if (site.value != null)*/ {
-                    m_collection.put(site.value);
+                    object[] sitelist = m_parent_type.GetCustomAttributes(typeof(SiteListAttribute), false);
+
+                    if (sitelist.Length > 0 || site.value != null) m_collection.put(site.value);
                 }
 
                 return true;
@@ -151,8 +157,15 @@ namespace ConstructLang {
                         new_siteseer = null;
                         return true;
                     } else {
+                        object[] sitelist = m_parent_type.GetCustomAttributes(typeof(SiteListAttribute), false);
+
+                        string name = resolve(site.type.Namespace, site.type.FullName, site.type.Name);
+
+                        if (site.name != null && sitelist.Length == 0)
+                            name = String.Format("{0}#{1}", name, site.name);
+
                         ProperListBox list = new ProperListBox();
-                        ((IBox)list).put(Symbol.get_symbol(resolve(site.type.Namespace, site.type.FullName, site.type.Name)+(site.name==null?"":site.name)));
+                        ((IBox)list).put(Symbol.get_symbol(name));
                         new_siteseer = new ConstructSiteseer(m_collection, list, m_ns, m_symtab, m_aliases);
                         return true;
                     }
@@ -165,7 +178,7 @@ namespace ConstructLang {
 
         public bool view_whole(Site site)
         {
-            m_name = site.name;
+            m_parent_type = site.type;
             return false;
         }
 

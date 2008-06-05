@@ -116,7 +116,7 @@ namespace Sexp {
             } else if (o == null) {
                 return "()";
             } else {
-                return "@";// throw new Exception();
+                throw new Exception();
             }
         }
 
@@ -125,7 +125,7 @@ namespace Sexp {
             try {
                 return format(o);
             } catch {
-                return null;
+                return String.Empty;
             }
         }
     }

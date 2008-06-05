@@ -64,6 +64,8 @@ namespace GuidedTour {
 
                             if (null == mi) mi = type.GetProperty(field, BindingFlags.Public|BindingFlags.Instance, null, null, no_params, null);
 
+                            if (null == mi) throw new Exception(String.Format("{0} not found", field));
+
                             add_member(value, type, mi);
                         }
                     } else {

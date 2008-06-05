@@ -9,18 +9,22 @@ namespace Sexp {
         Environment m_parent;
         Dictionary<Symbol, object> definitions = new Dictionary<Symbol, object>();
 
+        public delegate bool Trap(Symbol sym, out object def);
+
+        Trap m_trap;
+
         public Environment()
-            : this(null)
+            : this(null, no_trap)
         { }
 
         public Environment(Environment parent)
-        {
-            m_parent = parent;
-        }
+            : this(parent, no_trap)
+        { }
 
-        public object apply(TxtLocation loc, Closure fn, params object[] args)
+        public Environment(Environment parent, Trap trap)
         {
-            return null;
+            m_trap = trap;
+            m_parent = parent;
         }
 
         public object lookup(TxtLocation loc, Symbol sym)
@@ -31,17 +35,28 @@ namespace Sexp {
                 return def;
             } else if (m_parent != null) {
                 return m_parent.lookup(loc, sym);
+            } else if (m_trap(sym, out def)) {
+                return def;
             } else {
-                throw new InterpreterException(sym.name + " is undefined", loc);
+                throw new InterpreterException(loc, sym.name + " is undefined");
             }
         }
 
-        public object apply(TxtLocation loc, Closure fn, List<object> args)
+        public object apply(TxtLocation loc, Closure fn, object[] args)
         {
             try {
                 return fn.fn(args);
             } catch (Exception e) {
-                throw new InterpreterException("exception occured in method: " + fn.fn.Method.Name, e, loc);
+                throw new InterpreterException(loc, "exception occured in method: " + fn.fn.Method.Name, e);
+            }
+        }
+
+        public object transform(TxtLocation loc, SpecialForm m, object source)
+        {
+            try {
+                return m.m(source);
+            } catch (Exception e) {
+                throw new InterpreterException(loc, "exception occured in special form: " + m.m.Method.Name, e);
             }
         }
 
@@ -50,9 +65,20 @@ namespace Sexp {
             definitions.Add(sym, def);
         }
 
-        public void Add(Symbol sym, Closure.Fn fn)
+        public void AddFn(Symbol sym, Closure.Fn fn)
         {
             definitions.Add(sym, new Closure(fn));
+        }
+
+        public void AddMacro(Symbol sym, SpecialForm.Macro m)
+        {
+            definitions.Add(sym, new SpecialForm(m));
+        }
+
+        static bool no_trap(Symbol sym, out object def)
+        {
+            def = null;
+            return false;
         }
     }
 }

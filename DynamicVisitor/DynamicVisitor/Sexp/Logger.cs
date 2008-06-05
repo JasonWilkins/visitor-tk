@@ -183,13 +183,13 @@ namespace Sexp {
 
         //public override void visit()
         //{
-        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit()");
+        //    m_log.Add(m_sequence++, m_cons_loc,  m_class_name, "visit()");
         //    m_next.visit();
         //}
 
         //public override void visitEnd()
         //{
-        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visitEnd()");
+        //    m_log.Add(m_sequence++, m_cons_loc,  m_class_name, "visitEnd()");
         //    m_next.visitEnd();
         //}
 
@@ -201,37 +201,37 @@ namespace Sexp {
 
         //public override void visit_value(Boolean o)
         //{
-        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Boolean)");
+        //    m_log.Add(m_sequence++, m_cons_loc,  m_class_name, "visit_value(Boolean)");
         //    m_next.visit_value(o);
         //}
 
         //public override void visit_value(Int64 o)
         //{
-        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Int64)");
+        //    m_log.Add(m_sequence++, m_cons_loc,  m_class_name, "visit_value(Int64)");
         //    m_next.visit_value(o);
         //}
 
         //public override void visit_value(Double o)
         //{
-        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Double)");
+        //    m_log.Add(m_sequence++, m_cons_loc,  m_class_name, "visit_value(Double)");
         //    m_next.visit_value(o);
         //}
 
         //public override void visit_value(String o)
         //{
-        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(String)");
+        //    m_log.Add(m_sequence++, m_cons_loc,  m_class_name, "visit_value(String)");
         //    m_next.visit_value(o);
         //}
 
         //public override void visit_value(Char o)
         //{
-        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Char)");
+        //    m_log.Add(m_sequence++, m_cons_loc,  m_class_name, "visit_value(Char)");
         //    m_next.visit_value(o);
         //}
 
         //public override void visit_value(Symbol o)
         //{
-        //    m_log.Add(m_sequence++, m_loc,  m_class_name, "visit_value(Symbol)");
+        //    m_log.Add(m_sequence++, m_cons_loc,  m_class_name, "visit_value(Symbol)");
         //    m_next.visit_value(o);
         //}
     }

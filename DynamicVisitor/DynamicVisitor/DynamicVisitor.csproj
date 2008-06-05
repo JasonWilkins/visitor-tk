@@ -49,6 +49,7 @@
     <Compile Include="Flat\Common.cs" />
     <Compile Include="Sexp\Datum.cs" />
     <Compile Include="Sexp\Pair.cs" />
+    <Compile Include="Sexp\SpecialForm.cs" />
     <Compile Include="Sexp\StandardEnvironment.cs" />
     <Compile Include="Sexp\Symbol.cs" />
     <Compile Include="Util\StringUtil.cs" />

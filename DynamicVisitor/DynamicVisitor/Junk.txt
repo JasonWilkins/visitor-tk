@@ -2970,3 +2970,58 @@ namespace CodeBuilder {
                         sb.Append("\\f");
                         break;
 
+
+
+    class AtomInterpreter : AtomVisitor {
+        Environment m_env;
+        TxtLocation m_loc;
+
+        protected List<object> m_args;
+
+        public AtomInterpreter(Environment env, TxtLocation loc, List<object> args)
+        {
+            m_env = env;
+            m_loc = loc;
+            m_args = args;
+        }
+
+        public override void visit(object o)
+        {
+            if (o is Symbol) {
+                m_args.Add(m_env.lookup(m_loc, (Symbol)o));
+            } else {
+                m_args.Add(o);
+            }
+        }
+
+        //public override void visit_value(bool o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(char o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(double o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(long o)
+        //{
+        //    m_args.Add(o);
+        //}
+
+        //public override void visit_value(Symbol o)
+        //{
+        //    m_args.Add(m_env.lookup(m_loc, o));
+        //}
+
+        //public override void visit_value(string o)
+        //{
+        //    m_args.Add(o);
+        //}
+    }
+

@@ -945,7 +945,7 @@ namespace Main {
             code_builder_test(code_builder_test1());
             code_builder_test(code_builder_test2());
 #endif
-#if true
+#if false
             using (FileWriter writer = new FileWriter("construct1.txt")) {
                 Code c = code_builder_test2();
                 Dictionary<string, string> aliases = new Dictionary<string, string>();
@@ -974,8 +974,8 @@ namespace Main {
                 aliases.Add("Flat.If", ".if");
 
                 aliases.Add("Flat.Lambda", ".lambda");
-                aliases.Add("Flat.Operands", "->");
-                aliases.Add("Flat.Lvalues", "<-");
+                aliases.Add("Flat.Operands", "<-");
+                aliases.Add("Flat.Lvalues", "->");
 
                 aliases.Add("Flat.Types", "types:");
                 aliases.Add("Flat.Prototypes", "prototypes:");
@@ -984,6 +984,7 @@ namespace Main {
                 aliases.Add("Flat.Operators", "operators:");
                 aliases.Add("Flat.Relations", "relations:");
                 aliases.Add("Flat.Lambdas", "lambdas:");
+                aliases.Add("Flat.Listing", "listing:");
 
                 object[] test1 = ConstructLang.tour(c, ns, aliases);
                 //VectorLogger logger = new VectorLogger(new Log(), new TxtLocation(""), GetTopLevelWriter.create(writer));
@@ -1004,12 +1005,12 @@ namespace Main {
             //System.IO.TextWriter my_out = new System.IO.StreamWriter("output.txt");
             //Console.SetOut(my_out);
 
-            //Reader f = new Reader("test3.txt");
-            //Util.TxtLocation loc = new Util.TxtLocation("test3.txt");
-            //Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new StandardEnvironment(), loc)), loc);
-            //p.SafeRead();
+            Reader f = new Reader("test3.txt");
+            Util.TxtLocation loc = new Util.TxtLocation("test3.txt");
+            Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new StandardEnvironment(), loc)), loc);
+            p.Read();
 
-            //Vector v = build("test.txt");
+            //object[] v = build("test.txt");
             //DynamicVisitor.accept(v, new IntVisitor());
             //DynamicVisitor.accept(v, new Interpreter(new TestEnvironment(), null));
 #endif

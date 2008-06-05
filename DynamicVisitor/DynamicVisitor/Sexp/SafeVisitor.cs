@@ -1,5 +1,7 @@
 using System;
 
+using Symbols;
+
 namespace Sexp {
     public class SafeVectorVisitor : VectVisitor {
         VectVisitor m_vect;
@@ -25,15 +27,13 @@ namespace Sexp {
             m_atom = atom;
         }
 
-        //public override void visit() { if (m_atom != null) m_atom.visit(); }
-        //public override void visitEnd() { if (m_atom != null) m_atom.visitEnd(); }
         public override void visit(object o) { if (m_atom != null) m_atom.visit(o); }
-        //public override void visit_value(Boolean o) { if (m_atom != null) m_atom.visit_value(o); }
-        //public override void visit_value(Int64 o) { if (m_atom != null) m_atom.visit_value(o); }
-        //public override void visit_value(Double o) { if (m_atom != null) m_atom.visit_value(o); }
-        //public override void visit_value(String o) { if (m_atom != null) m_atom.visit_value(o); }
-        //public override void visit_value(Char o) { if (m_atom != null) m_atom.visit_value(o); }
-        //public override void visit_value(Symbol o) { if (m_atom != null) m_atom.visit_value(o); }
+        public override void visit(Boolean o) { if (m_atom != null) m_atom.visit(o); }
+        public override void visit(Int64 o) { if (m_atom != null) m_atom.visit(o); }
+        public override void visit(Double o) { if (m_atom != null) m_atom.visit(o); }
+        public override void visit(String o) { if (m_atom != null) m_atom.visit(o); }
+        public override void visit(Char o) { if (m_atom != null) m_atom.visit(o); }
+        public override void visit(Symbol o) { if (m_atom != null) m_atom.visit(o); }
     }
 
     public class SafeConsVisitor : ConsVisitor {

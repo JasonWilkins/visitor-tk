@@ -5,9 +5,9 @@ using Symbols;
 
 namespace Sexp {
     public class StandardEnvironment : Environment {
-        static object fn_eq(List<object> args)
+        static object fn_eq(object[] args)
         {
-            for (int i = 0; i < args.Count-1; i++) {
+            for (int i = 0; i < args.Length-1; i++) {
                 object a = args[i];
                 object b = args[i+1];
 
@@ -27,7 +27,7 @@ namespace Sexp {
             return true;
         }
 
-        static object fn_eqv_pred(List<object> args)
+        static object fn_eqv_pred(object[] args)
         {
             object a = args[0];
             object b = args[1];
@@ -35,7 +35,7 @@ namespace Sexp {
             return a == b || (a != null && a.Equals(b));
         }
 
-        static object fn_eq_pred(List<object> args)
+        static object fn_eq_pred(object[] args)
         {
             object a = args[0];
             object b = args[1];
@@ -43,7 +43,7 @@ namespace Sexp {
             return a == b || (a is ValueType && a.Equals(b));
         }
 
-        static object fn_add(List<object> args)
+        static object fn_add(object[] args)
         {
             object total = 0L;
 
@@ -64,11 +64,10 @@ namespace Sexp {
             return total;
         }
 
-        static object fn_sub(List<object> args)
+        static object fn_sub(object[] args)
         {
-            if (args.Count > 1) {
-                object total = args[0];
-                args.RemoveAt(0);
+            if (args.Length > 1) {
+                object total = 0;
 
                 foreach (object o in args) {
                     if ((total is Int64) && (o is Int64)) {
@@ -96,7 +95,7 @@ namespace Sexp {
             }
         }
 
-        static object fn_mul(List<object> args)
+        static object fn_mul(object[] args)
         {
             object total = 1L;
 
@@ -117,11 +116,10 @@ namespace Sexp {
             return total;
         }
 
-        static object fn_div(List<object> args)
+        static object fn_div(object[] args)
         {
-            if (args.Count > 1) {
-                object total = args[0];
-                args.RemoveAt(0);
+            if (args.Length > 1) {
+                object total = 1;
 
                 foreach (object o in args) {
                     if ((total is Int64) && (o is Int64)) {
@@ -149,77 +147,77 @@ namespace Sexp {
             }
         }
 
-        static object fn_boolean_pred(List<object> args)
+        static object fn_boolean_pred(object[] args)
         {
             return args[0] is Boolean;
         }
 
-        static object fn_char_pred(List<object> args)
+        static object fn_char_pred(object[] args)
         {
             return args[0] is Char;
         }
 
-        static object fn_null_pred(List<object> args)
+        static object fn_null_pred(object[] args)
         {
             return args[0] == null;
         }
 
-        static object fn_number_pred(List<object> args)
+        static object fn_number_pred(object[] args)
         {
             return args[0] is Int64 || args[0] is Double;
         }
 
-        static object fn_pair_pred(List<object> args)
+        static object fn_pair_pred(object[] args)
         {
-            return args[0] is Pair || args[0] is List<object>;
+            return args[0] is Pair || args[0] is Cons;
         }
 
-        static object fn_list_pred(List<object> args)
+        static object fn_list_pred(object[] args)
         {
             return (bool)fn_null_pred(args) || (bool)fn_pair_pred(args);
         }
 
-        static object fn_procedure_pred(List<object> args)
+        static object fn_procedure_pred(object[] args)
         {
             return args[0] is Closure;
         }
 
-        static object fn_string_pred(List<object> args)
+        static object fn_string_pred(object[] args)
         {
             return args[0] is String;
         }
 
-        static object fn_symbol_pred(List<object> args)
+        static object fn_symbol_pred(object[] args)
         {
             return args[0] is Symbol;
         }
 
-        static object fn_vector_pred(List<object> args)
+        static object fn_vector_pred(object[] args)
         {
             return args[0] is Object[];
         }
 
-        static object fn_integer_pred(List<object> args)
+        static object fn_integer_pred(object[] args)
         {
             return args[0] is Int64;
         }
 
-        static object fn_real_pred(List<object> args)
+        static object fn_real_pred(object[] args)
         {
             return args[0] is Int64 || args[0] is Double;
         }
 
-        static object fn_exact_pred(List<object> args)
+        static object fn_exact_pred(object[] args)
         {
             return args[0] is Int64;
         }
 
-        static object fn_inexact_pred(List<object> args)
+        static object fn_inexact_pred(object[] args)
         {
             return args[0] is Double;
         }
 
-        static object fn_zero_pred(List<object> args)
+        static object fn_zero_pred(object[] args)
         {
             object num = args[0];
             if (num is Int64) {
@@ -229,28 +227,22 @@ namespace Sexp {
             }
         }
 
-        static object fn_complex_pred(List<object> args)
+        static object fn_complex_pred(object[] args)
         {
             return args[0] is Int64 || args[0] is Double;
         }
 
-        static object fn_rational_pred(List<object> args)
+        static object fn_rational_pred(object[] args)
         {
             return args[0] is Int64;
         }
 
-        static List<object> pack(params object[] args)
+        static object[] pack(params object [] args)
         {
-            List<object> rv = new List<object>();
-
-            foreach (object o in args) {
-                rv.Add(o);
-            }
-
-            return rv;
+            return args;
         }
 
-        static object fn_equal_pred(List<object> args)
+        static object fn_equal_pred(object[] args)
         {
             object a = args[0];
             object b = args[1];
@@ -260,8 +252,8 @@ namespace Sexp {
             if (a == null || b == null) return false;
 
             if (a.GetType() == b.GetType()) {
-                if (a is Pair) {
-                    return (bool)fn_equal_pred(pack(((Pair)a).head, ((Pair)b).head)) && (bool)fn_equal_pred(pack(((Pair)a).tail, ((Pair)b).tail));
+                if (a is Cons) {
+                    return (bool)fn_equal_pred(pack(((Cons)a).car, ((Cons)b).car)) && (bool)fn_equal_pred(pack(((Cons)a).cdr, ((Cons)b).cdr));
                 } else if (a is object[] || a is List<object>) {
                     IEnumerator<object> ai = ((IEnumerable<object>)a).GetEnumerator();
                     IEnumerator<object> bi = ((IEnumerable<object>)b).GetEnumerator();
@@ -293,39 +285,52 @@ namespace Sexp {
             }
         }
 
-        static object fn_list(List<object> args)
+        static object fn_list(object[] args)
         {
-            return args;
+            ProperListBox list = new ProperListBox();
+
+            foreach (object o in args) {
+                ((IBox)list).put(o);
+            }
+
+            return list.cons;
+        }
+
+        static object m_quote(object s)
+        {
+            return s;
         }
 
         public StandardEnvironment()
         {
-            Add(Symbol.get_symbol("eqv?"), fn_eqv_pred);
-            Add(Symbol.get_symbol("eq?"), fn_eq_pred);
-            Add(Symbol.get_symbol("equal?"), fn_equal_pred);
-            Add(Symbol.get_symbol("="), fn_eq);
-            Add(Symbol.get_symbol("+"), fn_add);
-            Add(Symbol.get_symbol("-"), fn_sub);
-            Add(Symbol.get_symbol("*"), fn_mul);
-            Add(Symbol.get_symbol("/"), fn_div);
-            Add(Symbol.get_symbol("boolean?"), fn_boolean_pred);
-            Add(Symbol.get_symbol("char?"), fn_char_pred);
-            Add(Symbol.get_symbol("complex?"), fn_complex_pred);
-            Add(Symbol.get_symbol("number?"), fn_number_pred);
-            Add(Symbol.get_symbol("rational?"), fn_rational_pred);
-            Add(Symbol.get_symbol("null?"), fn_null_pred);
-            Add(Symbol.get_symbol("pair?"), fn_pair_pred);
-            Add(Symbol.get_symbol("list?"), fn_list_pred);
-            Add(Symbol.get_symbol("procedure?"), fn_procedure_pred);
-            Add(Symbol.get_symbol("string?"), fn_string_pred);
-            Add(Symbol.get_symbol("symbol?"), fn_symbol_pred);
-            Add(Symbol.get_symbol("vector?"), fn_vector_pred);
-            Add(Symbol.get_symbol("real?"), fn_real_pred);
-            Add(Symbol.get_symbol("integer?"), fn_integer_pred);
-            Add(Symbol.get_symbol("inexact?"), fn_inexact_pred);
-            Add(Symbol.get_symbol("exact?"), fn_exact_pred);
-            Add(Symbol.get_symbol("zero?"), fn_zero_pred);
-            Add(Symbol.get_symbol("list"), fn_list);
+            AddFn(Symbol.get_symbol("eqv?"), fn_eqv_pred);
+            AddFn(Symbol.get_symbol("eq?"), fn_eq_pred);
+            AddFn(Symbol.get_symbol("equal?"), fn_equal_pred);
+            AddFn(Symbol.get_symbol("="), fn_eq);
+            AddFn(Symbol.get_symbol("+"), fn_add);
+            AddFn(Symbol.get_symbol("-"), fn_sub);
+            AddFn(Symbol.get_symbol("*"), fn_mul);
+            AddFn(Symbol.get_symbol("/"), fn_div);
+            AddFn(Symbol.get_symbol("boolean?"), fn_boolean_pred);
+            AddFn(Symbol.get_symbol("char?"), fn_char_pred);
+            AddFn(Symbol.get_symbol("complex?"), fn_complex_pred);
+            AddFn(Symbol.get_symbol("number?"), fn_number_pred);
+            AddFn(Symbol.get_symbol("rational?"), fn_rational_pred);
+            AddFn(Symbol.get_symbol("null?"), fn_null_pred);
+            AddFn(Symbol.get_symbol("pair?"), fn_pair_pred);
+            AddFn(Symbol.get_symbol("list?"), fn_list_pred);
+            AddFn(Symbol.get_symbol("procedure?"), fn_procedure_pred);
+            AddFn(Symbol.get_symbol("string?"), fn_string_pred);
+            AddFn(Symbol.get_symbol("symbol?"), fn_symbol_pred);
+            AddFn(Symbol.get_symbol("vector?"), fn_vector_pred);
+            AddFn(Symbol.get_symbol("real?"), fn_real_pred);
+            AddFn(Symbol.get_symbol("integer?"), fn_integer_pred);
+            AddFn(Symbol.get_symbol("inexact?"), fn_inexact_pred);
+            AddFn(Symbol.get_symbol("exact?"), fn_exact_pred);
+            AddFn(Symbol.get_symbol("zero?"), fn_zero_pred);
+            AddFn(Symbol.get_symbol("list"), fn_list);
+
+            AddMacro(Symbol.get_symbol("quote"), m_quote);
         }
     }
 }

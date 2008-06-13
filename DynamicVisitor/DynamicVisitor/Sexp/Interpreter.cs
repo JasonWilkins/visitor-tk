@@ -17,9 +17,11 @@ namespace Sexp {
     }
 
     public class Print {
-        public void print(IBox o)
+        public void print(IBox box)
         {
-            Console.WriteLine(" => <{0}> {1}", o.get().GetType().FullName, Literal.try_format(o.get()));
+            object o = box.get();
+            string typename = o != null ? o.GetType().FullName : typeof(void).FullName;
+            Console.WriteLine(" => <{0}> {1}", typename, Literal.try_format(o));
         }
     }
 
@@ -67,6 +69,12 @@ namespace Sexp {
         }
 
         public override void visit(object o)
+        {
+            base.visit(o);
+            m_print.print(outbox);
+        }
+
+        public override void visit(Symbol o)
         {
             base.visit(o);
             m_print.print(outbox);

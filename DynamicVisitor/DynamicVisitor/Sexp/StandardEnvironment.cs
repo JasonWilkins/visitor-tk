@@ -237,7 +237,7 @@ namespace Sexp {
             return args[0] is Int64;
         }
 
-        static object[] pack(params object [] args)
+        static object[] pack(params object[] args)
         {
             return args;
         }
@@ -296,13 +296,52 @@ namespace Sexp {
             return list.cons;
         }
 
+        static object fn_cons(object[] args)
+        {
+            return new Cons(args[0], args[1]);
+        }
+
+        static object fn_car(object[] args)
+        {
+            return ((Cons)args[0]).car;
+        }
+
+        static object fn_cdr(object[] args)
+        {
+            return ((Cons)args[0]).cdr;
+        }
+
+        static object fn_make_vector(object[] args)
+        {
+            object[] rv = new object[(long)args[0]];
+
+            if (args.Length > 1) {
+                for (int i = 0; i < rv.Length; i++) {
+                    rv[i] = args[1];
+                }
+            }
+
+            return rv;
+        }
+
+        static object fn_vector(object[] args)
+        {
+            return args;
+        }
+
         static object m_quote(object s)
         {
-            return s;
+            return ((Cons)s).car;
         }
 
         public StandardEnvironment()
+            : this(null)
+        { }
+
+        public StandardEnvironment(Trap trap)
+            : base(null, trap)
         {
+
             AddFn(Symbol.get_symbol("eqv?"), fn_eqv_pred);
             AddFn(Symbol.get_symbol("eq?"), fn_eq_pred);
             AddFn(Symbol.get_symbol("equal?"), fn_equal_pred);
@@ -329,6 +368,11 @@ namespace Sexp {
             AddFn(Symbol.get_symbol("exact?"), fn_exact_pred);
             AddFn(Symbol.get_symbol("zero?"), fn_zero_pred);
             AddFn(Symbol.get_symbol("list"), fn_list);
+            AddFn(Symbol.get_symbol("cons"), fn_cons);
+            AddFn(Symbol.get_symbol("car"), fn_car);
+            AddFn(Symbol.get_symbol("cdr"), fn_cdr);
+            AddFn(Symbol.get_symbol("make-vector"), fn_make_vector);
+            AddFn(Symbol.get_symbol("vector"), fn_vector);
 
             AddMacro(Symbol.get_symbol("quote"), m_quote);
         }

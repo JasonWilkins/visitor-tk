@@ -3025,3 +3025,88 @@ namespace CodeBuilder {
         //}
     }
 
+            if (is_exact.HasValue) {
+                if (is_exact) {
+                    if (!radix.HasValue || radix == 10) {
+                        object rv;
+                        Int64.TryParse(num_part, NumberStyles.Integer|NumberStyles.AllowDecimalPoint, null, out rv);
+                        return rv;
+                    } else if ('-' == num_part[0]) {
+                        return -Convert.ToInt64(num_part.Substring(1), radix.Value);
+                    } else {
+                        return Convert.ToInt64(num_part, radix.Value);
+                    }
+                } else {
+                    if (!radix.HasValue || radix == 10) {
+                        object rv;
+                        Double.TryParse(num_part, NumberStyles.Float, null, out rv);
+                        return rv;
+                    } else if ('-' == num_part[0]) {
+                        return -Convert.ToInt64(num_part.Substring(1), radix.Value);
+                    } else {
+                        return Convert.ToInt64(num_part, radix.Value);
+                    }
+                }
+            } else {
+                if (radix == 10) {
+                    object rv;
+
+                    if (try_parse_number(num_part, out rv)) {
+                        return rv;
+                    } else {
+                        throw lexical_error("");
+                    }
+                } else {
+                    if ('-' == num_part[0]) {
+                        return -Convert.ToInt64(num_part.Substring(1), radix.Value);
+                    } else {
+                        return Convert.ToInt64(num_part, radix.Value);
+                    }
+                }
+            }
+
+
+
+
+inexact		parse_as_double
+inexact dec	parse_as_double
+inexact hex	parse_as_hex/convert_to_double 
+	
+exact		parse_as_long
+exact dec	parse_as_long
+exact hex	parse_as_hex
+
+dec		try_parse
+
+hex		parse_as_hex
+
+
+
+if (is_exact.HasValue) {
+	if (is_exact) {
+		if (!radix.HasValue || 10 == radix) {
+			return parse_fixnum();
+		} else {
+			return parse_hex();
+		}
+	} else {
+		if (!radix.HasValue || 10 == radix) {
+			return parse_flonum();
+		} else {
+			return new Double(parse_hex());
+		}
+	}
+} else if (radix.HasValue) {
+	if (10 == radix) {
+		object rv;
+		if (try_parse(,rv)) {
+			return rv;
+		} else {
+			throw lexical_error("");
+		}
+	} else {
+		return parse_hex();
+	}
+} else {
+	throw lexical_error("");
+}

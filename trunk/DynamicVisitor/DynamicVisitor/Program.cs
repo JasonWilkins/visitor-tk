@@ -1005,10 +1005,12 @@ namespace Main {
             //System.IO.TextWriter my_out = new System.IO.StreamWriter("output.txt");
             //Console.SetOut(my_out);
 
-            Reader f = new Reader("test3.txt");
-            Util.TxtLocation loc = new Util.TxtLocation("test3.txt");
-            Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new StandardEnvironment(), loc)), loc);
+            Reader f = new Reader("test4.txt");
+            Util.TxtLocation loc = new Util.TxtLocation("test4.txt");
+            Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new StandardEnvironment(delegate(Symbol sym, out object def) { def = null; return true; }), loc)), loc);
             p.Read();
+
+            Console.WriteLine();
 
             //object[] v = build("test.txt");
             //DynamicVisitor.accept(v, new IntVisitor());

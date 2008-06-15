@@ -143,9 +143,9 @@ namespace Sexp {
                 object imaginary = parse_real(is_exact, radix, "i_", m.Groups);
 
                 if (m.Groups["polar"].Length > 0) {
-                    value = make_complex(real, imaginary);
-                } else {
                     value = make_polar(real, imaginary);
+                } else {
+                    value = make_complex(real, imaginary);
                 }
             } else {
                 value = real;
@@ -160,7 +160,7 @@ namespace Sexp {
                 return parse_fixed(is_exact, radix, prefix, g);
             } else if (g[prefix+"whole"].Length > 0 || g[prefix+"fract"].Length > 0) {
                 return parse_float(is_exact, prefix, g);
-            } else if (g[prefix+"m_numer"].Length > 0 && g[prefix+"m_denom"].Length > 0) {
+            } else if (g[prefix+"numer"].Length > 0 && g[prefix+"denom"].Length > 0) {
                 return parse_ratio(is_exact, radix, prefix, g);
             } else {
                 return 0;
@@ -178,7 +178,11 @@ namespace Sexp {
 
                 if (g[prefix+"sign"].Value == "-") rv = -rv;
 
-                return (is_exact ?? true) ? rv : Convert.ToDouble(rv);
+                if (is_exact ?? true) {
+                    return rv;
+                } else {
+                    return Convert.ToDouble(rv);
+                }
             }
         }
 
@@ -245,14 +249,24 @@ namespace Sexp {
 
         static object parse_ratio(bool? is_exact, int radix, string prefix, GroupCollection g)
         {
-            long numer = Convert.ToInt64(g[prefix+"sign"].Value + g[prefix+"m_numer"].Value, radix);
-            long denom = Convert.ToInt64(g[prefix+"m_denom"].Value, radix);
+            long numer = Convert.ToInt64(g[prefix+"sign"].Value + g[prefix+"numer"].Value, radix);
+            long denom = Convert.ToInt64(g[prefix+"denom"].Value, radix);
 
-            return (is_exact ?? true) ? make_ratio(numer, denom) : (double)numer / (double)denom;
+            return (is_exact ?? true) ?  make_ratio(numer, denom) : (double)numer / (double)denom;
         }
 
         static object make_complex(object real_part, object imaginary_part)
         {
+            if (imaginary_part is long) {
+                if ((long)imaginary_part == 0) return real_part;
+            } else if (imaginary_part is float) {
+                if ((float)imaginary_part == 0) return real_part;
+            } else if (imaginary_part is double) {
+                if ((double)imaginary_part == 0) return real_part;
+            } else if (imaginary_part is Rational) {
+                if (((Rational)imaginary_part).CompareTo(0) == 0) return real_part;
+            }
+
             return new Complex(real_part, imaginary_part);
         }
 
@@ -263,7 +277,13 @@ namespace Sexp {
 
         static object make_ratio(long numer, long denom)
         {
-            return new Rational(numer, denom);
+            Rational rv = new Rational(numer, denom);
+
+            if (rv.denom == 1) {
+                return rv.numer;
+            } else {
+                return rv;
+            }
         }
     }
 }

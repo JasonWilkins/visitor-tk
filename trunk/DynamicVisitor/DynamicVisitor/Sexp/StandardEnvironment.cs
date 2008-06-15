@@ -204,17 +204,17 @@ namespace Sexp {
 
         static object fn_real_pred(object[] args)
         {
-            return args[0] is Int64 || args[0] is Double;
+            return args[0] is Int64 || args[0] is Double || args[0] is Single || args[0] is Rational;
         }
 
         static object fn_exact_pred(object[] args)
         {
-            return args[0] is Int64;
+            return args[0] is Int64 || args[0] is Rational;
         }
 
         static object fn_inexact_pred(object[] args)
         {
-            return args[0] is Double;
+            return args[0] is Double || args[0] is Single;
         }
 
         static object fn_zero_pred(object[] args)
@@ -224,17 +224,17 @@ namespace Sexp {
                 return (Int64)num == 0;
             } else {
                 return (Double)num == 0;
-            }
+            } 
         }
 
         static object fn_complex_pred(object[] args)
         {
-            return args[0] is Int64 || args[0] is Double;
+            return args[0] is Int64 || args[0] is Double || args[0] is Rational || args[0] is Complex;
         }
 
         static object fn_rational_pred(object[] args)
         {
-            return args[0] is Int64;
+            return args[0] is Int64 || args[0] is Rational;
         }
 
         static object[] pack(params object[] args)

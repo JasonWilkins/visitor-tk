@@ -39,6 +39,7 @@ namespace Sexp {
         {
             this.m_numer = numer;
             this.m_denom = denom;
+            reduce();
         }
 
         public static long gcd(long a, long b)

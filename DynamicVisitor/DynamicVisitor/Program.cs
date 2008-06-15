@@ -1007,7 +1007,7 @@ namespace Main {
 
             Reader f = new Reader("test4.txt");
             Util.TxtLocation loc = new Util.TxtLocation("test4.txt");
-            Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new StandardEnvironment(delegate(Symbol sym, out object def) { def = null; return true; }), loc)), loc);
+            Parser p = new Parser(f, new SafeVectorVisitor(new Interpreter(new StandardEnvironment(null/*delegate(Symbol sym, out object def) { def = null; return true; }*/), loc)), loc);
             p.Read();
 
             Console.WriteLine();

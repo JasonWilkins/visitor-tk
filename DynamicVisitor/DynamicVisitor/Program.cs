@@ -717,7 +717,7 @@ namespace Main {
             FlatType string_type = cb.defineType("string");
             Prototype print_prototype = cb.definePrototype(null, new Types(string_type), null);
             Global print_global = cb.defineGlobal("print", print_prototype);
-            FlatLiteral hello_world = cb.defineLiteral(string_type, "Hello World!"+System.Environment.NewLine);
+            FlatLiteral hello_world = cb.defineLiteral(string_type, @"Hello World!"+System.Environment.NewLine);
             LambdaBuilder lb = cb.getLambdaBuilder("main", null);
             lb.addCall(print_global, null, new Operands(hello_world));
             cb.defineLambda(lb.getLambda(null));
@@ -785,10 +785,10 @@ namespace Main {
             lb.addDo(sub, new Lvalues(x2), new Operands(n0, n4));
             lb.addDo(div_assign, new Lvalues(x2), new Operands(n3));
 
-            Constant answer1 = cb.defineConstant(null, string_type, "Answers to ABC formula are:"/*+System.Environment.NewLine*/);
-            Constant answer2 = cb.defineConstant(null, string_type, "x1 = ");
-            Constant answer3 = cb.defineConstant(null, string_type, /*System.Environment.NewLine+*/"x2 = ");
-            Constant answer4 = cb.defineConstant(null, string_type, ""/*System.Environment.NewLine*/);
+            Constant answer1 = cb.defineConstant(null, string_type, @"Answers to ABC formula are:"/*+System.Environment.NewLine*/);
+            Constant answer2 = cb.defineConstant(null, string_type, @"x1 = ");
+            Constant answer3 = cb.defineConstant(null, string_type, /*System.Environment.NewLine+*/@"x2 = ");
+            Constant answer4 = cb.defineConstant(null, string_type, @""/*System.Environment.NewLine*/);
 
             lb.addCall(print_global1, null, new Operands(answer1));
             lb.addCall(print_global1, null, new Operands(answer2));

@@ -3110,3 +3110,202 @@ if (is_exact.HasValue) {
 } else {
 	throw lexical_error("");
 }
+
+
+
+
+
+
+            //if (m.Success) {
+            //    Console.WriteLine("exact={0}", m.Groups["exact"]);
+            //    Console.WriteLine("radix={0}", m.Groups["radix"]);
+
+            //    Console.WriteLine("sign={0}", m.Groups["sign"]);
+            //    Console.WriteLine("int={0}", m.Groups["int"]);
+            //    Console.WriteLine("whole={0}", m.Groups["whole"]);
+            //    Console.WriteLine("fract={0}", m.Groups["fract"]);
+            //    Console.WriteLine("expmark={0}", m.Groups["expmark"]);
+            //    Console.WriteLine("expsign={0}", m.Groups["expsign"]);
+            //    Console.WriteLine("exp={0}", m.Groups["exp"]);
+            //    Console.WriteLine("numer={0}", m.Groups["numer"]);
+            //    Console.WriteLine("denum={0}", m.Groups["denom"]);
+
+            //    Console.WriteLine("i_sign={0}", m.Groups["i_sign"]);
+            //    Console.WriteLine("i_int={0}", m.Groups["i_int"]);
+            //    Console.WriteLine("i_whole={0}", m.Groups["i_whole"]);
+            //    Console.WriteLine("i_fract={0}", m.Groups["i_fract"]);
+            //    Console.WriteLine("i_expmark={0}", m.Groups["i_expmark"]);
+            //    Console.WriteLine("i_expsign={0}", m.Groups["i_expsign"]);
+            //    Console.WriteLine("i_exp={0}", m.Groups["i_exp"]);
+            //    Console.WriteLine("i_numer={0}", m.Groups["i_numer"]);
+            //    Console.WriteLine("i_denum={0}", m.Groups["i_denom"]);
+            //} else {
+            //    throw new Exception();
+            //    //Console.WriteLine("symbol={0}", input);
+            //}
+
+
+
+
+#if false
+        static int? get_radix(char prefix)
+        {
+            if ('x' == prefix || 'X' == prefix) {
+                return 16;
+            } else if ('d' == prefix || 'D' == prefix) {
+                return 10;
+            } else if ('o' == prefix || 'O' == prefix) {
+                return 8;
+            } else if ('b' == prefix || 'B' == prefix) {
+                return 2;
+            } else {
+                return null;
+            }
+        }
+
+        static bool? get_exact(char prefix)
+        {
+            if ('e' == prefix || 'E' == prefix) {
+                return true;
+            } else if ('i' == prefix || 'I' == prefix) {
+                return false;
+            } else {
+                return null;
+            }
+        }
+
+        static char? get_precision(char prefix)
+        {
+            if ('s' == prefix || 'S' == prefix) {
+                return 's';
+            } else if ('f' == prefix || 'F' == prefix) {
+                return 'f';
+            } else if ('d' == prefix || 'D' == prefix) {
+                return 'd';
+            } else if ('l' == prefix || 'L' == prefix) {
+                return 'l';
+            } else {
+                return null;
+            }
+        }
+#endif
+        static bool parse_hash_number(string num, out object result)
+        {
+            return foo(num, out result);
+#if false
+
+            int? radix = get_radix(num[1]);
+            bool? is_exact = get_exact(num[1]);
+
+            string num_part;
+
+            if ('#' == num[2]) {
+                if (radix.HasValue) {
+                    is_exact = get_exact(num[3]);
+                } else {
+                    radix = get_radix(num[3]);
+                }
+
+                num_part = num.Substring(4);
+            } else {
+                num_part = num.Substring(2);
+            }
+
+            if (is_exact.HasValue) {
+                if (is_exact.Value) {
+                    if (!radix.HasValue || 10 == radix.Value) {
+                        return parse_fixnum(num_part, out result);
+                    } else {
+                        return parse_hex(num_part, radix.Value, out result);
+                    }
+                } else {
+                    if (!radix.HasValue || 10 == radix) {
+                        return parse_flonum(num_part, out result);
+                    } else {
+                        object rv;
+
+                        if (parse_hex(num_part, radix.Value, out rv)) {
+                            result = Convert.ToDouble(rv);
+                            return true;
+                        } else {
+                            result = null;
+                            return false;
+                        }
+                    }
+                }
+            } else if (radix.HasValue) {
+                if (10 == radix.Value) {
+                    return try_parse_number(num_part, out result);
+                } else {
+                    return parse_hex(num_part, radix.Value, out result);
+                }
+            } else {
+                result = null;
+                return false;
+            }
+#endif
+        }
+#if false
+        static bool parse_fixnum(string num, out object result)
+        {
+            long rv;
+            if (Int64.TryParse(num, NumberStyles.Integer|NumberStyles.AllowDecimalPoint, null, out rv)) {
+                result = rv;
+                return true;
+            } else {
+                result = null;
+                return false;
+            }
+        }
+
+        static bool parse_hex(string num, int radix, out object result)
+        {
+            try {
+                if ('-' == num[0]) {
+                    result = -Convert.ToInt64(num.Substring(1), radix);
+                } else {
+                    result = Convert.ToInt64(num, radix);
+                }
+
+                return true;
+            } catch {
+                result = null;
+                return false;
+            }
+        }
+
+        static bool parse_flonum(string num, out object result)
+        {
+            double rv;
+            if (Double.TryParse(num, NumberStyles.Float, null, out rv)) {
+                result = rv;
+                return true;
+            } else {
+                result = null;
+                return false;
+            }
+        }
+#endif
+        static bool try_parse_number2(string num, out object value)
+        {
+            return foo(num, out value);
+            //return try_parse_number(num, out value);
+        }
+#if false
+        static bool try_parse_number(string num, out object value)
+        {
+            long result1;
+            double result2;
+
+            if (Int64.TryParse(num, NumberStyles.Integer|NumberStyles.AllowDecimalPoint, null, out result1)) {
+                value = result1;
+                return true;
+            } else if (Double.TryParse(num, NumberStyles.Float, null, out result2)) {
+                value = result2;
+                return true;
+            } else {
+                value = null;
+                return false;
+            }
+        }
+#endif

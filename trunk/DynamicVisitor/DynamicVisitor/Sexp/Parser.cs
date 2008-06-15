@@ -253,8 +253,14 @@ namespace Sexp {
             } else if (Token.NUM == lookahead) {
                 if (m_attrib.value is long) {
                     atom.visit((long)m_attrib.value);
+                } else if (m_attrib.value is float) {
+                    atom.visit((float)m_attrib.value);
                 } else if (m_attrib.value is double) {
                     atom.visit((double)m_attrib.value);
+                } else if (m_attrib.value is Complex) {
+                    atom.visit((Complex)m_attrib.value);
+                } else if (m_attrib.value is Rational) {
+                    atom.visit((Rational)m_attrib.value);
                 } else {
                     throw new Exception();
                 }

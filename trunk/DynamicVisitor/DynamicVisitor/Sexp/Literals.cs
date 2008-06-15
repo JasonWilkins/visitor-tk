@@ -14,6 +14,8 @@ namespace Sexp {
                 o is double   ||
                 o is string   ||
                 o is Symbol   ||
+                o is Rational ||
+                o is Complex  ||
                 o == null;
         }
 
@@ -74,6 +76,58 @@ namespace Sexp {
         public static string format(Symbol v)
         {
             return v.name;
+        }
+
+        public static string format(Rational r)
+        {
+            return r.ToString();
+        }
+
+        public static string format(Complex c)
+        {
+            return format(c.real_part) + format_imaginary(c.imaginary_part);
+        }
+
+        static string format_imaginary<T> (T i) where T : IComparable 
+        {
+            T ci = (T)i;
+
+            if (ci.Equals(1)) {
+                return "+i";
+            } else if (ci.Equals(-1)) {
+                return "-i";
+            } else if (ci.CompareTo(0) > 0) {
+                return "+"+format(ci)+'i';
+            } else if (ci.CompareTo(0) < 0) {
+                return format(ci)+'i';
+            } else {
+                return "";
+            }
+        }
+
+        static string format_imaginary(object i)
+        {
+            if (i is long) {
+                return format_imaginary<long>((long)i);
+            } else if (i is float) {
+                return format_imaginary<float>((float)i);
+            } else if (i is double) {
+                return format_imaginary<double>((double)i);
+            } else if (i is Rational) {
+                Rational ci = (Rational)i;
+
+                if (ci.Equals(1)) {
+                    return "+i";
+                } else if (ci.Equals(-1)) {
+                    return "-i";
+                } else if (ci.CompareTo(0) > 0) {
+                    return "+"+format(ci);
+                } else {
+                    return format(ci);
+                }
+            } else {
+                throw new Exception();
+            }
         }
 
         public static string format(Object[] v)

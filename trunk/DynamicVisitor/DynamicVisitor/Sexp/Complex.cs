@@ -13,7 +13,7 @@ namespace Sexp {
 
         public static Complex from_polar(object angle, object distance)
         {
-            return new Complex(0,0);
+            return new Complex(0L,0L);
             //throw new NotImplementedException();
         }
     }

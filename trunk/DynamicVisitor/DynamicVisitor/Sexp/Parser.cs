@@ -49,6 +49,12 @@ namespace Sexp {
         }
     }
 
+    public class TypeExpected : TxtException {
+        public TypeExpected(TxtLocation loc, string type)
+            : base(loc, "internal error! expected object of type <" + type + ">")
+        { }
+    }
+
     public class Parser {
         readonly Scanner m_scanner;
         Attributes m_attrib;
@@ -246,7 +252,7 @@ namespace Sexp {
                 if (m_attrib.value is bool) {
                     atom.visit((Boolean)m_attrib.value);
                 } else {
-                    throw new Exception();
+                    throw new TypeExpected(m_attrib.loc, "bool");
                 }
 
                 match(Token.BOOL);
@@ -262,7 +268,7 @@ namespace Sexp {
                 } else if (m_attrib.value is Rational) {
                     atom.visit((Rational)m_attrib.value);
                 } else {
-                    throw new Exception();
+                    throw new TypeExpected(m_attrib.loc, "long, float, double, Complex, or Rational");
                 }
 
                 match(Token.NUM);
@@ -270,7 +276,7 @@ namespace Sexp {
                 if (m_attrib.value is char) {
                     atom.visit((char)m_attrib.value);
                 } else {
-                    throw new Exception();
+                    throw new TypeExpected(m_attrib.loc, "char");
                 }
 
                 match(Token.CHAR);
@@ -278,7 +284,7 @@ namespace Sexp {
                 if (m_attrib.value is string) {
                     atom.visit((string)m_attrib.value);
                 } else {
-                    throw new Exception();
+                    throw new TypeExpected(m_attrib.loc, "string");
                 }
 
                 match(Token.STRING);
@@ -286,7 +292,7 @@ namespace Sexp {
                 if (m_attrib.value is Symbol) {
                     atom.visit((Symbol)m_attrib.value);
                 } else {
-                    throw new Exception();
+                    throw new TypeExpected(m_attrib.loc, "Symbol");
                 }
 
                 match(Token.ID);

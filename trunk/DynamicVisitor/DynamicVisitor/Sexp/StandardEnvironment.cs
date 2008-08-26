@@ -237,6 +237,22 @@ namespace Sexp {
             return args[0] is Int64 || args[0] is Rational;
         }
 
+        static object fn_imag_part(object[] args)
+        {
+            return args[0] is Complex ? ((Complex)args[0]).imaginary_part : (long)0;
+        }
+
+        static object fn_round(object[] args)
+        {
+            if (args[0] is long) {
+                return args[0];
+            } else if (args[0] is float || args[0] is double) {
+                return (long)Math.Round(((double)args[0]));
+            } else {
+                throw new ArgumentException();
+            }
+        }
+
         static object[] pack(params object[] args)
         {
             return args;
@@ -373,6 +389,8 @@ namespace Sexp {
             AddFn(Symbol.get_symbol("cdr"), fn_cdr);
             AddFn(Symbol.get_symbol("make-vector"), fn_make_vector);
             AddFn(Symbol.get_symbol("vector"), fn_vector);
+            AddFn(Symbol.get_symbol("imag-part"), fn_imag_part);
+            AddFn(Symbol.get_symbol("round"), fn_round);
 
             AddMacro(Symbol.get_symbol("quote"), m_quote);
         }

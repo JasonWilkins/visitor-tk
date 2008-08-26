@@ -5,7 +5,10 @@ namespace Sexp {
         public abstract void visit(object o);
         public virtual void visit(bool o) { visit((object)o); }
         public virtual void visit(long o) { visit((object)o); }
+        public virtual void visit(float o) { visit((object)o); }
         public virtual void visit(double o) { visit((object)o); }
+        public virtual void visit(Rational o) { visit((object)o); }
+        public virtual void visit(Complex o) { visit((object)o); }
         public virtual void visit(string o) { visit((object)o); }
         public virtual void visit(char o) { visit((object)o); }
         public virtual void visit(Symbol o) { visit((object)o); }

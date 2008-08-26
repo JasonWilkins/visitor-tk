@@ -1,6 +1,8 @@
 using System;
 using System.Text.RegularExpressions;
 
+using Util;
+
 namespace Sexp {
     public class Number {
         static readonly Regex regex = init_regex();
@@ -28,7 +30,7 @@ namespace Sexp {
             string digit10 = @"[0-9]";
             string digit16 = @"[0-9a-f]";
 
-            string uinteger = @"({0}+\#*)";
+            string uinteger = @"({0}+)";
 
             string uinteger2 = String.Format(uinteger, digit2);
             string uinteger8 = String.Format(uinteger, digit8);
@@ -44,16 +46,16 @@ namespace Sexp {
 
             string decimal10 = String.Format(@"
                 (
-                    (?<r_whole>{0}+)\#*{1}|
-                    \.(?<r_fract>{0}+)\#*{1}?|
-                    (?<r_whole>{0}+)\.(?<r_fract>{0}*)\#*{1}?|
-                    (?<r_whole>{0}+)\#+\.\#*{1}?
+                    (?<r_whole>{0}+)(?<r_whole_hash>\#*){1}|
+                    \.(?<r_fract>{0}+)(?<r_fract_hash>\#*){1}?|
+                    (?<r_whole>{0}+)\.(?<r_fract>{0}*)(?<r_fract_hash>\#*){1}?|
+                    (?<r_whole>{0}+)(?<r_whole_hash>\#+)\.(?<r_fract_hash>\#*){1}?
                 )", digit10, suffix);
 
             string ureal = @"
-                (?<r_int>
-                    {0})|
-                    (?<r_numer>{0})/(?<r_denom>{0}
+                (
+                    (?<r_int>{0})(?<r_int_hash>\#*)|
+                    (?<r_numer>{0})(?<r_numer_hash>\#*)/(?<r_denom>{0})(?<r_denom_hash>\#*)
                 )";
 
             string ureal2 = String.Format(ureal, uinteger2);
@@ -80,7 +82,7 @@ namespace Sexp {
                     {0}|
                     {0}(?<polar>@){2}{1}|
                     {0}{2}{1}i|
-                    {0}{2}i|
+                    {0}{2}(?<i_int>i)|
                     {2}{1}i|
                     {2}(?<i_int>i)
                 )";
@@ -163,18 +165,18 @@ namespace Sexp {
             } else if (g[prefix+"numer"].Length > 0 && g[prefix+"denom"].Length > 0) {
                 return parse_ratio(is_exact, radix, prefix, g);
             } else {
-                return 0;
+                return 0L;
             }
         }
 
         static object parse_fixed(bool? is_exact, int radix, string prefix, GroupCollection g)
         {
-            string value = g[prefix+"int"].Value;
+            string value = g[prefix+"int"].Value + StringUtil.repeat('0', g[prefix+"int_hash"].Length);
 
             if ("i" == value) {
-                return 1;
+                return 1L;
             } else {
-                long rv = Convert.ToInt64(g[prefix+"int"].Value, radix);
+                long rv = Convert.ToInt64(value, radix);
 
                 if (g[prefix+"sign"].Value == "-") rv = -rv;
 
@@ -191,7 +193,10 @@ namespace Sexp {
             if (!is_exact ?? false) {
                 string num = 
                     g[prefix+"sign"].Value + 
-                    g[prefix+"whole"].Value + '.' + 
+                    g[prefix+"whole"].Value + 
+                    StringUtil.repeat('0', g[prefix+"whole_hash"].Length) +
+                    '.' + 
+                    StringUtil.repeat('0', g[prefix+"fract_hash"].Length) +
                     g[prefix+"fract"].Value;
 
                 if (g[prefix+"exp"].Length > 0) {
@@ -212,10 +217,13 @@ namespace Sexp {
                 return rv;
             } else {
                 long len = g[prefix+"fract"].Length;
-                long fract = len == 0 ? 0 : Convert.ToInt64(g[prefix+"fract"].Value);
+                long fract = len == 0 ? 0 : Convert.ToInt64(StringUtil.repeat('0', g[prefix+"fract_hash"].Length) + g[prefix+"fract"].Value);
 
                 if (0 == fract) {
-                    long n = Convert.ToInt64(g[prefix+"sign"].Value + g[prefix+"whole"].Value);
+                    long n = Convert.ToInt64(
+                        g[prefix+"sign"].Value + 
+                        g[prefix+"whole"].Value +
+                        StringUtil.repeat('0', g[prefix+"whole_hash"].Length));
 
                     if (g[prefix+"exp"].Length > 0) {
                         long exp = Convert.ToInt64(g[prefix+"exp"].Value);
@@ -229,7 +237,11 @@ namespace Sexp {
 
                     return n;
                 } else {
-                    long numer = Convert.ToInt64(g[prefix+"sign"].Value + g[prefix+"whole"].Value) + fract;
+                    long numer = Convert.ToInt64(
+                        g[prefix+"sign"].Value + 
+                        g[prefix+"whole"].Value  +
+                        StringUtil.repeat('0', g[prefix+"whole_hash"].Length)) + fract;
+
                     long denom = int_pow(10, len);
                     return make_ratio(numer, denom);
                 }
@@ -249,8 +261,14 @@ namespace Sexp {
 
         static object parse_ratio(bool? is_exact, int radix, string prefix, GroupCollection g)
         {
-            long numer = Convert.ToInt64(g[prefix+"sign"].Value + g[prefix+"numer"].Value, radix);
-            long denom = Convert.ToInt64(g[prefix+"denom"].Value, radix);
+            long numer = Convert.ToInt64(
+                g[prefix+"sign"].Value + 
+                g[prefix+"numer"].Value +
+                StringUtil.repeat('0', g[prefix+"numer_hash"].Length), radix);
+
+            long denom = Convert.ToInt64(
+                g[prefix+"denom"].Value +
+                StringUtil.repeat('0', g[prefix+"denom_hash"].Length), radix);
 
             return (is_exact ?? true) ?  make_ratio(numer, denom) : (double)numer / (double)denom;
         }
@@ -270,9 +288,9 @@ namespace Sexp {
             return new Complex(real_part, imaginary_part);
         }
 
-        static object make_polar(object angle, object distance)
+        static object make_polar(object magnitude, object angle)
         {
-            return Complex.from_polar(angle, distance);
+            return Complex.from_polar(magnitude, angle);
         }
 
         static object make_ratio(long numer, long denom)
